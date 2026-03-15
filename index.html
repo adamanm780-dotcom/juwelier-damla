@@ -15,8 +15,8 @@
        DESIGN TOKENS
     ═══════════════════════════════════════════ */
     :root {
-      --marble:       #F8F8F6;
-      --marble-dark:  #F4F3EF;
+      --marble:       #FFFFFF;
+      --marble-dark:  #F8F7F3;
       --gold:         #C9A055;
       --gold-light:   #DFC082;
       --gold-dark:    #A07838;
@@ -235,7 +235,7 @@
     /* Mobiles Standbild (nur auf Handy sichtbar) */
     #heroMobileImg {
       display: none;
-      width: clamp(280px, 92vw, 600px);
+      width: clamp(220px, 72vw, 420px);
       height: auto;
       aspect-ratio: 16 / 9;
       object-fit: cover;
@@ -944,7 +944,7 @@
         align-items: stretch;
         gap: 10px;
         width: 100%;
-        max-width: 280px;
+        max-width: 260px;
         margin: 0 auto;
       }
       .hero__actions a {
@@ -952,7 +952,7 @@
         padding: 14px 24px;
       }
       .hero__rule { margin-bottom: 22px; }
-      .hero__scroll { bottom: 20px; }
+      .hero__scroll { display: none; }
 
       /* ── Sektions-Überschriften ── */
       .section-label { font-size: 0.5rem; }
@@ -1129,15 +1129,15 @@
       </defs>
 
       <!-- 1. Bright white base -->
-      <rect width="1440" height="960" fill="#F8F8F6"/>
+      <rect width="1440" height="960" fill="#FFFFFF"/>
 
       <!-- 2 + 3. Grey vein layers (parallax: slowest) -->
       <!-- Reduced opacity: video's own marble dominates in hero -->
       <g id="marbleGrey">
         <rect width="1440" height="960"
-              filter="url(#greyVeins)" fill="#808080" opacity="0.28"/>
+              filter="url(#greyVeins)" fill="#808080" opacity="0.12"/>
         <rect width="1440" height="960"
-              filter="url(#hairVeins)" fill="#707070" opacity="0.20"/>
+              filter="url(#hairVeins)" fill="#707070" opacity="0.09"/>
       </g>
 
       <!-- Gold bundles hidden — replaced by interactive canvas veins -->
