@@ -1,0 +1,1957 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Juwelier Damla – Wiesbaden</title>
+  <meta name="description" content="Juwelier Damla in Wiesbaden – Schmuck, Uhren, Trauringe und persönliche Beratung in der Wellritzstraße 3. Mo–Fr 09:30–19:00, Sa 09:30–17:00." />
+  <meta name="keywords" content="Juwelier Wiesbaden, Schmuck Wiesbaden, Trauringe Wiesbaden, Uhren Wiesbaden, Juwelier Damla, Wellritzstraße" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ═══════════════════════════════════════════
+       DESIGN TOKENS
+    ═══════════════════════════════════════════ */
+    :root {
+      --marble:       #FFFFFF;
+      --marble-dark:  #FFFFFF;
+      --gold:         #C9A055;
+      --gold-light:   #DFC082;
+      --gold-dark:    #A07838;
+      --gold-pale:    #F3EAD6;
+      --ink:          #1B1916;
+      --ink-soft:     #4E4840;
+      --ink-muted:    #9A9088;
+      --surface:      rgba(255, 255, 255, 0.92);
+      --border-gold:  rgba(201, 160, 85, 0.22);
+      --border-light: rgba(180, 172, 160, 0.18);
+      --shadow-soft:  0 2px 32px rgba(27, 25, 22, 0.06);
+      --shadow-card:  0 4px 48px rgba(27, 25, 22, 0.08);
+      --font-serif:   'Cormorant Garamond', Georgia, serif;
+      --font-sans:    'Raleway', system-ui, sans-serif;
+      --nav-h:        90px;
+      --pad-section:  clamp(72px, 10vw, 128px);
+      --pad-x:        clamp(20px, 5vw, 72px);
+    }
+
+    /* ═══════════════════════════════════════════
+       RESET
+    ═══════════════════════════════════════════ */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+    body {
+      font-family: var(--font-sans);
+      color: var(--ink);
+      background-color: var(--marble);
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    img { display: block; max-width: 100%; }
+    a   { color: inherit; text-decoration: none; }
+
+    /* ═══════════════════════════════════════════
+       MARBLE BACKGROUND (Calacatta-Style)
+       Matches the logo's warm-white marble with
+       fine diagonal grey veining
+    ═══════════════════════════════════════════ */
+    .marble-canvas {
+      display: block;
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    /* Interactive gold vein canvas — above white backgrounds, below content */
+    #veinCanvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .marble-canvas svg {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      inset: 0;
+    }
+
+    /* ═══════════════════════════════════════════
+       NAVIGATION
+    ═══════════════════════════════════════════ */
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 200;
+      height: var(--nav-h);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--pad-x);
+      transition: background 0.5s ease, box-shadow 0.5s ease;
+    }
+
+    .nav--scrolled {
+      background: rgba(249, 247, 243, 0.94);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      box-shadow: 0 1px 0 var(--border-gold);
+    }
+
+    .nav__brand {
+      display: flex;
+      align-items: center;
+    }
+    .nav__logo-img {
+      height: 110px;
+      width: auto;
+      display: block;
+      object-fit: contain;
+      clip-path: inset(0 0 18% 0);  /* weißen Rand unten wegschneiden */
+    }
+
+    .nav__links {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      list-style: none;
+    }
+
+    .nav__links a {
+      font-size: 0.62rem;
+      font-weight: 500;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+      position: relative;
+      transition: color 0.3s;
+    }
+    .nav__links a::after {
+      content: '';
+      position: absolute;
+      bottom: -3px; left: 0;
+      width: 0; height: 1px;
+      background: var(--gold);
+      transition: width 0.35s ease;
+    }
+    .nav__links a:hover        { color: var(--gold); }
+    .nav__links a:hover::after { width: 100%; }
+
+    .nav__cta {
+      font-size: 0.6rem !important;
+      font-weight: 600 !important;
+      letter-spacing: 0.28em !important;
+      color: var(--gold) !important;
+      border: 1px solid var(--border-gold);
+      padding: 9px 22px;
+      transition: all 0.35s ease !important;
+    }
+    .nav__cta:hover {
+      background: var(--gold) !important;
+      color: white !important;
+      border-color: var(--gold) !important;
+    }
+    .nav__cta::after { display: none !important; }
+
+    /* Mobile toggle */
+    .nav__burger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px;
+    }
+    .nav__burger span {
+      display: block;
+      width: 22px; height: 1px;
+      background: var(--ink);
+      transition: all 0.3s ease;
+    }
+    .nav__burger.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+    .nav__burger.open span:nth-child(2) { opacity: 0; }
+    .nav__burger.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+    /* ═══════════════════════════════════════════
+       HERO — scroll-scrubbed video
+       • #hero is 260vh → scroll runway for full video scrub
+       • .hero__sticky pins to viewport while user scrolls
+       • Video fills viewport, scrubbed frame-by-frame
+    ═══════════════════════════════════════════ */
+    #hero {
+      height: 140vh;
+      position: relative;
+      background: #FFFFFF;
+    }
+
+    /* Sticky container: stays visible while parent scrolls */
+    .hero__sticky {
+      position: sticky;
+      top: 0;
+      height: 100svh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      z-index: 2;   /* above veinCanvas (z-index:1), below nav (z-index:200) */
+    }
+
+    /* Video */
+    .hero__video-wrap {
+      pointer-events: none;
+      margin-bottom: 28px;
+    }
+
+    /* Video läuft versteckt im Hintergrund für Frame-Capture */
+    #heroVideo {
+      position: fixed;
+      left: -9999px;
+      width: 1px;
+      height: 1px;
+    }
+
+    /* Canvas zeigt die vorgeladenen Frames */
+    #heroCanvas {
+      width: clamp(280px, 52vw, 780px);
+      aspect-ratio: 16 / 9;
+      display: block;
+      transform: translateZ(0);
+    }
+
+    /* Mobiles Standbild (nur auf Handy sichtbar) */
+    #heroMobileImg {
+      display: none;
+      width: clamp(280px, 92vw, 780px);
+      height: auto;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      border-radius: 4px;
+    }
+
+    @media (max-width: 768px) {
+      .hero__video-wrap { display: none; }
+      #heroMobileImg    { display: block; }
+      #veinCanvas       { display: none; }
+    }
+
+    /* Ring image sits above video */
+    .hero__ring-wrap {
+      position: relative;
+      z-index: 1;
+      margin-bottom: 32px;
+      opacity: 0;
+      animation: riseIn 1.6s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
+    }
+
+    .hero__ring-img {
+      width: clamp(220px, 30vw, 420px);
+      height: auto;
+      display: block;
+      filter:
+        drop-shadow(0 8px 40px rgba(201,160,85,0.28))
+        drop-shadow(0 2px 12px rgba(27,25,22,0.10));
+      transform: translateZ(0);
+    }
+
+    /* Text content */
+    .hero__content {
+      padding: 0 var(--pad-x);
+    }
+    .hero__content .btn-solid,
+    .hero__content .btn-ghost {
+      pointer-events: auto;
+    }
+
+    .hero__rule {
+      width: 52px; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      margin: 0 auto 36px;
+      opacity: 0;
+      animation: fadeIn 1s ease 0.55s forwards;
+    }
+
+    .hero__title {
+      font-family: var(--font-serif);
+      font-size: clamp(2.6rem, 6.5vw, 5.2rem);
+      font-weight: 300;
+      font-style: italic;
+      line-height: 1.12;
+      letter-spacing: 0.01em;
+      color: var(--ink);
+      margin-bottom: 22px;
+      max-width: 720px;
+      opacity: 0;
+      animation: riseIn 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.35s forwards;
+    }
+    .hero__title strong {
+      font-weight: 400;
+      font-style: normal;
+      color: var(--gold);
+    }
+
+    .hero__sub {
+      font-size: 0.68rem;
+      font-weight: 400;
+      letter-spacing: 0.34em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      margin-bottom: 52px;
+      opacity: 0;
+      animation: riseIn 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.5s forwards;
+    }
+
+    .hero__actions {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+      opacity: 0;
+      animation: riseIn 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.65s forwards;
+    }
+
+    .btn-solid {
+      display: inline-block;
+      font-family: var(--font-sans);
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      background: var(--gold);
+      color: white;
+      padding: 15px 40px;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.35s ease;
+    }
+    .btn-solid:hover { background: var(--gold-dark); }
+
+    .btn-ghost {
+      display: inline-block;
+      font-family: var(--font-sans);
+      font-size: 0.62rem;
+      font-weight: 400;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--ink);
+      border: 1px solid var(--border-light);
+      padding: 15px 40px;
+      transition: all 0.35s ease;
+    }
+    .btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+
+    .hero__scroll {
+      position: absolute;
+      bottom: 36px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      opacity: 0;
+      animation: fadeIn 1s ease 1.4s forwards;
+    }
+    .hero__scroll span {
+      font-size: 0.52rem;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+    }
+    .hero__scroll-line {
+      width: 1px; height: 36px;
+      background: linear-gradient(to bottom, var(--gold) 0%, transparent 100%);
+      animation: pulse 2.2s ease-in-out infinite;
+    }
+
+    /* ═══════════════════════════════════════════
+       SECTION BASE
+    ═══════════════════════════════════════════ */
+    section { padding: var(--pad-section) 0; }
+
+    .wrap {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 0 var(--pad-x);
+    }
+
+    .eyebrow {
+      display: block;
+      font-size: 0.58rem;
+      font-weight: 600;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 18px;
+    }
+
+    .section-title {
+      font-family: var(--font-serif);
+      font-size: clamp(1.9rem, 4vw, 3.2rem);
+      font-weight: 400;
+      font-style: italic;
+      line-height: 1.18;
+      color: var(--ink);
+      margin-bottom: 28px;
+    }
+
+    .gold-bar {
+      width: 44px; height: 1px;
+      background: var(--gold);
+    }
+
+    /* ═══════════════════════════════════════════
+       ÜBER UNS
+    ═══════════════════════════════════════════ */
+    #about {
+      position: relative;
+      background: rgba(245, 242, 237, 0.45);
+    }
+    #about::before, #about::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent 0%, var(--border-gold) 50%, transparent 100%);
+    }
+    #about::before { top: 0; }
+    #about::after  { bottom: 0; }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: clamp(48px, 7vw, 100px);
+      align-items: center;
+    }
+
+    .about-body p {
+      font-family: var(--font-serif);
+      font-size: clamp(1rem, 1.5vw, 1.18rem);
+      font-weight: 300;
+      line-height: 1.9;
+      color: var(--ink-soft);
+      margin-bottom: 18px;
+    }
+    .about-body p.lead {
+      font-size: clamp(1.15rem, 2vw, 1.38rem);
+      font-style: italic;
+      color: var(--ink);
+      margin-bottom: 24px;
+    }
+
+    .about-ornament {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .about-ring {
+      position: relative;
+      width: 280px; height: 280px;
+      border: 1px solid var(--border-gold);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .about-ring::before {
+      content: '';
+      position: absolute;
+      inset: 18px;
+      border: 1px solid rgba(201, 160, 85, 0.1);
+      border-radius: 50%;
+    }
+    .about-ring-text {
+      font-family: var(--font-serif);
+      font-size: 4.5rem;
+      font-weight: 300;
+      font-style: italic;
+      color: var(--gold);
+      opacity: 0.35;
+      user-select: none;
+    }
+
+    .about-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 36px;
+    }
+    .tag {
+      font-size: 0.6rem;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+      border: 1px solid var(--border-light);
+      padding: 8px 18px;
+      background: rgba(255,254,252,0.7);
+      transition: all 0.3s ease;
+    }
+    .tag:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* ═══════════════════════════════════════════
+       SORTIMENT
+    ═══════════════════════════════════════════ */
+    #services { position: relative; }
+
+    .services-header {
+      text-align: center;
+      margin-bottom: 64px;
+    }
+    .services-header .gold-bar {
+      margin: 0 auto;
+    }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border-light);
+      border: 1px solid var(--border-light);
+    }
+
+    .service-card {
+      background: rgba(251, 249, 245, 0.92);
+      padding: clamp(36px, 5vw, 56px) clamp(28px, 4vw, 44px);
+      position: relative;
+      overflow: hidden;
+      transition: background 0.4s ease;
+    }
+    .service-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--gold-dark), var(--gold-light));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .service-card:hover { background: rgba(255, 253, 249, 0.98); }
+    .service-card:hover::after { transform: scaleX(1); }
+
+    .service-icon {
+      width: 40px; height: 40px;
+      margin-bottom: 26px;
+      stroke: var(--gold);
+    }
+    .service-icon svg {
+      width: 100%; height: 100%;
+      fill: none;
+      stroke: var(--gold);
+      stroke-width: 1.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .service-title {
+      font-family: var(--font-serif);
+      font-size: 1.22rem;
+      font-weight: 400;
+      font-style: italic;
+      color: var(--ink);
+      margin-bottom: 14px;
+    }
+
+    .service-text {
+      font-size: 0.78rem;
+      font-weight: 300;
+      line-height: 1.85;
+      color: var(--ink-soft);
+    }
+
+    /* ═══════════════════════════════════════════
+       ÖFFNUNGSZEITEN & KONTAKT
+    ═══════════════════════════════════════════ */
+    #contact {
+      position: relative;
+      background: rgba(244, 241, 235, 0.4);
+    }
+    #contact::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent 0%, var(--border-gold) 50%, transparent 100%);
+    }
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(48px, 7vw, 96px);
+    }
+
+    .hours-list {
+      margin-top: 36px;
+      border-top: 1px solid var(--border-light);
+    }
+    .hour-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border-light);
+      font-size: 0.85rem;
+    }
+    .hour-day   { font-weight: 400; letter-spacing: 0.04em; }
+    .hour-time  { color: var(--ink-soft); font-weight: 300; }
+    .hour-closed{ color: var(--ink-muted); font-style: italic; }
+
+    .contact-items { margin-top: 36px; }
+    .c-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+    .c-item__icon {
+      width: 42px; height: 42px;
+      border: 1px solid var(--border-gold);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .c-item__icon svg {
+      width: 16px; height: 16px;
+      fill: none;
+      stroke: var(--gold);
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .c-item__label {
+      display: block;
+      font-size: 0.52rem;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      margin-bottom: 5px;
+    }
+    .c-item__value {
+      font-family: var(--font-serif);
+      font-size: 1.05rem;
+      font-weight: 400;
+      line-height: 1.5;
+      color: var(--ink);
+      transition: color 0.3s;
+    }
+    .c-item__value:hover { color: var(--gold); }
+
+    /* ═══════════════════════════════════════════
+       KARTE
+    ═══════════════════════════════════════════ */
+    #location { padding-bottom: 0; }
+
+    .location-intro {
+      text-align: center;
+      padding-bottom: var(--pad-section);
+    }
+    .location-intro .gold-bar { margin: 0 auto; }
+    .location-intro p {
+      font-family: var(--font-serif);
+      font-size: clamp(1rem, 1.5vw, 1.15rem);
+      font-weight: 300;
+      line-height: 1.85;
+      color: var(--ink-soft);
+      max-width: 500px;
+      margin: 24px auto 0;
+    }
+
+    .map-frame {
+      position: relative;
+      height: clamp(340px, 44vw, 520px);
+      overflow: hidden;
+    }
+    .map-frame iframe {
+      width: 100%; height: 100%;
+      border: none;
+      filter: grayscale(15%) sepia(8%) brightness(1.03);
+      display: block;
+    }
+    .map-badge {
+      position: absolute;
+      top: 36px; left: 36px;
+      background: rgba(249, 247, 243, 0.94);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 22px 28px;
+      border: 1px solid var(--border-gold);
+      box-shadow: var(--shadow-card);
+    }
+    .map-badge__name {
+      font-family: var(--font-serif);
+      font-size: 1.12rem;
+      font-style: italic;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+    .map-badge__addr {
+      font-size: 0.75rem;
+      color: var(--ink-soft);
+      line-height: 1.6;
+    }
+
+    /* ═══════════════════════════════════════════
+       BESUCHEN SIE UNS – CTA DARK
+    ═══════════════════════════════════════════ */
+    #visit {
+      text-align: center;
+      background: #1A1714;
+      padding: clamp(72px, 10vw, 120px) var(--pad-x);
+      position: relative;
+      overflow: hidden;
+    }
+    #visit::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(201,160,85,0.07) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 40% at 50% 120%, rgba(201,160,85,0.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .visit-eyebrow { color: var(--gold); }
+    .visit-title {
+      font-family: var(--font-serif);
+      font-size: clamp(2.2rem, 5vw, 4.2rem);
+      font-weight: 300;
+      font-style: italic;
+      line-height: 1.12;
+      color: white;
+      margin-bottom: 20px;
+    }
+    .visit-title em { font-weight: 400; color: var(--gold-light); }
+    .visit-sub {
+      font-family: var(--font-serif);
+      font-size: clamp(0.95rem, 1.5vw, 1.12rem);
+      font-weight: 300;
+      color: rgba(255,255,255,0.48);
+      max-width: 480px;
+      margin: 0 auto 48px;
+      line-height: 1.85;
+    }
+    .visit-actions {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .btn-gold-inv {
+      display: inline-block;
+      font-family: var(--font-sans);
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      background: var(--gold);
+      color: white;
+      padding: 16px 44px;
+      transition: background 0.35s ease;
+    }
+    .btn-gold-inv:hover { background: var(--gold-dark); }
+    .btn-line-light {
+      display: inline-block;
+      font-family: var(--font-sans);
+      font-size: 0.62rem;
+      font-weight: 400;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.55);
+      border: 1px solid rgba(255,255,255,0.16);
+      padding: 16px 44px;
+      transition: all 0.35s ease;
+    }
+    .btn-line-light:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* ═══════════════════════════════════════════
+       FOOTER
+    ═══════════════════════════════════════════ */
+    footer {
+      background: #110F0D;
+      color: rgba(255,255,255,0.42);
+      padding: 64px 0 36px;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: clamp(32px, 5vw, 64px);
+      margin-bottom: 48px;
+    }
+    .footer-brand-name {
+      font-family: var(--font-serif);
+      font-size: 1.35rem;
+      font-style: italic;
+      color: rgba(255,255,255,0.82);
+      margin-bottom: 8px;
+    }
+    .footer-brand-tag {
+      font-size: 0.58rem;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 18px;
+    }
+    .footer-brand-desc {
+      font-size: 0.78rem;
+      line-height: 1.8;
+      max-width: 260px;
+    }
+    .footer-col-head {
+      font-size: 0.56rem;
+      letter-spacing: 0.36em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 20px;
+    }
+    .footer-col ul { list-style: none; }
+    .footer-col ul li { margin-bottom: 12px; }
+    .footer-col ul li a {
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.42);
+      transition: color 0.3s;
+    }
+    .footer-col ul li a:hover { color: var(--gold); }
+    .footer-bottom {
+      border-top: 1px solid rgba(255,255,255,0.05);
+      padding-top: 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.68rem;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    /* ═══════════════════════════════════════════
+       SCROLL REVEAL
+    ═══════════════════════════════════════════ */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition:
+        opacity  0.9s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .reveal.in { opacity: 1; transform: translateY(0); }
+    .d1 { transition-delay: 0.08s; }
+    .d2 { transition-delay: 0.16s; }
+    .d3 { transition-delay: 0.24s; }
+    .d4 { transition-delay: 0.32s; }
+    .d5 { transition-delay: 0.40s; }
+
+    /* ═══════════════════════════════════════════
+       ANIMATIONS
+    ═══════════════════════════════════════════ */
+    @keyframes riseIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.3; }
+      50%       { opacity: 1;   }
+    }
+
+    /* ═══════════════════════════════════════════
+       RESPONSIVE — TABLET
+    ═══════════════════════════════════════════ */
+    /* ═══════════════════════════════════════════
+       TABLET  ≤ 960px
+    ═══════════════════════════════════════════ */
+    @media (max-width: 960px) {
+      .nav__links {
+        display: none;
+        position: fixed;
+        top: var(--nav-h); left: 0; right: 0;
+        background: rgba(249, 247, 243, 0.97);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 28px var(--pad-x);
+        gap: 22px;
+        border-bottom: 1px solid var(--border-gold);
+        box-shadow: 0 8px 32px rgba(27,25,22,0.08);
+        z-index: 199;
+      }
+      .nav__links.open { display: flex; }
+      .nav__burger     { display: flex; }
+
+      .about-grid,
+      .contact-grid  { grid-template-columns: 1fr; gap: 40px; }
+      .about-ornament{ display: none; }
+      .services-grid { grid-template-columns: 1fr 1fr; }
+      .footer-grid   { grid-template-columns: 1fr 1fr; }
+      .visit-actions { flex-direction: column; align-items: center; }
+      .btn-gold-inv,
+      .btn-line-light{ width: 100%; max-width: 320px; text-align: center; }
+    }
+
+    /* ═══════════════════════════════════════════
+       MOBIL  ≤ 600px
+    ═══════════════════════════════════════════ */
+    @media (max-width: 600px) {
+      /* ── Variablen ── */
+      :root {
+        --nav-h:       70px;
+        --pad-x:       18px;
+        --pad-section: 56px;
+      }
+
+      /* ── Navigation ── */
+      .nav { overflow: visible; }
+      .nav__logo-img {
+        height: 56px;
+        clip-path: inset(0 0 18% 0);
+      }
+
+      /* ── Hero ── */
+      #hero { height: 170vh; }
+      .hero__sticky { padding-top: var(--nav-h); box-sizing: border-box; }
+      #heroCanvas   { width: 94vw !important; }
+      .hero__video-wrap { margin-bottom: 18px; }
+      .hero__ring-img {
+        width: clamp(120px, 50vw, 220px);
+      }
+      .hero__title {
+        font-size: clamp(1.9rem, 7.5vw, 2.8rem);
+        text-align: center;
+        max-width: 100%;
+      }
+      .hero__sub {
+        font-size: 0.58rem;
+        letter-spacing: 0.18em;
+      }
+      .hero__actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        width: 100%;
+        max-width: 280px;
+        margin: 0 auto;
+      }
+      .hero__actions a {
+        text-align: center;
+        padding: 14px 24px;
+      }
+      .hero__rule { margin-bottom: 22px; }
+      .hero__scroll { bottom: 20px; }
+
+      /* ── Sektions-Überschriften ── */
+      .section-label { font-size: 0.5rem; }
+
+      /* ── About ── */
+      .about-tags { gap: 8px; }
+      .tag        { font-size: 0.55rem; padding: 6px 14px; }
+
+      /* ── Services ── */
+      .services-grid {
+        grid-template-columns: 1fr;
+        background: transparent;
+        gap: 10px;
+        border: none;
+      }
+      .service-card {
+        border: 1px solid var(--border-light);
+        padding: 28px 22px;
+      }
+      .services-header { margin-bottom: 36px; }
+
+      /* ── Kontakt ── */
+      .contact-grid { grid-template-columns: 1fr; gap: 36px; }
+      .c-item       { gap: 14px; margin-bottom: 24px; }
+      .hours-list   { margin-top: 24px; }
+      .hour-row     { font-size: 0.8rem; padding: 12px 0; }
+
+      /* ── Karte ── */
+      .map-frame  { height: 260px; }
+      .map-badge  {
+        top: 12px; left: 12px;
+        padding: 12px 16px;
+        max-width: calc(100vw - 60px);
+      }
+      .map-badge__name { font-size: 0.95rem; }
+      .map-badge__addr { font-size: 0.7rem; }
+
+      /* ── Visit-CTA ── */
+      .visit-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        max-width: 300px;
+        margin: 0 auto;
+      }
+      .btn-gold-inv,
+      .btn-line-light {
+        width: 100%;
+        max-width: 100%;
+        padding: 14px 24px;
+        text-align: center;
+      }
+
+      /* ── Footer ── */
+      .footer-grid   { grid-template-columns: 1fr; gap: 32px; }
+      .footer-bottom {
+        flex-direction: column;
+        text-align: center;
+        gap: 8px;
+        font-size: 0.62rem;
+      }
+      .footer-brand-desc { max-width: 100%; }
+    }
+
+    /* ═══════════════════════════════════════════
+       SEHR KLEIN  ≤ 390px  (iPhone SE etc.)
+    ═══════════════════════════════════════════ */
+    @media (max-width: 390px) {
+      .hero__title { font-size: clamp(1.6rem, 7vw, 2.2rem); }
+      #heroCanvas  { width: 97vw !important; }
+      .map-frame   { height: 220px; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ═══════════════════════════════════
+       CALACATTA ORO MARBLE BACKGROUND
+       Matching the provided reference image:
+       - Bright near-white base
+       - Soft cloud-like grey veins
+       - Thin glowing GOLD veins (diagonal)
+       - Subtle shimmer / warm atmosphere
+  ═══════════════════════════════════ -->
+  <div class="marble-canvas" aria-hidden="true">
+    <svg xmlns="http://www.w3.org/2000/svg"
+         viewBox="0 0 1440 960"
+         preserveAspectRatio="xMidYMid slice"
+         width="100%" height="100%">
+      <defs>
+
+        <!-- ── Grey cloud veins (fractal noise) ── -->
+        <filter id="greyVeins" x="-5%" y="-5%" width="110%" height="110%"
+                color-interpolation-filters="sRGB">
+          <feTurbulence type="fractalNoise"
+                        baseFrequency="0.007 0.011"
+                        numOctaves="6" seed="9" result="n"/>
+          <!-- Soft wide grey cloud areas -->
+          <feColorMatrix type="matrix"
+            values="0 0 0 0 0.60
+                    0 0 0 0 0.60
+                    0 0 0 0 0.60
+                    0 0 0 -3 2.78"
+            in="n" result="clouds"/>
+          <feGaussianBlur stdDeviation="2.5" in="clouds"/>
+        </filter>
+
+        <!-- ── Fine sharp grey hairline veins ── -->
+        <filter id="hairVeins" x="-5%" y="-5%" width="110%" height="110%"
+                color-interpolation-filters="sRGB">
+          <feTurbulence type="turbulence"
+                        baseFrequency="0.006 0.018"
+                        numOctaves="4" seed="17" result="n2"/>
+          <feColorMatrix type="matrix"
+            values="0 0 0 0 0.58
+                    0 0 0 0 0.58
+                    0 0 0 0 0.59
+                    0 0 0 -7 6.72"
+            in="n2" result="thin"/>
+          <feGaussianBlur stdDeviation="0.5" in="thin"/>
+        </filter>
+
+        <!-- ── Gold vein glow filter ── -->
+        <filter id="goldGlow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="2.8" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+        <filter id="goldGlowFine" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="1.2" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+
+        <!-- Gold vein gradients (fade in/out at ends) -->
+        <linearGradient id="gv1" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%"   stop-color="#C9A055" stop-opacity="0"/>
+          <stop offset="12%"  stop-color="#D4A843" stop-opacity="0.82"/>
+          <stop offset="45%"  stop-color="#EDD280" stop-opacity="0.92"/>
+          <stop offset="75%"  stop-color="#C9A055" stop-opacity="0.78"/>
+          <stop offset="100%" stop-color="#A07838" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="gv2" x1="10%" y1="0%" x2="90%" y2="100%">
+          <stop offset="0%"   stop-color="#C9A055" stop-opacity="0"/>
+          <stop offset="15%"  stop-color="#E0BE70" stop-opacity="0.72"/>
+          <stop offset="55%"  stop-color="#D4A843" stop-opacity="0.85"/>
+          <stop offset="85%"  stop-color="#C2993E" stop-opacity="0.68"/>
+          <stop offset="100%" stop-color="#C9A055" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="gv3" x1="0%" y1="20%" x2="100%" y2="80%">
+          <stop offset="0%"   stop-color="#D4AA50" stop-opacity="0"/>
+          <stop offset="20%"  stop-color="#C9A055" stop-opacity="0.70"/>
+          <stop offset="60%"  stop-color="#EDD070" stop-opacity="0.80"/>
+          <stop offset="100%" stop-color="#C9A055" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="gv4" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%"   stop-color="#C2993E" stop-opacity="0"/>
+          <stop offset="30%"  stop-color="#D4A843" stop-opacity="0.58"/>
+          <stop offset="70%"  stop-color="#C9A055" stop-opacity="0.65"/>
+          <stop offset="100%" stop-color="#A07838" stop-opacity="0"/>
+        </linearGradient>
+
+        <!-- Warm atmosphere gradient -->
+        <radialGradient id="atm" cx="35%" cy="15%" r="65%">
+          <stop offset="0%"   stop-color="#FDFAF5" stop-opacity="0.40"/>
+          <stop offset="100%" stop-color="#F4EFE6" stop-opacity="0"/>
+        </radialGradient>
+
+      </defs>
+
+      <!-- 1. Bright white base -->
+      <rect width="1440" height="960" fill="#F8F8F6"/>
+
+      <!-- 2 + 3. Grey vein layers (parallax: slowest) -->
+      <!-- Reduced opacity: video's own marble dominates in hero -->
+      <g id="marbleGrey">
+        <rect width="1440" height="960"
+              filter="url(#greyVeins)" fill="#808080" opacity="0.28"/>
+        <rect width="1440" height="960"
+              filter="url(#hairVeins)" fill="#707070" opacity="0.20"/>
+      </g>
+
+      <!-- Gold bundles hidden — replaced by interactive canvas veins -->
+      <g id="marbleGoldA" style="display:none">
+        <path d="M 60,960 Q 140,680 210,500 Q 280,320 320,160 Q 350,40 420,-20"
+              fill="none" stroke="url(#gv1)" stroke-width="3.2" stroke-linecap="round"
+              filter="url(#goldGlow)" opacity="0.88"/>
+        <path d="M 90,960 Q 170,690 240,510 Q 308,330 348,170 Q 376,50 445,-20"
+              fill="none" stroke="url(#gv1)" stroke-width="1.6" stroke-linecap="round"
+              filter="url(#goldGlowFine)" opacity="0.72"/>
+        <path d="M 45,960 Q 120,700 190,530 Q 250,370 295,220 Q 330,80 390,-20"
+              fill="none" stroke="url(#gv2)" stroke-width="0.9" stroke-linecap="round"
+              filter="url(#goldGlowFine)" opacity="0.55"/>
+        <path d="M 200,960 Q 270,820 310,700 Q 370,560 400,440"
+              fill="none" stroke="url(#gv2)" stroke-width="1.2" stroke-linecap="round"
+              filter="url(#goldGlowFine)" opacity="0.45"/>
+      </g>
+
+      <!-- 4b. Gold Bundle B – right diagonal (parallax: medium) -->
+      <g id="marbleGoldB" style="display:none">
+        <path d="M 960,0 Q 1010,120 1020,260 Q 1030,400 980,520 Q 930,650 920,800 Q 910,900 930,960"
+              fill="none" stroke="url(#gv3)" stroke-width="2.8" stroke-linecap="round"
+              filter="url(#goldGlow)" opacity="0.82"/>
+        <path d="M 990,0 Q 1038,130 1050,275 Q 1060,418 1008,538 Q 958,665 948,810 Q 938,912 955,960"
+              fill="none" stroke="url(#gv3)" stroke-width="1.4" stroke-linecap="round"
+              filter="url(#goldGlowFine)" opacity="0.62"/>
+        <path d="M 1000,600 Q 1040,700 1060,800 Q 1070,880 1040,960"
+              fill="none" stroke="url(#gv4)" stroke-width="0.8" stroke-linecap="round"
+              filter="url(#goldGlowFine)" opacity="0.48"/>
+      </g>
+
+      <!-- 5. Warm atmosphere overlay -->
+      <rect width="1440" height="960" fill="url(#atm)"/>
+
+    </svg>
+  </div>
+
+  <!-- Interactive gold vein canvas (physics-based mouse repulsion) -->
+  <canvas id="veinCanvas" aria-hidden="true"></canvas>
+
+
+  <!-- ═══════════════════════════════════
+       NAVIGATION
+  ═══════════════════════════════════ -->
+  <nav class="nav" id="mainNav" role="navigation" aria-label="Hauptnavigation">
+    <a href="#hero" class="nav__brand" aria-label="Juwelier Damla – Startseite">
+      <img src="jfggjkfgujlzfg.webp" alt="Juwelier Damla Logo" class="nav__logo-img">
+    </a>
+
+    <ul class="nav__links" id="navLinks">
+      <li><a href="#about">Über uns</a></li>
+      <li><a href="#services">Sortiment</a></li>
+      <li><a href="#contact">Öffnungszeiten</a></li>
+      <li><a href="#location">Standort</a></li>
+      <li><a href="tel:+496115807830" class="nav__cta" aria-label="Jetzt anrufen">Anrufen</a></li>
+    </ul>
+
+    <button class="nav__burger" id="navBurger" aria-label="Menü öffnen" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+
+  <!-- ═══════════════════════════════════
+       HERO
+  ═══════════════════════════════════ -->
+  <section id="hero" aria-labelledby="heroTitle">
+    <div class="hero__sticky">
+
+      <div class="hero__video-wrap" aria-hidden="true">
+        <video id="heroVideo" src="uzg.mp4" muted playsinline preload="auto"
+               disablePictureInPicture disableRemotePlayback></video>
+        <canvas id="heroCanvas"></canvas>
+      </div>
+      <img id="heroMobileImg" src="output.png" alt="" aria-hidden="true">
+
+<!-- Text -->
+      <div class="hero__content">
+        <div class="hero__rule" role="presentation"></div>
+        <h1 class="hero__title" id="heroTitle">
+          Zeitlose <strong>Eleganz</strong><br>in Wiesbaden
+        </h1>
+        <p class="hero__sub">Stilvoll &nbsp;·&nbsp; Persönlich &nbsp;·&nbsp; Hochwertig</p>
+        <div class="hero__actions">
+          <a href="#location" class="btn-solid">Jetzt besuchen</a>
+          <a href="#contact"  class="btn-ghost">Öffnungszeiten</a>
+        </div>
+      </div>
+
+      <div class="hero__scroll" aria-hidden="true">
+        <span>Entdecken</span>
+        <div class="hero__scroll-line"></div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════
+       ÜBER JUWELIER DAMLA
+  ═══════════════════════════════════ -->
+  <section id="about" aria-labelledby="aboutTitle">
+    <div class="wrap">
+      <div class="about-grid">
+
+        <!-- Text Column -->
+        <div class="about-body">
+          <span class="eyebrow reveal">Über uns</span>
+          <h2 class="section-title reveal d1" id="aboutTitle">
+            Schmuck mit<br>besonderem Anspruch
+          </h2>
+          <div class="gold-bar reveal d2" role="presentation"></div>
+
+          <p class="lead reveal d2">
+            Bei Juwelier Damla steht das Besondere im Mittelpunkt – Qualität, die man spürt, und Beratung, die man nicht vergisst.
+          </p>
+          <p class="reveal d3">
+            Mitten in Wiesbaden, in der Wellritzstraße, empfangen wir Sie in einem Ambiente, das Ruhe und Stil vereint. Wir nehmen uns Zeit – für Ihre Wünsche, Ihre Fragen, Ihre Geschichte.
+          </p>
+          <p class="reveal d4">
+            Unser Sortiment verbindet klassische Juwelierkunst mit zeitgemäßem Geschmack. Hochwertige Materialien, sorgfältige Auswahl, ehrliche Beratung.
+          </p>
+
+          <div class="about-tags reveal d5">
+            <span class="tag">Schmuck</span>
+            <span class="tag">Uhren</span>
+            <span class="tag">Trauringe</span>
+            <span class="tag">Beratung</span>
+            <span class="tag">Wiesbaden</span>
+          </div>
+        </div>
+
+        <!-- Ornament Column -->
+        <div class="about-ornament reveal d2">
+          <div class="about-ring">
+            <span class="about-ring-text" aria-hidden="true">JD</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════
+       SORTIMENT & LEISTUNGEN
+  ═══════════════════════════════════ -->
+  <section id="services" aria-labelledby="servicesTitle">
+    <div class="wrap">
+      <div class="services-header">
+        <span class="eyebrow reveal">Sortiment</span>
+        <h2 class="section-title reveal d1" id="servicesTitle">
+          Alles, was Schmuck<br>bedeutsam macht
+        </h2>
+        <div class="gold-bar reveal d2" role="presentation"></div>
+      </div>
+    </div>
+
+    <div class="wrap" style="padding-left: 0; padding-right: 0; max-width: 100%;">
+      <div class="services-grid">
+
+        <!-- Schmuck -->
+        <article class="service-card reveal">
+          <div class="service-icon" aria-hidden="true">
+            <svg viewBox="0 0 48 48">
+              <polygon points="24,6 38,20 24,42 10,20"/>
+              <polyline points="10,20 24,6 38,20"/>
+              <line x1="10" y1="20" x2="38" y2="20"/>
+            </svg>
+          </div>
+          <h3 class="service-title">Schmuck & Kollektionen</h3>
+          <p class="service-text">Feine Ketten, Ringe, Armbänder und Ohrringe – ausgewählt für Menschen mit Sinn für Qualität und Stil. Klassisch wie zeitgemäß.</p>
+        </article>
+
+        <!-- Uhren -->
+        <article class="service-card reveal d1">
+          <div class="service-icon" aria-hidden="true">
+            <svg viewBox="0 0 48 48">
+              <circle cx="24" cy="26" r="14"/>
+              <circle cx="24" cy="26" r="10"/>
+              <line x1="24" y1="12" x2="24" y2="16"/>
+              <line x1="24" y1="36" x2="24" y2="40"/>
+              <line x1="10" y1="26" x2="14" y2="26"/>
+              <line x1="34" y1="26" x2="38" y2="26"/>
+              <polyline points="24,20 24,27 29,27"/>
+              <line x1="20" y1="8" x2="28" y2="8"/>
+            </svg>
+          </div>
+          <h3 class="service-title">Uhren</h3>
+          <p class="service-text">Zeitmessung als Ausdruck von Persönlichkeit. Eine sorgfältige Auswahl hochwertiger Armbanduhren für jeden Anlass und Stil.</p>
+        </article>
+
+        <!-- Trauringe -->
+        <article class="service-card reveal d2">
+          <div class="service-icon" aria-hidden="true">
+            <svg viewBox="0 0 48 48">
+              <circle cx="16" cy="26" r="8"/>
+              <circle cx="32" cy="26" r="8"/>
+              <path d="M 22,21 Q 24,16 26,21"/>
+            </svg>
+          </div>
+          <h3 class="service-title">Trauringe & Verlobung</h3>
+          <p class="service-text">Der Ring für das wichtigste Versprechen. Wir begleiten Sie mit Sachverstand und Einfühlungsvermögen auf dem Weg zu Ihrem perfekten Ring.</p>
+        </article>
+
+        <!-- Geschenke -->
+        <article class="service-card reveal d1">
+          <div class="service-icon" aria-hidden="true">
+            <svg viewBox="0 0 48 48">
+              <rect x="10" y="20" width="28" height="20" rx="1"/>
+              <rect x="8"  y="14" width="32" height="6"/>
+              <line x1="24" y1="14" x2="24" y2="40"/>
+              <path d="M 16,14 Q 16,8 24,8 Q 24,8 24,14"/>
+              <path d="M 32,14 Q 32,8 24,8 Q 24,8 24,14"/>
+            </svg>
+          </div>
+          <h3 class="service-title">Geschenkideen</h3>
+          <p class="service-text">Ein Schmuckstück als Geschenk trägt eine Botschaft. Lassen Sie sich inspirieren – wir helfen Ihnen, das Richtige für jeden Moment zu finden.</p>
+        </article>
+
+        <!-- Beratung -->
+        <article class="service-card reveal d2">
+          <div class="service-icon" aria-hidden="true">
+            <svg viewBox="0 0 48 48">
+              <path d="M 24,6 C 14,6 8,13 8,22 C 8,34 24,44 24,44 C 24,44 40,34 40,22 C 40,13 34,6 24,6 Z"/>
+              <circle cx="24" cy="22" r="5"/>
+            </svg>
+          </div>
+          <h3 class="service-title">Persönliche Beratung</h3>
+          <p class="service-text">Bei Juwelier Damla nehmen wir uns Zeit für Sie. Individuelle Empfehlungen mit echtem Fachverstand – ohne Druck, mit Freude.</p>
+        </article>
+
+        <!-- Reparatur -->
+        <article class="service-card reveal d3">
+          <div class="service-icon" aria-hidden="true">
+            <svg viewBox="0 0 48 48">
+              <path d="M 36,12 L 30,18 L 22,10 L 28,4 A 10,10 0 0 1 36,12 Z" fill="rgba(201,160,85,0.12)"/>
+              <line x1="30" y1="18" x2="12" y2="36"/>
+              <circle cx="9" cy="39" r="3"/>
+              <line x1="22" y1="10" x2="16" y2="16"/>
+            </svg>
+          </div>
+          <h3 class="service-title">Pflege & Restauration</h3>
+          <p class="service-text">Wertvoller Schmuck verdient sorgfältige Behandlung. Wir beraten Sie zur Pflege und vermitteln bei Bedarf fachkundige Restauration.</p>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════
+       ÖFFNUNGSZEITEN & KONTAKT
+  ═══════════════════════════════════ -->
+  <section id="contact" aria-labelledby="contactTitle">
+    <div class="wrap">
+      <div class="contact-grid">
+
+        <!-- Öffnungszeiten -->
+        <div>
+          <span class="eyebrow reveal">Öffnungszeiten</span>
+          <h2 class="section-title reveal d1" id="contactTitle">
+            Wir freuen uns<br>auf Ihren Besuch
+          </h2>
+          <div class="gold-bar reveal d2" role="presentation"></div>
+
+          <div class="hours-list reveal d2" role="list">
+            <div class="hour-row" role="listitem">
+              <span class="hour-day">Montag – Freitag</span>
+              <span class="hour-time">09:30 – 19:00 Uhr</span>
+            </div>
+            <div class="hour-row" role="listitem">
+              <span class="hour-day">Samstag</span>
+              <span class="hour-time">09:30 – 17:00 Uhr</span>
+            </div>
+            <div class="hour-row" role="listitem">
+              <span class="hour-day">Sonntag</span>
+              <span class="hour-closed">Geschlossen</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Kontaktdaten -->
+        <div>
+          <span class="eyebrow reveal">Kontakt</span>
+          <h2 class="section-title reveal d1">
+            Sprechen Sie<br>mit uns
+          </h2>
+          <div class="gold-bar reveal d2" role="presentation"></div>
+
+          <div class="contact-items">
+
+            <div class="c-item reveal d2">
+              <div class="c-item__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+                  <circle cx="12" cy="9" r="2.5"/>
+                </svg>
+              </div>
+              <div>
+                <span class="c-item__label">Adresse</span>
+                <a class="c-item__value"
+                   href="https://maps.google.com/?q=Wellritzstraße+3,+65183+Wiesbaden"
+                   target="_blank" rel="noopener noreferrer"
+                   aria-label="Adresse in Google Maps öffnen">
+                  Wellritzstraße 3<br>65183 Wiesbaden
+                </a>
+              </div>
+            </div>
+
+            <div class="c-item reveal d3">
+              <div class="c-item__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                </svg>
+              </div>
+              <div>
+                <span class="c-item__label">Telefon</span>
+                <a class="c-item__value" href="tel:+496115807830">+49 611 5807830</a>
+              </div>
+            </div>
+
+            <div class="c-item reveal d4">
+              <div class="c-item__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="2" y1="12" x2="22" y2="12"/>
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                </svg>
+              </div>
+              <div>
+                <span class="c-item__label">Website</span>
+                <a class="c-item__value" href="http://juwelier-damla.de"
+                   target="_blank" rel="noopener noreferrer">juwelier-damla.de</a>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════
+       STANDORT / KARTE
+  ═══════════════════════════════════ -->
+  <section id="location">
+    <div class="wrap">
+      <div class="location-intro">
+        <span class="eyebrow reveal">Standort</span>
+        <h2 class="section-title reveal d1">
+          Finden Sie uns in<br>der Wellritzstraße
+        </h2>
+        <div class="gold-bar reveal d2" role="presentation"></div>
+        <p class="reveal d3">
+          Besuchen Sie uns mitten in Wiesbaden. Wir empfangen Sie gerne persönlich und nehmen uns Zeit für Ihre Wünsche.
+        </p>
+      </div>
+    </div>
+
+    <div class="map-frame">
+      <iframe
+        src="https://maps.google.com/maps?q=Wellritzstra%C3%9Fe+3%2C+65183+Wiesbaden%2C+Germany&output=embed&z=16&hl=de"
+        allowfullscreen
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        title="Karte: Juwelier Damla, Wellritzstraße 3, 65183 Wiesbaden">
+      </iframe>
+
+      <div class="map-badge" role="complementary" aria-label="Standortinformation">
+        <div class="map-badge__name">Juwelier Damla</div>
+        <div class="map-badge__addr">
+          Wellritzstraße 3<br>65183 Wiesbaden
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════
+       KOMMEN SIE VORBEI — DARK CTA
+  ═══════════════════════════════════ -->
+  <section id="visit" aria-labelledby="visitTitle">
+    <span class="eyebrow visit-eyebrow reveal">Kommen Sie vorbei</span>
+    <h2 class="visit-title reveal d1" id="visitTitle">
+      Ihr Juwelier<br><em>in Wiesbaden</em>
+    </h2>
+    <p class="visit-sub reveal d2">
+      Entdecken Sie unsere Kollektionen und erleben Sie persönliche Beratung auf höchstem Niveau – in der Wellritzstraße 3.
+    </p>
+    <div class="visit-actions reveal d3">
+      <a href="https://maps.google.com/?q=Wellritzstraße+3,+65183+Wiesbaden"
+         target="_blank" rel="noopener noreferrer"
+         class="btn-gold-inv">Standort ansehen</a>
+      <a href="tel:+496115807830" class="btn-line-light">+49 611 5807830</a>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════
+       FOOTER
+  ═══════════════════════════════════ -->
+  <footer role="contentinfo">
+    <div class="wrap">
+      <div class="footer-grid">
+
+        <div>
+          <div class="footer-brand-name">Juwelier Damla</div>
+          <div class="footer-brand-tag">Stilvoll · Persönlich · Wiesbaden</div>
+          <p class="footer-brand-desc">
+            Ihr Juwelier in der Wellritzstraße – für Momente, die bleiben. Persönliche Beratung, ausgewählte Qualität, echte Leidenschaft für Schmuck.
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <div class="footer-col-head">Navigation</div>
+          <ul>
+            <li><a href="#about">Über uns</a></li>
+            <li><a href="#services">Sortiment</a></li>
+            <li><a href="#contact">Öffnungszeiten</a></li>
+            <li><a href="#location">Standort</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <div class="footer-col-head">Kontakt</div>
+          <ul>
+            <li><a href="tel:+496115807830">+49 611 5807830</a></li>
+            <li>
+              <a href="https://maps.google.com/?q=Wellritzstraße+3,+65183+Wiesbaden"
+                 target="_blank" rel="noopener noreferrer">
+                Wellritzstraße 3<br>65183 Wiesbaden
+              </a>
+            </li>
+            <li><a href="http://juwelier-damla.de" target="_blank" rel="noopener noreferrer">juwelier-damla.de</a></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="footer-bottom">
+        <span>© 2025 Juwelier Damla · Wiesbaden</span>
+        <span>Wellritzstraße 3 · 65183 Wiesbaden · Deutschland</span>
+      </div>
+    </div>
+  </footer>
+
+
+  <!-- ═══════════════════════════════════
+       JAVASCRIPT
+  ═══════════════════════════════════ -->
+  <script>
+    // ── Navbar scroll state ──────────────────────────
+    const nav = document.getElementById('mainNav');
+    const onScroll = () => {
+      nav.classList.toggle('nav--scrolled', window.scrollY > 32);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll(); // run once on load
+
+    // ── Mobile navigation toggle ─────────────────────
+    const burger = document.getElementById('navBurger');
+    const links  = document.getElementById('navLinks');
+    burger.addEventListener('click', () => {
+      const open = links.classList.toggle('open');
+      burger.classList.toggle('open', open);
+      burger.setAttribute('aria-expanded', String(open));
+    });
+    // Close on any link tap
+    links.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', () => {
+        links.classList.remove('open');
+        burger.classList.remove('open');
+        burger.setAttribute('aria-expanded', 'false');
+      });
+    });
+    // Close on outside click
+    document.addEventListener('click', e => {
+      if (!nav.contains(e.target) && links.classList.contains('open')) {
+        links.classList.remove('open');
+        burger.classList.remove('open');
+        burger.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    // ── Scroll reveal (IntersectionObserver) ─────────
+    const revealEls = document.querySelectorAll('.reveal');
+    const revealObs = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in');
+          revealObs.unobserve(entry.target);
+        }
+      });
+    }, {
+      threshold: 0.1,
+      rootMargin: '0px 0px -48px 0px'
+    });
+    revealEls.forEach(el => revealObs.observe(el));
+
+    // ── Scroll-Animation: Mobil direkt, Desktop Frame-Buffer ──
+    (function () {
+      var vid  = document.getElementById('heroVideo');
+      var cnvs = document.getElementById('heroCanvas');
+      var hero = document.getElementById('hero');
+      if (!vid || !cnvs || !hero) return;
+
+      var isMobile = window.innerWidth <= 768 ||
+                     /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+      // ── MOBIL: Statisches Bild statt Animation ──
+      if (isMobile) {
+        vid.style.cssText = 'position:fixed;left:-9999px;width:1px;height:1px;opacity:0';
+        cnvs.style.display = 'none';
+        var mImg = document.getElementById('heroMobileImg');
+        if (mImg) mImg.style.display = 'block';
+        return;
+      }
+
+      // ── DESKTOP: Frame-Buffer mit Blending ───────────
+      var ctx = cnvs.getContext('2d');
+      var frames = [], W = 0, H = 0, loaded = false;
+
+      var lastSY = -1;
+      (function tick() {
+        if (loaded) {
+          var sy = window.scrollY;
+          if (sy !== lastSY) {
+            lastSY = sy;
+            var rwy = hero.offsetHeight - window.innerHeight;
+            if (rwy > 0) {
+              var pos = Math.max(0, Math.min(sy / rwy, 1)) * (frames.length - 1);
+              var lo = Math.floor(pos), hi = Math.min(lo + 1, frames.length - 1);
+              var blend = pos - lo;
+              ctx.clearRect(0, 0, W, H);
+              ctx.globalAlpha = 1;
+              ctx.drawImage(frames[lo], 0, 0);
+              if (blend > 0 && hi !== lo) {
+                ctx.globalAlpha = blend;
+                ctx.drawImage(frames[hi], 0, 0);
+                ctx.globalAlpha = 1;
+              }
+            }
+          }
+        }
+        requestAnimationFrame(tick);
+      }());
+
+      function snap() {
+        try {
+          var oc = new OffscreenCanvas(W, H);
+          oc.getContext('2d').drawImage(vid, 0, 0, W, H);
+          return oc;
+        } catch (_) {
+          var c = document.createElement('canvas');
+          c.width = W; c.height = H;
+          c.getContext('2d').drawImage(vid, 0, 0, W, H);
+          return c;
+        }
+      }
+
+      function showFirst() {
+        if (frames.length > 0 && !loaded) {
+          ctx.drawImage(frames[0], 0, 0);
+          loaded = true;
+        }
+      }
+
+      function captureRVFC() {
+        var STEP = 1 / 5, last = -999;
+        function onFrame(_, meta) {
+          var t = meta ? meta.mediaTime : vid.currentTime;
+          if (t - last >= STEP - 0.001) {
+            last = t; frames.push(snap());
+            if (frames.length === 1) showFirst();
+          }
+          if (!vid.ended && vid.currentTime < vid.duration - 0.02) {
+            vid.requestVideoFrameCallback(onFrame);
+          } else { vid.pause(); }
+        }
+        vid.currentTime = 0; vid.playbackRate = 16;
+        vid.requestVideoFrameCallback(onFrame);
+        vid.play().catch(captureSeek);
+      }
+
+      function captureSeek() {
+        var FPS = 5, dur = vid.duration;
+        var total = Math.ceil(dur * FPS), n = 0, busy = false;
+        function step() {
+          if (busy || n > total) return;
+          busy = true;
+          var t = Math.min(n / FPS, dur);
+          function done() {
+            frames[n] = snap();
+            if (n === 0) showFirst();
+            n++; busy = false; step();
+          }
+          if (Math.abs(vid.currentTime - t) < 0.001) { done(); return; }
+          vid.addEventListener('seeked', done, { once: true });
+          vid.currentTime = t;
+        }
+        step();
+      }
+
+      function init() {
+        W = vid.videoWidth; H = vid.videoHeight;
+        if (!W || !H || !vid.duration || isNaN(vid.duration)) return;
+        cnvs.width = W; cnvs.height = H;
+        if (typeof vid.requestVideoFrameCallback === 'function') captureRVFC();
+        else captureSeek();
+      }
+
+      if (vid.readyState >= 2) init();
+      else vid.addEventListener('loadeddata', init, { once: true });
+    })();
+
+    // ── Marble Parallax ──────────────────────────────
+    // Three depth layers scroll at different speeds,
+    // creating an organic luxury depth effect.
+    // Uses transform only → no layout thrashing, 60 fps.
+    const pGrey  = document.getElementById('marbleGrey');
+    const pGoldA = document.getElementById('marbleGoldA');
+    const pGoldB = document.getElementById('marbleGoldB');
+
+    // Parallax multipliers per layer (px shift per scrolled px)
+    const SPEED_GREY  =  0.018;  // very slow – feels distant
+    const SPEED_GOLD_A = 0.072;  // faster  – "closest" layer
+    const SPEED_GOLD_B = 0.044;  // medium  – mid depth
+
+    let scrollY    = 0;
+    let currentA   = 0;
+    let currentB   = 0;
+    let currentGrey= 0;
+    let rafId      = null;
+
+    function lerp(a, b, t) { return a + (b - a) * t; }
+
+    function updateMarble() {
+      const targetGrey  = -scrollY * SPEED_GREY;
+      const targetA     = -scrollY * SPEED_GOLD_A;
+      const targetB     = -scrollY * SPEED_GOLD_B;
+
+      // Smooth interpolation for silky feel
+      currentGrey = lerp(currentGrey, targetGrey, 0.08);
+      currentA    = lerp(currentA,    targetA,    0.08);
+      currentB    = lerp(currentB,    targetB,    0.06);
+
+      pGrey.setAttribute('transform',  `translate(0,${currentGrey.toFixed(2)})`);
+      pGoldA.setAttribute('transform', `translate(0,${currentA.toFixed(2)})`);
+      pGoldB.setAttribute('transform', `translate(0,${currentB.toFixed(2)})`);
+
+      // Keep animating until values settle
+      const settled =
+        Math.abs(currentA - targetA) < 0.05 &&
+        Math.abs(currentB - targetB) < 0.05 &&
+        Math.abs(currentGrey - targetGrey) < 0.05;
+
+      if (!settled) rafId = requestAnimationFrame(updateMarble);
+      else rafId = null;
+    }
+
+    window.addEventListener('scroll', () => {
+      scrollY = window.scrollY;
+      if (!rafId) rafId = requestAnimationFrame(updateMarble);
+    }, { passive: true });
+
+    // ── Interactive Gold Veins (Canvas + Physics) ────
+    // Gold veins are drawn on a fixed canvas.
+    // Each vein is a set of physics particles.
+    // Mouse proximity → repulsion force → veins bend away.
+    // Spring + damping → veins snap back when mouse leaves.
+    (function () {
+      if (window.innerWidth <= 768 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) return;
+      const canvas = document.getElementById('veinCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      // Vein control points in SVG 1440×960 coordinate space
+      const VEINS = [
+        { pts: [[60,960],[140,680],[210,500],[280,320],[320,160],[420,-20]],   w: 3.2, a: 0.88 },
+        { pts: [[90,960],[170,690],[240,510],[308,330],[348,170],[445,-20]],   w: 1.6, a: 0.70 },
+        { pts: [[45,960],[120,700],[190,530],[250,370],[295,220],[390,-20]],   w: 0.9, a: 0.52 },
+        { pts: [[200,960],[270,820],[310,700],[370,560],[400,440]],            w: 1.2, a: 0.42 },
+        { pts: [[960,0],[1010,120],[1020,260],[1030,400],[980,520],[930,650],[920,800],[930,960]], w: 2.8, a: 0.82 },
+        { pts: [[990,0],[1038,130],[1050,275],[1060,418],[1008,538],[958,665],[948,810],[955,960]], w: 1.4, a: 0.60 },
+        { pts: [[1000,600],[1040,700],[1060,800],[1070,880],[1040,960]],       w: 0.8, a: 0.46 },
+      ];
+
+      let W = 0, H = 0;
+
+      // Scale SVG coords → canvas pixels
+      const sx = x => x / 1440 * W;
+      const sy = y => y / 960  * H;
+
+      // Physics state — one particle per control point
+      let veins = [];
+
+      function buildVeins() {
+        veins = VEINS.map(v => ({
+          ...v,
+          pts: v.pts.map(([x, y]) => ({
+            x: sx(x), y: sy(y),
+            ox: sx(x), oy: sy(y),
+            vx: 0, vy: 0
+          }))
+        }));
+      }
+
+      function resize() {
+        W = window.innerWidth;
+        H = window.innerHeight;
+        canvas.width  = W;
+        canvas.height = H;
+        buildVeins();
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      // Mouse position (stays off-screen until moved)
+      let mx = -9999, my = -9999;
+      window.addEventListener('mousemove', e => {
+        mx = e.clientX;
+        my = e.clientY;
+      });
+
+      const REPEL_R = 110;   // repulsion radius (px)
+      const REPEL_F = 14;    // repulsion force
+      const SPRING  = 0.055; // spring constant (pull back to origin)
+      const DAMPING = 0.78;  // velocity damping
+
+      function update() {
+        veins.forEach(v => {
+          v.pts.forEach(p => {
+            const dx = p.x - mx;
+            const dy = p.y - my;
+            const d  = Math.hypot(dx, dy);
+            if (d < REPEL_R && d > 0) {
+              const s = (1 - d / REPEL_R) * REPEL_F;
+              p.vx += (dx / d) * s;
+              p.vy += (dy / d) * s;
+            }
+            // Spring back to original position
+            p.vx += (p.ox - p.x) * SPRING;
+            p.vy += (p.oy - p.y) * SPRING;
+            // Damping
+            p.vx *= DAMPING;
+            p.vy *= DAMPING;
+            p.x  += p.vx;
+            p.y  += p.vy;
+          });
+        });
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, W, H);
+        veins.forEach(v => {
+          const p = v.pts;
+          if (p.length < 2) return;
+
+          // Gold gradient along vein direction
+          const g = ctx.createLinearGradient(p[0].x, p[0].y, p[p.length-1].x, p[p.length-1].y);
+          g.addColorStop(0,    'rgba(201,160,85,0)');
+          g.addColorStop(0.12, `rgba(212,168,67,${v.a * 0.9})`);
+          g.addColorStop(0.45, `rgba(237,210,112,${v.a})`);
+          g.addColorStop(0.78, `rgba(201,160,85,${v.a * 0.85})`);
+          g.addColorStop(1,    'rgba(160,120,56,0)');
+
+          ctx.save();
+          ctx.shadowColor = 'rgba(201,160,85,0.5)';
+          ctx.shadowBlur  = 10;
+          ctx.beginPath();
+          ctx.moveTo(p[0].x, p[0].y);
+          for (let i = 0; i < p.length - 1; i++) {
+            // Draw smooth curve through midpoints
+            const mx2 = (p[i].x + p[i+1].x) / 2;
+            const my2 = (p[i].y + p[i+1].y) / 2;
+            ctx.quadraticCurveTo(p[i].x, p[i].y, mx2, my2);
+          }
+          ctx.lineTo(p[p.length-1].x, p[p.length-1].y);
+          ctx.strokeStyle = g;
+          ctx.lineWidth   = v.w * W / 1440;
+          ctx.lineCap     = 'round';
+          ctx.stroke();
+          ctx.restore();
+        });
+      }
+
+      function loop() {
+        update();
+        draw();
+        requestAnimationFrame(loop);
+      }
+      loop();
+    })();
+
+    // ── Respect reduced-motion preference ────────────
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (mq.matches) {
+      // Disable parallax for users who prefer reduced motion
+      window.removeEventListener('scroll', updateMarble);
+      if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+
+      document.querySelectorAll('.hero__logo, .hero__rule, .hero__title, .hero__sub, .hero__actions, .hero__scroll')
+        .forEach(el => {
+          el.style.opacity = '1';
+          el.style.transform = 'none';
+          el.style.animation = 'none';
+        });
+      revealEls.forEach(el => {
+        el.style.opacity = '1';
+        el.style.transform = 'none';
+        el.style.transition = 'none';
+        el.classList.add('in');
+      });
+    }
+  </script>
+
+</body>
+</html>
