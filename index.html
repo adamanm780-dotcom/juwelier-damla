@@ -15,8 +15,8 @@
        DESIGN TOKENS
     ═══════════════════════════════════════════ */
     :root {
-      --marble:       #FFFFFF;
-      --marble-dark:  #FFFFFF;
+      --marble:       #F8F8F6;
+      --marble-dark:  #F4F3EF;
       --gold:         #C9A055;
       --gold-light:   #DFC082;
       --gold-dark:    #A07838;
@@ -96,14 +96,17 @@
       align-items: center;
       justify-content: space-between;
       padding: 0 var(--pad-x);
-      transition: background 0.5s ease, box-shadow 0.5s ease;
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(201, 160, 85, 0.35);
+      transition: background 0.5s ease, box-shadow 0.5s ease, border-color 0.5s ease;
     }
 
     .nav--scrolled {
-      background: rgba(249, 247, 243, 0.94);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      box-shadow: 0 1px 0 var(--border-gold);
+      background: rgba(255, 255, 255, 0.98);
+      box-shadow: 0 2px 24px rgba(27, 25, 22, 0.06);
+      border-bottom: 1px solid rgba(201, 160, 85, 0.50);
     }
 
     .nav__brand {
@@ -190,7 +193,7 @@
     #hero {
       height: 140vh;
       position: relative;
-      background: #FFFFFF;
+      background: transparent;
     }
 
     /* Sticky container: stays visible while parent scrolls */
@@ -232,11 +235,12 @@
     /* Mobiles Standbild (nur auf Handy sichtbar) */
     #heroMobileImg {
       display: none;
-      width: clamp(280px, 92vw, 780px);
+      width: clamp(280px, 92vw, 600px);
       height: auto;
       aspect-ratio: 16 / 9;
       object-fit: cover;
       border-radius: 4px;
+      margin-bottom: 24px;
     }
 
     @media (max-width: 768px) {
@@ -919,8 +923,8 @@
       }
 
       /* ── Hero ── */
-      #hero { height: 170vh; }
-      .hero__sticky { padding-top: var(--nav-h); box-sizing: border-box; }
+      #hero { height: auto; min-height: 100svh; }
+      .hero__sticky { padding-top: var(--nav-h); box-sizing: border-box; position: relative; min-height: 100svh; }
       #heroCanvas   { width: 94vw !important; }
       .hero__video-wrap { margin-bottom: 18px; }
       .hero__ring-img {
@@ -1204,7 +1208,7 @@
     <div class="hero__sticky">
 
       <div class="hero__video-wrap" aria-hidden="true">
-        <video id="heroVideo" src="uzg.mp4" muted playsinline preload="auto"
+        <video id="heroVideo" muted playsinline preload="none"
                disablePictureInPicture disableRemotePlayback></video>
         <canvas id="heroCanvas"></canvas>
       </div>
@@ -1648,12 +1652,17 @@
 
       // ── MOBIL: Statisches Bild statt Animation ──
       if (isMobile) {
-        vid.style.cssText = 'position:fixed;left:-9999px;width:1px;height:1px;opacity:0';
+        // Do NOT load the video on mobile at all
+        vid.removeAttribute('src');
         cnvs.style.display = 'none';
         var mImg = document.getElementById('heroMobileImg');
-        if (mImg) mImg.style.display = 'block';
+        if (mImg) { mImg.style.display = 'block'; }
         return;
       }
+
+      // Desktop only: set video src and start loading
+      vid.src = 'uzg.mp4';
+      vid.preload = 'auto';
 
       // ── DESKTOP: Frame-Buffer mit Blending ───────────
       var ctx = cnvs.getContext('2d');
