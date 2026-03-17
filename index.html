@@ -73,7 +73,7 @@
       inset: 0;
       width: 100%;
       height: 100%;
-      z-index: 1;
+      z-index: 3;
       pointer-events: none;
     }
 
@@ -227,7 +227,8 @@
     /* Canvas zeigt die vorgeladenen Frames */
     #heroCanvas {
       width: clamp(280px, 52vw, 780px);
-      aspect-ratio: 16 / 9;
+      aspect-ratio: auto;
+      height: auto;
       display: block;
       transform: translateZ(0);
     }
