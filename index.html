@@ -483,15 +483,17 @@
     .about-figure { position: relative; }
     .about-img {
       width: 100%;
-      aspect-ratio: 4 / 4.6;
+      aspect-ratio: 4 / 4.9;
       object-fit: cover;
       box-shadow: var(--shadow-card);
+      border-radius: 999px 999px 10px 10px;  /* Bogen-Form */
     }
     .about-figure::after {
       content: '';
       position: absolute;
       inset: -16px 16px 16px -16px;
       border: 1px solid var(--border-gold);
+      border-radius: 999px 999px 10px 10px;
       pointer-events: none;
     }
     .about-monogram {
@@ -566,14 +568,20 @@
       position: relative;
       overflow: hidden;
       box-shadow: var(--shadow-soft);
+      border-radius: 240px 240px 8px 8px;  /* Bogen-Form */
+      transition: transform 0.6s var(--ease-out), box-shadow 0.6s ease;
+    }
+    .collection-card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-card);
     }
     .collection-card img {
       width: 100%;
-      aspect-ratio: 4 / 5;
+      aspect-ratio: 4 / 5.4;
       object-fit: cover;
       transition: transform 1.1s var(--ease-out);
     }
-    .collection-card:hover img { transform: scale(1.05); }
+    .collections-grid .collection-card:hover img { transform: scale(1.06); }
     .collection-card figcaption {
       position: absolute;
       inset: auto 0 0 0;
@@ -689,7 +697,14 @@
       position: relative;
       overflow: hidden;
       box-shadow: var(--shadow-soft);
+      border-radius: 22px;
+      transition: transform 0.6s var(--ease-out), box-shadow 0.6s ease;
     }
+    .gallery-card:hover {
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-card);
+    }
+    .gallery-card:first-child { border-radius: 999px 999px 22px 22px; }  /* Bogen */
     .gallery-card img {
       width: 100%;
       height: 100%;
@@ -703,7 +718,7 @@
       aspect-ratio: 16 / 8;
       object-position: center 30%;
     }
-    .gallery-card:hover img { transform: scale(1.04); }
+    .gallery-grid .gallery-card:hover img { transform: scale(1.05); }
     .gallery-card figcaption {
       position: absolute;
       inset: auto 0 0 0;
@@ -770,15 +785,17 @@
     .review-card {
       background: rgba(255, 254, 251, 0.95);
       border: 1px solid var(--border-light);
+      border-radius: 14px;
       padding: 30px 28px 24px;
       margin: 0;
       display: flex;
       flex-direction: column;
-      transition: border-color 0.35s ease, box-shadow 0.35s ease;
+      transition: border-color 0.35s ease, box-shadow 0.35s ease, transform 0.45s var(--ease-out);
     }
     .review-card:hover {
       border-color: var(--border-gold);
-      box-shadow: var(--shadow-soft);
+      box-shadow: var(--shadow-card);
+      transform: translateY(-5px);
     }
     .review-stars {
       color: var(--gold);
@@ -1088,11 +1105,14 @@
     .flowstate-credit a:hover { color: var(--gold-light); }
 
     /* ═══════════════════════════════════════════
-       SCROLL REVEAL
+       SCROLL REVEAL — drei Choreografien:
+       .reveal       sanftes Aufsteigen (Text, Karten)
+       .reveal-img   Bild-Wipe von unten + Zoom-Settle
+       .reveal-lines Zeilen-Maske für Überschriften
     ═══════════════════════════════════════════ */
     .reveal {
       opacity: 0;
-      transform: translateY(28px);
+      transform: translateY(34px);
       transition:
         opacity 0.9s var(--ease-out),
         transform 0.9s var(--ease-out);
@@ -1103,6 +1123,90 @@
     .d3 { transition-delay: 0.24s; }
     .d4 { transition-delay: 0.32s; }
     .d5 { transition-delay: 0.40s; }
+
+    /* Bild-Wipe: Bild wird von unten aufgedeckt und setzt sich
+       aus einer leichten Vergrößerung weich ab */
+    .reveal-img img {
+      clip-path: inset(100% 0 0 0);
+      transform: scale(1.14);
+      transition:
+        clip-path 1.15s var(--ease-out),
+        transform 1.6s var(--ease-out);
+    }
+    .reveal-img.in img {
+      clip-path: inset(0 0 0 0);
+      transform: none;
+    }
+    .reveal-img.d1 img { transition-delay: 0.14s; }
+    .reveal-img.d2 img { transition-delay: 0.28s; }
+    .reveal-img figcaption {
+      opacity: 0;
+      transform: translateY(14px);
+      transition: opacity 0.7s ease 0.55s, transform 0.7s var(--ease-out) 0.55s;
+    }
+    .reveal-img.in figcaption { opacity: 1; transform: translateY(0); }
+
+    /* Zeilen-Maske: Überschriften-Zeilen gleiten aus einer
+       unsichtbaren Maske nach oben */
+    .reveal-lines .tl__line { display: block; overflow: hidden; }
+    .reveal-lines .tl__line > span {
+      display: block;
+      transform: translateY(118%);
+      transition: transform 0.9s var(--ease-out);
+    }
+    .reveal-lines .tl__line:nth-child(2) > span { transition-delay: 0.14s; }
+    .reveal-lines.in .tl__line > span { transform: translateY(0); }
+
+    /* ═══════════════════════════════════════════
+       MARQUEE-BAND (Editorial-Laufband)
+    ═══════════════════════════════════════════ */
+    .marquee {
+      overflow: hidden;
+      padding: clamp(26px, 4vw, 46px) 0;
+      border-top: 1px solid var(--border-gold);
+      border-bottom: 1px solid var(--border-gold);
+      background: rgba(255, 254, 251, 0.6);
+    }
+    .marquee__track {
+      display: flex;
+      align-items: center;
+      gap: clamp(28px, 4vw, 56px);
+      width: max-content;
+      animation: marquee 36s linear infinite;
+    }
+    .marquee__track span {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-weight: 300;
+      font-size: clamp(1.5rem, 3.2vw, 2.4rem);
+      color: rgba(27, 25, 22, 0.22);
+      white-space: nowrap;
+    }
+    .marquee__track .diamond {
+      font-style: normal;
+      font-size: clamp(0.7rem, 1.2vw, 0.95rem);
+      color: var(--gold);
+      opacity: 0.75;
+    }
+    @keyframes marquee {
+      to { transform: translateX(-50%); }
+    }
+
+    /* ═══════════════════════════════════════════
+       CURSOR-GLOW (nur Desktop mit Maus)
+    ═══════════════════════════════════════════ */
+    #cursorGlow {
+      position: fixed;
+      left: 0; top: 0;
+      width: 560px; height: 560px;
+      margin: -280px 0 0 -280px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(201, 160, 85, 0.11) 0%, transparent 62%);
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
 
     @keyframes riseIn {
       from { opacity: 0; transform: translateY(26px); }
@@ -1125,6 +1229,11 @@
         transition-duration: 0.01ms !important;
       }
       .reveal { opacity: 1; transform: none; }
+      .reveal-img img { clip-path: none; transform: none; }
+      .reveal-img figcaption { opacity: 1; transform: none; }
+      .reveal-lines .tl__line > span { transform: none; }
+      .marquee__track { animation: none; }
+      #cursorGlow { display: none; }
       .hero__eyebrow, .hero__title, .hero__text,
       .hero__actions, #ringCanvas,
       .hero__badge, .hero__scroll { opacity: 1; }
@@ -1280,6 +1389,9 @@
     </svg>
   </div>
 
+  <!-- Gold-Glow, folgt dem Cursor (nur Desktop mit Maus) -->
+  <div id="cursorGlow" aria-hidden="true"></div>
+
   <!-- ═══════════════════════════════════
        NAVIGATION
   ═══════════════════════════════════ -->
@@ -1354,16 +1466,14 @@
     <div class="wrap">
       <div class="about-grid">
 
-        <div class="about-figure reveal">
+        <div class="about-figure reveal-img">
           <img src="assets/laden-innen-1.jpg" alt="Verkaufsraum von Juwelier Damla mit Vitrinen und Schmuckpräsentation" class="about-img" width="1000" height="1333" loading="lazy">
           <div class="about-monogram" aria-hidden="true">JD</div>
         </div>
 
         <div class="about-body">
           <span class="eyebrow reveal">Über uns</span>
-          <h2 class="section-title reveal d1" id="aboutTitle">
-            Schmuck mit<br>besonderem Anspruch
-          </h2>
+          <h2 class="section-title reveal-lines" id="aboutTitle"><span class="tl__line"><span>Schmuck mit</span></span><span class="tl__line"><span>besonderem Anspruch</span></span></h2>
           <div class="gold-bar reveal d2" role="presentation"></div>
 
           <p class="lead reveal d2">
@@ -1389,6 +1499,26 @@
     </div>
   </section>
 
+  <!-- Editorial-Laufband -->
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee__track">
+      <span>Trauringe</span><span class="diamond">◆</span>
+      <span>Verlobungsringe</span><span class="diamond">◆</span>
+      <span>Uhren</span><span class="diamond">◆</span>
+      <span>Ketten</span><span class="diamond">◆</span>
+      <span>Ohrringe</span><span class="diamond">◆</span>
+      <span>Armbänder</span><span class="diamond">◆</span>
+      <span>Persönliche Beratung</span><span class="diamond">◆</span>
+      <span>Trauringe</span><span class="diamond">◆</span>
+      <span>Verlobungsringe</span><span class="diamond">◆</span>
+      <span>Uhren</span><span class="diamond">◆</span>
+      <span>Ketten</span><span class="diamond">◆</span>
+      <span>Ohrringe</span><span class="diamond">◆</span>
+      <span>Armbänder</span><span class="diamond">◆</span>
+      <span>Persönliche Beratung</span><span class="diamond">◆</span>
+    </div>
+  </div>
+
   <!-- ═══════════════════════════════════
        KOLLEKTIONEN
   ═══════════════════════════════════ -->
@@ -1396,14 +1526,12 @@
     <div class="wrap">
       <div class="collections-header">
         <span class="eyebrow reveal">Kollektionen</span>
-        <h2 class="section-title reveal d1" id="collectionsTitle">
-          Ausgewählte Stücke,<br>die bleiben
-        </h2>
+        <h2 class="section-title reveal-lines" id="collectionsTitle"><span class="tl__line"><span>Ausgewählte Stücke,</span></span><span class="tl__line"><span>die bleiben</span></span></h2>
         <div class="gold-bar reveal d2" role="presentation"></div>
       </div>
 
       <div class="collections-grid">
-        <figure class="collection-card reveal">
+        <figure class="collection-card reveal-img">
           <img src="assets/trauringe.jpg" alt="Zwei goldene Trauringe auf Marmor" width="800" height="1000" loading="lazy">
           <figcaption>
             <strong>Trauringe & Verlobung</strong>
@@ -1411,7 +1539,7 @@
           </figcaption>
         </figure>
 
-        <figure class="collection-card reveal d1">
+        <figure class="collection-card reveal-img d1">
           <img src="assets/uhren.jpg" alt="Elegante Armbanduhr mit goldenem Gehäuse auf Marmor" width="800" height="1000" loading="lazy">
           <figcaption>
             <strong>Uhren</strong>
@@ -1419,7 +1547,7 @@
           </figcaption>
         </figure>
 
-        <figure class="collection-card reveal d2">
+        <figure class="collection-card reveal-img d2">
           <img src="assets/schmuck.jpg" alt="Goldschmuck-Stillleben mit Ketten, Ring und Armbändern auf Marmor" width="800" height="1000" loading="lazy">
           <figcaption>
             <strong>Ketten & Schmuck</strong>
@@ -1437,9 +1565,7 @@
     <div class="wrap">
       <div class="services-header">
         <span class="eyebrow reveal">Leistungen</span>
-        <h2 class="section-title reveal d1" id="servicesTitle">
-          Alles, was Schmuck<br>bedeutsam macht
-        </h2>
+        <h2 class="section-title reveal-lines" id="servicesTitle"><span class="tl__line"><span>Alles, was Schmuck</span></span><span class="tl__line"><span>bedeutsam macht</span></span></h2>
         <div class="gold-bar reveal d2" role="presentation"></div>
       </div>
 
@@ -1535,22 +1661,20 @@
     <div class="wrap">
       <div class="gallery-header">
         <span class="eyebrow reveal">Einblicke</span>
-        <h2 class="section-title reveal d1" id="galleryTitle">
-          Willkommen in unserem<br>Geschäft
-        </h2>
+        <h2 class="section-title reveal-lines" id="galleryTitle"><span class="tl__line"><span>Willkommen in unserem</span></span><span class="tl__line"><span>Geschäft</span></span></h2>
         <div class="gold-bar reveal d2" role="presentation"></div>
       </div>
 
       <div class="gallery-grid">
-        <figure class="gallery-card gallery-card--tall reveal">
+        <figure class="gallery-card gallery-card--tall reveal-img">
           <img src="assets/laden-innen-2.jpg" alt="Innenansicht von Juwelier Damla mit Vitrinen, Ringen und Beratungsplatz" width="900" height="1220" loading="lazy">
           <figcaption>Unser Verkaufsraum</figcaption>
         </figure>
-        <figure class="gallery-card gallery-card--tall reveal d1">
+        <figure class="gallery-card gallery-card--tall reveal-img d1">
           <img src="assets/schaufenster.jpg" alt="Schaufenster von Juwelier Damla mit Goldketten, Armbändern und Colliers" width="900" height="1200" loading="lazy">
           <figcaption>Unser Schaufenster</figcaption>
         </figure>
-        <figure class="gallery-card gallery-card--wide reveal d2">
+        <figure class="gallery-card gallery-card--wide reveal-img d2">
           <img src="assets/aussenansicht.jpg" alt="Außenansicht von Juwelier Damla in der Wellritzstraße 3 in Wiesbaden" width="1200" height="984" loading="lazy">
           <figcaption>Wellritzstraße 3, Wiesbaden</figcaption>
         </figure>
@@ -1565,15 +1689,13 @@
     <div class="wrap">
       <div class="reviews-header">
         <span class="eyebrow reveal">Bewertungen</span>
-        <h2 class="section-title reveal d1" id="reviewsTitle">
-          Was unsere Kunden<br>über uns sagen
-        </h2>
+        <h2 class="section-title reveal-lines" id="reviewsTitle"><span class="tl__line"><span>Was unsere Kunden</span></span><span class="tl__line"><span>über uns sagen</span></span></h2>
         <div class="gold-bar reveal d2" role="presentation"></div>
 
         <div class="reviews-summary reveal d2">
-          <span class="reviews-score">4,6</span>
+          <span class="reviews-score" data-count="4.6" data-decimals="1">4,6</span>
           <span class="reviews-stars" aria-label="4,6 von 5 Sternen">★★★★★</span>
-          <span class="reviews-count">145 Google-Rezensionen</span>
+          <span class="reviews-count"><span data-count="145">145</span> Google-Rezensionen</span>
         </div>
       </div>
 
@@ -1626,6 +1748,22 @@
     </div>
   </section>
 
+  <!-- Editorial-Laufband -->
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee__track">
+      <span>Wellritzstraße 3</span><span class="diamond">◆</span>
+      <span>Wiesbaden</span><span class="diamond">◆</span>
+      <span>Mo – Sa geöffnet</span><span class="diamond">◆</span>
+      <span>4,6 von 5 Sternen</span><span class="diamond">◆</span>
+      <span>145 Google-Rezensionen</span><span class="diamond">◆</span>
+      <span>Wellritzstraße 3</span><span class="diamond">◆</span>
+      <span>Wiesbaden</span><span class="diamond">◆</span>
+      <span>Mo – Sa geöffnet</span><span class="diamond">◆</span>
+      <span>4,6 von 5 Sternen</span><span class="diamond">◆</span>
+      <span>145 Google-Rezensionen</span><span class="diamond">◆</span>
+    </div>
+  </div>
+
   <!-- ═══════════════════════════════════
        ÖFFNUNGSZEITEN & KONTAKT
   ═══════════════════════════════════ -->
@@ -1635,9 +1773,7 @@
 
         <div>
           <span class="eyebrow reveal">Öffnungszeiten</span>
-          <h2 class="section-title reveal d1" id="contactTitle">
-            Wir freuen uns<br>auf Ihren Besuch
-          </h2>
+          <h2 class="section-title reveal-lines" id="contactTitle"><span class="tl__line"><span>Wir freuen uns</span></span><span class="tl__line"><span>auf Ihren Besuch</span></span></h2>
           <div class="gold-bar reveal d2" role="presentation"></div>
 
           <ul class="hours-list reveal d2" id="hoursList">
@@ -1658,9 +1794,7 @@
 
         <div>
           <span class="eyebrow reveal">Kontakt</span>
-          <h2 class="section-title reveal d1">
-            Sprechen Sie<br>mit uns
-          </h2>
+          <h2 class="section-title reveal-lines"><span class="tl__line"><span>Sprechen Sie</span></span><span class="tl__line"><span>mit uns</span></span></h2>
           <div class="gold-bar reveal d2" role="presentation"></div>
 
           <div class="contact-items">
@@ -1724,9 +1858,7 @@
     <div class="wrap">
       <div class="location-intro">
         <span class="eyebrow reveal">Standort</span>
-        <h2 class="section-title reveal d1" id="locationTitle">
-          Finden Sie uns in<br>der Wellritzstraße
-        </h2>
+        <h2 class="section-title reveal-lines" id="locationTitle"><span class="tl__line"><span>Finden Sie uns in</span></span><span class="tl__line"><span>der Wellritzstraße</span></span></h2>
         <div class="gold-bar reveal d2" role="presentation"></div>
         <p class="reveal d3">
           Besuchen Sie uns mitten in Wiesbaden. Wir empfangen Sie gerne persönlich und nehmen uns Zeit für Ihre Wünsche.
@@ -1757,9 +1889,7 @@
   ═══════════════════════════════════ -->
   <section id="visit" aria-labelledby="visitTitle">
     <span class="eyebrow reveal">Kommen Sie vorbei</span>
-    <h2 class="visit-title reveal d1" id="visitTitle">
-      Ihr Juwelier<br><em>in Wiesbaden</em>
-    </h2>
+    <h2 class="visit-title reveal-lines" id="visitTitle"><span class="tl__line"><span>Ihr Juwelier</span></span><span class="tl__line"><span><em>in Wiesbaden</em></span></span></h2>
     <p class="visit-sub reveal d2">
       Entdecken Sie unsere Kollektionen und erleben Sie persönliche Beratung auf höchstem Niveau – in der Wellritzstraße 3.
     </p>
@@ -1864,8 +1994,8 @@
       if (e.key === 'Escape') closeMenu();
     });
 
-    // ── Scroll-Reveal ─────────────────────────────────
-    const revealEls = document.querySelectorAll('.reveal');
+    // ── Scroll-Reveal (drei Choreografien) ────────────
+    const revealEls = document.querySelectorAll('.reveal, .reveal-img, .reveal-lines');
     if ('IntersectionObserver' in window) {
       const revealObs = new IntersectionObserver(entries => {
         entries.forEach(entry => {
@@ -1874,11 +2004,60 @@
             revealObs.unobserve(entry.target);
           }
         });
-      }, { threshold: 0.1, rootMargin: '0px 0px -48px 0px' });
+      }, { threshold: 0.12, rootMargin: '0px 0px -56px 0px' });
       revealEls.forEach(el => revealObs.observe(el));
     } else {
       revealEls.forEach(el => el.classList.add('in'));
     }
+
+    // ── Zähl-Animation für Bewertungs-Statistik ───────
+    (function () {
+      const els = document.querySelectorAll('[data-count]');
+      if (!els.length || !('IntersectionObserver' in window)) return;
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+          if (!e.isIntersecting) return;
+          obs.unobserve(e.target);
+          const el = e.target;
+          const target = parseFloat(el.dataset.count);
+          const dec = parseInt(el.dataset.decimals || '0', 10);
+          const fmt = v => (dec ? v.toFixed(dec).replace('.', ',') : Math.round(v).toString());
+          if (reduced) { el.textContent = fmt(target); return; }
+          const dur = 1400, t0 = performance.now();
+          function tick(now) {
+            const p = Math.min(1, (now - t0) / dur);
+            const eased = 1 - Math.pow(1 - p, 3);   // ease-out cubic
+            el.textContent = fmt(target * eased);
+            if (p < 1) requestAnimationFrame(tick);
+            else el.textContent = fmt(target);
+          }
+          requestAnimationFrame(tick);
+        });
+      }, { threshold: 0.6 });
+      els.forEach(el => obs.observe(el));
+    })();
+
+    // ── Cursor-Glow (nur Geräte mit Maus) ─────────────
+    (function () {
+      const glow = document.getElementById('cursorGlow');
+      if (!glow || !window.matchMedia('(pointer: fine)').matches) return;
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      let tx = 0, ty = 0, x = 0, y = 0, active = false;
+      window.addEventListener('mousemove', e => {
+        tx = e.clientX; ty = e.clientY;
+        if (!active) { active = true; glow.style.opacity = '1'; follow(); }
+      }, { passive: true });
+      document.documentElement.addEventListener('mouseleave', () => {
+        glow.style.opacity = '0';
+      });
+      function follow() {
+        x += (tx - x) * 0.12;
+        y += (ty - y) * 0.12;
+        glow.style.transform = 'translate3d(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px,0)';
+        requestAnimationFrame(follow);
+      }
+    })();
 
     // ── Ring-Scroll-Animation (Frame-Scrubbing) ──────
     // 48 vorgerenderte Frames (Higgsfield-Video), per Scroll
