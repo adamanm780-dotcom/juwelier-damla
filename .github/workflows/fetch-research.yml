@@ -1,6 +1,5 @@
-# Einmaliger Hilfs-Workflow: lädt in research/urls.txt gelistete URLs
-# (Format: <dateiname>|<url>) herunter und committet sie nach research/.
-# Wird nach Abschluss der Recherche wieder entfernt.
+# Einmaliger Hilfs-Workflow: rendert Recherche-Seiten mit headless Chrome
+# und committet die DOM-Dumps nach research/out/. Wird danach entfernt.
 name: Fetch research pages
 
 on:
@@ -8,7 +7,6 @@ on:
     branches:
       - claude/daimler-website-redesign-lu881y
     paths:
-      - research/urls.txt
       - .github/workflows/fetch-research.yml
 
 permissions:
@@ -22,22 +20,35 @@ jobs:
         with:
           ref: ${{ github.ref_name }}
 
-      - name: Download pages
+      - name: Render pages with headless Chrome
         run: |
           set -uo pipefail
-          UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
           mkdir -p research/out
-          while IFS='|' read -r name url; do
-            [ -z "$name" ] && continue
+          UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+
+          dump () {
+            local name="$1" url="$2"
             echo "==> $name : $url"
-            curl -fsSL --compressed --max-time 60 \
-              -H "User-Agent: $UA" \
-              -H "Accept-Language: de-DE,de;q=0.9,en;q=0.8" \
-              -H "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8" \
-              "$url" -o "research/out/$name" \
+            timeout 90 google-chrome --headless=new --no-sandbox --disable-gpu \
+              --user-agent="$UA" --lang=de-DE --window-size=1400,2000 \
+              --virtual-time-budget=15000 --dump-dom "$url" \
+              > "research/out/$name" 2>/dev/null \
               && echo "OK $name ($(stat -c%s research/out/$name) bytes)" \
               || echo "FAIL $name"
-          done < research/urls.txt
+          }
+
+          # Google Maps (HTML enthält eingebettete Bewertungs- und Fotodaten)
+          curl -fsSL --compressed -H "User-Agent: $UA" -H "Accept-Language: de-DE,de;q=0.9" \
+            "https://www.google.com/maps/search/Juwelier+Damla+Wellritzstra%C3%9Fe+3+Wiesbaden?hl=de" \
+            -o research/out/gmaps-search.html \
+            && echo "OK gmaps-search.html ($(stat -c%s research/out/gmaps-search.html) bytes)" \
+            || echo "FAIL gmaps-search.html"
+
+          dump gmaps-rendered.html "https://www.google.com/maps/search/Juwelier+Damla+Wellritzstra%C3%9Fe+3+Wiesbaden?hl=de"
+          dump toprated.html "https://www.top-rated.online/cities/Wiesbaden/place/p/13751172/Juwelier+Damla+Wiesbaden"
+          dump wheree.html "https://juwelier-damla-wiesbaden.wheree.com/"
+          dump nicelocal.html "https://en.nicelocal.com.de/wiesbaden/utility_service/juwelier_damla/"
+
           ls -la research/out/
 
       - name: Commit and push
