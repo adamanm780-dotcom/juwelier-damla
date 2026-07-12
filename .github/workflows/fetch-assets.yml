@@ -4,7 +4,11 @@
 name: Fetch website assets
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - claude/daimler-website-redesign-lu881y
+    paths:
+      - .github/workflows/fetch-assets.yml
 
 permissions:
   contents: write
