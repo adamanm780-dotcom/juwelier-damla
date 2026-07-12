@@ -1,0 +1,26 @@
+# Temporärer Check: Was liefert die GitHub-Pages-URL aktuell aus?
+name: Check live site
+
+on:
+  push:
+    branches:
+      - claude/daimler-website-redesign-lu881y
+    paths:
+      - .github/workflows/check-live.yml
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch live page
+        run: |
+          set -uo pipefail
+          echo "== HTTP-Header =="
+          curl -sI "https://adamanm780-dotcom.github.io/juwelier-damla/" | head -20
+          echo "== Inhalt =="
+          curl -s "https://adamanm780-dotcom.github.io/juwelier-damla/" -o page.html
+          echo "Bytes: $(stat -c%s page.html)"
+          grep -o '<title>[^<]*</title>' page.html || true
+          echo "Bewertungen-Sektion: $(grep -c 'Was unsere Kunden' page.html || true)"
+          echo "Kollektionen-Sektion: $(grep -c 'id="collections"' page.html || true)"
+          echo "Altes Video (uzg.mp4): $(grep -c 'uzg.mp4' page.html || true)"
