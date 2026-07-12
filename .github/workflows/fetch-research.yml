@@ -1,0 +1,50 @@
+# Einmaliger Hilfs-Workflow: lädt in research/urls.txt gelistete URLs
+# (Format: <dateiname>|<url>) herunter und committet sie nach research/.
+# Wird nach Abschluss der Recherche wieder entfernt.
+name: Fetch research pages
+
+on:
+  push:
+    branches:
+      - claude/daimler-website-redesign-lu881y
+    paths:
+      - research/urls.txt
+      - .github/workflows/fetch-research.yml
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Download pages
+        run: |
+          set -uo pipefail
+          UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+          mkdir -p research/out
+          while IFS='|' read -r name url; do
+            [ -z "$name" ] && continue
+            echo "==> $name : $url"
+            curl -fsSL --compressed --max-time 60 \
+              -H "User-Agent: $UA" \
+              -H "Accept-Language: de-DE,de;q=0.9,en;q=0.8" \
+              -H "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8" \
+              "$url" -o "research/out/$name" \
+              && echo "OK $name ($(stat -c%s research/out/$name) bytes)" \
+              || echo "FAIL $name"
+          done < research/urls.txt
+          ls -la research/out/
+
+      - name: Commit and push
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f research/out
+          git commit -m "Add research downloads" || echo "nothing to commit"
+          git push origin "HEAD:${{ github.ref_name }}"
