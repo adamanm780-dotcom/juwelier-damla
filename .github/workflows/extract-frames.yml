@@ -1,0 +1,66 @@
+# Einmaliger Hilfs-Workflow: lädt das generierte Ring-Rotationsvideo,
+# extrahiert 48 gleichmäßig verteilte Frames, normalisiert den weißen
+# Hintergrund (für mix-blend-mode: multiply) und committet sie nach
+# assets/ring/. Wird nach erfolgreichem Lauf entfernt.
+name: Extract ring frames
+
+on:
+  push:
+    branches:
+      - claude/daimler-website-redesign-lu881y
+    paths:
+      - .github/workflows/extract-frames.yml
+
+permissions:
+  contents: write
+
+jobs:
+  frames:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Download video and extract frames
+        run: |
+          set -euo pipefail
+          curl -fsSL "https://d8j0ntlcm91z4.cloudfront.net/user_3EfaPD3NJ6lU9EMsrAcoIvwpUMX/hf_20260712_153510_3de2e1ba-db4a-4a7c-b22e-519bc2233594.mp4" -o /tmp/ring.mp4
+          echo "Video: $(stat -c%s /tmp/ring.mp4) bytes"
+          mkdir -p /tmp/raw
+          ffmpeg -hide_banner -loglevel error -i /tmp/ring.mp4 -vf "scale=640:640" /tmp/raw/f-%04d.png
+          ls /tmp/raw | wc -l
+
+      - name: Pick 48 frames, normalize white, save as webp
+        run: |
+          set -euo pipefail
+          pip install --quiet pillow
+          python3 - <<'EOF'
+          import os
+          from PIL import Image
+
+          raw = sorted(os.listdir('/tmp/raw'))
+          n = len(raw)
+          count = 48
+          os.makedirs('assets/ring', exist_ok=True)
+
+          # Weißpunkt strecken: Werte >= 247 werden reines Weiß,
+          # damit der Hintergrund bei mix-blend-mode: multiply verschwindet
+          lut = [min(255, round(v * 255 / 247)) for v in range(256)] * 3
+
+          for k in range(count):
+              src = raw[round(k * (n - 1) / (count - 1))]
+              im = Image.open(f'/tmp/raw/{src}').convert('RGB').point(lut)
+              im.save(f'assets/ring/frame-{k+1:03d}.webp', 'WEBP', quality=78, method=6)
+          total = sum(os.path.getsize(f'assets/ring/{f}') for f in os.listdir('assets/ring'))
+          print(f'{count} frames, {total//1024} KB gesamt')
+          EOF
+
+      - name: Commit and push
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/ring
+          git commit -m "Add ring rotation frames"
+          git push origin "HEAD:${{ github.ref_name }}"
