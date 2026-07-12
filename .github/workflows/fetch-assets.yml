@@ -35,15 +35,32 @@ jobs:
       - name: Optimize and place assets
         run: |
           set -euo pipefail
-          # Hero: Ketten-Portrait 928x1152 (4:5)
-          convert /tmp/img/hero.png -resize 928x -quality 82 -strip assets/hero.jpg
+          pip install --quiet pillow
+          python3 - <<'EOF'
+          from PIL import Image
+
+          def save(src, dst, width=None, crop=None):
+              im = Image.open(src).convert('RGB')
+              if crop:
+                  im = im.crop(crop)
+              if width and im.width > width:
+                  im = im.resize((width, round(im.height * width / im.width)), Image.LANCZOS)
+              im.save(dst, 'JPEG', quality=82, optimize=True, progressive=True)
+
+          # Hero: Ketten-Portrait (4:5)
+          save('/tmp/img/hero.png', 'assets/hero.jpg', 928)
           # OG-Bild: 16:9 Stillleben in voller Breite
-          convert /tmp/img/still.png -resize 1376x -quality 82 -strip assets/og.jpg
-          # Kollektion "Ketten & Schmuck": 4:5-Ausschnitt aus dem Stillleben (Motiv rechts)
-          convert /tmp/img/still.png -gravity East -crop 614x768+40+0 +repage -resize 800x -quality 82 -strip assets/schmuck.jpg
-          convert /tmp/img/trauringe.png -resize 800x -quality 82 -strip assets/trauringe.jpg
-          convert /tmp/img/uhren.png -resize 800x -quality 82 -strip assets/uhren.jpg
-          convert /tmp/img/boutique.png -resize 1100x -quality 82 -strip assets/boutique.jpg
+          save('/tmp/img/still.png', 'assets/og.jpg', 1376)
+          # Kollektion "Ketten & Schmuck": 4:5-Ausschnitt rechts aus dem Stillleben
+          im = Image.open('/tmp/img/still.png')
+          w, h = im.size
+          cw = round(h * 4 / 5)
+          right = w - 40
+          save('/tmp/img/still.png', 'assets/schmuck.jpg', 800, crop=(right - cw, 0, right, h))
+          save('/tmp/img/trauringe.png', 'assets/trauringe.jpg', 800)
+          save('/tmp/img/uhren.png', 'assets/uhren.jpg', 800)
+          save('/tmp/img/boutique.png', 'assets/boutique.jpg', 1100)
+          EOF
           ls -la assets/
 
       - name: Commit and push
