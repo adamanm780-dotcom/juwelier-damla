@@ -1,0 +1,52 @@
+# Einmaliger Hilfs-Workflow: lädt die generierten Website-Bilder vom CDN,
+# optimiert sie und committet sie nach assets/. Kann nach erfolgreichem
+# Lauf wieder entfernt werden.
+name: Fetch website assets
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Download generated images
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/img assets
+          BASE="https://d8j0ntlcm91z4.cloudfront.net/user_3EfaPD3NJ6lU9EMsrAcoIvwpUMX"
+          curl -fsSL "$BASE/hf_20260712_102820_a315622d-9104-4f55-b2fb-5135acd3baa5.png" -o /tmp/img/hero.png
+          curl -fsSL "$BASE/hf_20260712_102756_c449ec9b-939a-44fd-acf4-71775e4b1d58.png" -o /tmp/img/still.png
+          curl -fsSL "$BASE/hf_20260712_102803_7ce2f70e-0005-455e-ae06-c217e8f63782.png" -o /tmp/img/trauringe.png
+          curl -fsSL "$BASE/hf_20260712_102814_d7b3cc77-e01e-49cf-b544-93bcd66fd08e.png" -o /tmp/img/uhren.png
+          curl -fsSL "$BASE/hf_20260712_102826_739b23cd-9bbc-48e3-b47d-c1bd9b8c517f.png" -o /tmp/img/boutique.png
+
+      - name: Optimize and place assets
+        run: |
+          set -euo pipefail
+          # Hero: Ketten-Portrait 928x1152 (4:5)
+          convert /tmp/img/hero.png -resize 928x -quality 82 -strip assets/hero.jpg
+          # OG-Bild: 16:9 Stillleben in voller Breite
+          convert /tmp/img/still.png -resize 1376x -quality 82 -strip assets/og.jpg
+          # Kollektion "Ketten & Schmuck": 4:5-Ausschnitt aus dem Stillleben (Motiv rechts)
+          convert /tmp/img/still.png -gravity East -crop 614x768+40+0 +repage -resize 800x -quality 82 -strip assets/schmuck.jpg
+          convert /tmp/img/trauringe.png -resize 800x -quality 82 -strip assets/trauringe.jpg
+          convert /tmp/img/uhren.png -resize 800x -quality 82 -strip assets/uhren.jpg
+          convert /tmp/img/boutique.png -resize 1100x -quality 82 -strip assets/boutique.jpg
+          ls -la assets/
+
+      - name: Commit and push
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/
+          git commit -m "Add optimized website images"
+          git push origin "HEAD:${{ github.ref_name }}"
