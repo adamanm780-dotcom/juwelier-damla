@@ -651,6 +651,158 @@
     }
 
     /* ═══════════════════════════════════════════
+       EINBLICKE (echte Fotos)
+    ═══════════════════════════════════════════ */
+    .gallery-header {
+      text-align: center;
+      margin-bottom: 64px;
+    }
+    .gallery-header .gold-bar { margin: 0 auto; }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(18px, 3vw, 32px);
+      align-items: stretch;
+    }
+    .gallery-card {
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-soft);
+    }
+    .gallery-card img {
+      width: 100%;
+      height: 100%;
+      aspect-ratio: 3 / 4;
+      object-fit: cover;
+      transition: transform 1.1s var(--ease-out);
+    }
+    .gallery-card--wide { grid-column: 1 / -1; }
+    .gallery-card--wide img {
+      height: auto;
+      aspect-ratio: 16 / 8;
+      object-position: center 30%;
+    }
+    .gallery-card:hover img { transform: scale(1.04); }
+    .gallery-card figcaption {
+      position: absolute;
+      inset: auto 0 0 0;
+      padding: 48px 22px 18px;
+      background: linear-gradient(to top, rgba(20, 17, 13, 0.66), transparent);
+      color: #fff;
+      font-size: 0.76rem;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    /* ═══════════════════════════════════════════
+       GOOGLE-BEWERTUNGEN
+    ═══════════════════════════════════════════ */
+    #reviews {
+      position: relative;
+      background: rgba(245, 242, 237, 0.5);
+    }
+    #reviews::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border-gold) 50%, transparent);
+    }
+
+    .reviews-header {
+      text-align: center;
+      margin-bottom: 56px;
+    }
+    .reviews-header .gold-bar { margin: 0 auto; }
+
+    .reviews-summary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+    .reviews-score {
+      font-family: var(--font-serif);
+      font-size: 2.6rem;
+      font-weight: 500;
+      line-height: 1;
+    }
+    .reviews-stars {
+      color: var(--gold);
+      font-size: 1.3rem;
+      letter-spacing: 0.12em;
+    }
+    .reviews-count {
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      color: var(--ink-muted);
+    }
+
+    .reviews-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: clamp(16px, 2.5vw, 28px);
+    }
+    .review-card {
+      background: rgba(255, 254, 251, 0.95);
+      border: 1px solid var(--border-light);
+      padding: 30px 28px 24px;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      transition: border-color 0.35s ease, box-shadow 0.35s ease;
+    }
+    .review-card:hover {
+      border-color: var(--border-gold);
+      box-shadow: var(--shadow-soft);
+    }
+    .review-stars {
+      color: var(--gold);
+      font-size: 0.95rem;
+      letter-spacing: 0.16em;
+      margin-bottom: 14px;
+    }
+    .review-card p {
+      font-family: var(--font-serif);
+      font-size: 1.02rem;
+      font-weight: 300;
+      font-style: italic;
+      line-height: 1.75;
+      color: var(--ink-soft);
+      flex: 1;
+      margin-bottom: 20px;
+    }
+    .review-card footer {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      border-top: 1px solid var(--border-light);
+      padding-top: 14px;
+    }
+    .review-card cite {
+      font-style: normal;
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+    }
+    .review-card footer span {
+      font-size: 0.68rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+    }
+
+    .reviews-cta {
+      text-align: center;
+      margin-top: 48px;
+    }
+
+    /* ═══════════════════════════════════════════
        ÖFFNUNGSZEITEN & KONTAKT
     ═══════════════════════════════════════════ */
     .contact-grid {
@@ -843,7 +995,7 @@
     /* ═══════════════════════════════════════════
        FOOTER
     ═══════════════════════════════════════════ */
-    footer {
+    .site-footer {
       background: #110F0D;
       color: rgba(255, 255, 255, 0.55);
       padding: 64px 0 36px;
@@ -988,6 +1140,8 @@
       .about-figure { max-width: 480px; }
       .collections-grid { grid-template-columns: 1fr 1fr; }
       .services-grid { grid-template-columns: 1fr 1fr; }
+      .gallery-card--wide img { aspect-ratio: 16 / 10; }
+      .reviews-grid { grid-template-columns: 1fr 1fr; }
       .footer-grid { grid-template-columns: 1fr 1fr; }
     }
 
@@ -1028,6 +1182,13 @@
       }
       .service-card { border: 1px solid var(--border-light); padding: 28px 22px; }
       .services-header { margin-bottom: 40px; }
+
+      .gallery-grid { grid-template-columns: 1fr; gap: 16px; }
+      .gallery-card--wide img { aspect-ratio: 4 / 3; }
+      .gallery-header { margin-bottom: 40px; }
+      .reviews-grid { grid-template-columns: 1fr; gap: 14px; }
+      .reviews-summary { gap: 12px; }
+      .reviews-score { font-size: 2.1rem; }
 
       .hour-row { font-size: 0.84rem; padding: 13px 4px; }
 
@@ -1107,6 +1268,7 @@
       <li><a href="#about">Über uns</a></li>
       <li><a href="#collections">Kollektionen</a></li>
       <li><a href="#services">Leistungen</a></li>
+      <li><a href="#reviews">Bewertungen</a></li>
       <li><a href="#contact">Öffnungszeiten</a></li>
       <li><a href="#location">Standort</a></li>
       <li><a href="tel:+496115807830" class="nav__cta">Anrufen</a></li>
@@ -1169,7 +1331,7 @@
       <div class="about-grid">
 
         <div class="about-figure reveal">
-          <img src="assets/boutique.jpg" alt="Elegante Vitrinen mit Schmuck im warmen Licht" class="about-img" width="900" height="1035" loading="lazy">
+          <img src="assets/laden-innen-1.jpg" alt="Verkaufsraum von Juwelier Damla mit Vitrinen und Schmuckpräsentation" class="about-img" width="1000" height="1333" loading="lazy">
           <div class="about-monogram" aria-hidden="true">JD</div>
         </div>
 
@@ -1343,6 +1505,104 @@
   </section>
 
   <!-- ═══════════════════════════════════
+       EINBLICKE — ECHTE FOTOS
+  ═══════════════════════════════════ -->
+  <section id="gallery" aria-labelledby="galleryTitle">
+    <div class="wrap">
+      <div class="gallery-header">
+        <span class="eyebrow reveal">Einblicke</span>
+        <h2 class="section-title reveal d1" id="galleryTitle">
+          Willkommen in unserem<br>Geschäft
+        </h2>
+        <div class="gold-bar reveal d2" role="presentation"></div>
+      </div>
+
+      <div class="gallery-grid">
+        <figure class="gallery-card gallery-card--tall reveal">
+          <img src="assets/laden-innen-2.jpg" alt="Innenansicht von Juwelier Damla mit Vitrinen, Ringen und Beratungsplatz" width="900" height="1220" loading="lazy">
+          <figcaption>Unser Verkaufsraum</figcaption>
+        </figure>
+        <figure class="gallery-card gallery-card--tall reveal d1">
+          <img src="assets/schaufenster.jpg" alt="Schaufenster von Juwelier Damla mit Goldketten, Armbändern und Colliers" width="900" height="1200" loading="lazy">
+          <figcaption>Unser Schaufenster</figcaption>
+        </figure>
+        <figure class="gallery-card gallery-card--wide reveal d2">
+          <img src="assets/aussenansicht.jpg" alt="Außenansicht von Juwelier Damla in der Wellritzstraße 3 in Wiesbaden" width="1200" height="984" loading="lazy">
+          <figcaption>Wellritzstraße 3, Wiesbaden</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       GOOGLE-BEWERTUNGEN (echte Rezensionen)
+  ═══════════════════════════════════ -->
+  <section id="reviews" aria-labelledby="reviewsTitle">
+    <div class="wrap">
+      <div class="reviews-header">
+        <span class="eyebrow reveal">Bewertungen</span>
+        <h2 class="section-title reveal d1" id="reviewsTitle">
+          Was unsere Kunden<br>über uns sagen
+        </h2>
+        <div class="gold-bar reveal d2" role="presentation"></div>
+
+        <div class="reviews-summary reveal d2">
+          <span class="reviews-score">4,6</span>
+          <span class="reviews-stars" aria-label="4,6 von 5 Sternen">★★★★★</span>
+          <span class="reviews-count">145 Google-Rezensionen</span>
+        </div>
+      </div>
+
+      <div class="reviews-grid">
+
+        <blockquote class="review-card reveal">
+          <div class="review-stars" aria-label="5 von 5 Sternen">★★★★★</div>
+          <p>Wir haben heute unsere Verlobungsringe hier gekauft. Wir wurden sehr herzlich empfangen und super gut beraten. Man hat sich sehr viel Zeit und Geduld für uns genommen. Super Erfahrung!</p>
+          <footer><cite>Emily R.</cite><span>Google-Rezension</span></footer>
+        </blockquote>
+
+        <blockquote class="review-card reveal d1">
+          <div class="review-stars" aria-label="5 von 5 Sternen">★★★★★</div>
+          <p>Die Beratung war erstklassig – freundlich, kompetent und geduldig. Die Qualität der Ringe ist hervorragend, und die Auswahl war beeindruckend. Ich habe genau den Ring gefunden, den ich mir vorgestellt habe.</p>
+          <footer><cite>Hasan A.</cite><span>Google-Rezension</span></footer>
+        </blockquote>
+
+        <blockquote class="review-card reveal d2">
+          <div class="review-stars" aria-label="5 von 5 Sternen">★★★★★</div>
+          <p>Wir haben hier unsere Eheringe gekauft und sind super zufrieden. Waren zuvor in 4 weiteren Läden – hier hat uns die persönliche Beratung in kurzer Zeit zu den perfekten Ringen geführt.</p>
+          <footer><cite>Fabio S.</cite><span>Google-Rezension</span></footer>
+        </blockquote>
+
+        <blockquote class="review-card reveal">
+          <div class="review-stars" aria-label="5 von 5 Sternen">★★★★★</div>
+          <p>Für mich der beste Juwelier! Wir haben in der Vergangenheit schon einige besucht und wurden nirgends so erstklassig, kompetent und freundlich beraten. Auch Reparaturen werden sehr sorgfältig durchgeführt.</p>
+          <footer><cite>Jennifer E.</cite><span>Google-Rezension</span></footer>
+        </blockquote>
+
+        <blockquote class="review-card reveal d1">
+          <div class="review-stars" aria-label="5 von 5 Sternen">★★★★★</div>
+          <p>Ein Juwelier mit Herz, Leidenschaft und echter Handwerkskunst! Die Beratung ist persönlich, ehrlich und sehr kompetent. Hier wird auf jedes Detail geachtet. Absolute Empfehlung für alle, die etwas Besonderes suchen!</p>
+          <footer><cite>Deniz A.</cite><span>Google-Rezension</span></footer>
+        </blockquote>
+
+        <blockquote class="review-card reveal d2">
+          <div class="review-stars" aria-label="5 von 5 Sternen">★★★★★</div>
+          <p>Erstklassige persönliche Beratung durch Inhaber und seinen Sohn. Familiäre Atmosphäre, sehr freundlicher Empfang und Begleitung während des ganzen Kaufprozesses. Unsere Trauringe sind wunderschön geworden!</p>
+          <footer><cite>M. &amp; A.</cite><span>Google-Rezension</span></footer>
+        </blockquote>
+
+      </div>
+
+      <div class="reviews-cta reveal">
+        <a href="https://www.google.com/maps/search/Juwelier+Damla+Wellritzstra%C3%9Fe+3+Wiesbaden"
+           target="_blank" rel="noopener noreferrer" class="btn-ghost">
+          Alle Bewertungen auf Google lesen
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
        ÖFFNUNGSZEITEN & KONTAKT
   ═══════════════════════════════════ -->
   <section id="contact" aria-labelledby="contactTitle">
@@ -1492,7 +1752,7 @@
   <!-- ═══════════════════════════════════
        FOOTER
   ═══════════════════════════════════ -->
-  <footer>
+  <footer class="site-footer">
     <div class="wrap">
       <div class="footer-grid">
 
@@ -1510,6 +1770,7 @@
             <li><a href="#about">Über uns</a></li>
             <li><a href="#collections">Kollektionen</a></li>
             <li><a href="#services">Leistungen</a></li>
+            <li><a href="#reviews">Bewertungen</a></li>
             <li><a href="#contact">Öffnungszeiten</a></li>
             <li><a href="#location">Standort</a></li>
           </ul>
