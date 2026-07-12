@@ -1,5 +1,5 @@
-# Einmaliger Hilfs-Workflow: rendert Recherche-Seiten mit headless Chrome
-# und committet die DOM-Dumps nach research/out/. Wird danach entfernt.
+# Einmaliger Hilfs-Workflow: lädt die echten Laden-Fotos (Google-Business-
+# Profil / Verzeichnis-Spiegel) herunter und committet sie nach research/photos/.
 name: Fetch research pages
 
 on:
@@ -20,42 +20,28 @@ jobs:
         with:
           ref: ${{ github.ref_name }}
 
-      - name: Render pages with headless Chrome
+      - name: Download real store photos
         run: |
           set -uo pipefail
-          mkdir -p research/out
           UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
-
-          dump () {
-            local name="$1" url="$2"
-            echo "==> $name : $url"
-            timeout 90 google-chrome --headless=new --no-sandbox --disable-gpu \
-              --user-agent="$UA" --lang=de-DE --window-size=1400,2000 \
-              --virtual-time-budget=15000 --dump-dom "$url" \
-              > "research/out/$name" 2>/dev/null \
-              && echo "OK $name ($(stat -c%s research/out/$name) bytes)" \
-              || echo "FAIL $name"
+          mkdir -p research/photos
+          get () {
+            curl -fsSL --compressed -H "User-Agent: $UA" "$2" -o "research/photos/$1" \
+              && echo "OK $1 ($(stat -c%s research/photos/$1) bytes)" || echo "FAIL $1"
           }
-
-          # Google Maps (HTML enthält eingebettete Bewertungs- und Fotodaten)
-          curl -fsSL --compressed -H "User-Agent: $UA" -H "Accept-Language: de-DE,de;q=0.9" \
-            "https://www.google.com/maps/search/Juwelier+Damla+Wellritzstra%C3%9Fe+3+Wiesbaden?hl=de" \
-            -o research/out/gmaps-search.html \
-            && echo "OK gmaps-search.html ($(stat -c%s research/out/gmaps-search.html) bytes)" \
-            || echo "FAIL gmaps-search.html"
-
-          dump gmaps-rendered.html "https://www.google.com/maps/search/Juwelier+Damla+Wellritzstra%C3%9Fe+3+Wiesbaden?hl=de"
-          dump toprated.html "https://www.top-rated.online/cities/Wiesbaden/place/p/13751172/Juwelier+Damla+Wiesbaden"
-          dump wheree.html "https://juwelier-damla-wiesbaden.wheree.com/"
-          dump nicelocal.html "https://en.nicelocal.com.de/wiesbaden/utility_service/juwelier_damla/"
-
-          ls -la research/out/
+          get gplace-main.jpg "https://lh3.googleusercontent.com/p/AF1QipNLwMtvulBVWdw3qXyRKLzU4_lL4QACzSAuT7UE=w1600-h1000-k-no"
+          get w1.jpg "https://static.where-e.com/Germany/Juwelier-Damla-Wiesbaden_00625e26b281526f8a84ed4be77622de.jpg"
+          get w2.jpg "https://static.where-e.com/Germany/Juwelier-Damla-Wiesbaden_1c278f5201654d6219702b1e9d493331.jpg"
+          get w3.jpg "https://static.where-e.com/Germany/Juwelier-Damla-Wiesbaden_35fb529a476a860e4a820b6d35c62fe5.jpg"
+          get w4.jpg "https://static.where-e.com/Germany/Juwelier-Damla-Wiesbaden_5528a38d686ef840ed62b1bf108df4e2.jpg"
+          get w5.jpg "https://static.where-e.com/Germany/Juwelier-Damla-Wiesbaden_d6daf66f3577d65cf0d59ab696bf8bb1.jpg"
+          ls -la research/photos/
 
       - name: Commit and push
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f research/out
-          git commit -m "Add research downloads" || echo "nothing to commit"
+          git add -f research/photos
+          git commit -m "Add real store photos" || echo "nothing to commit"
           git push origin "HEAD:${{ github.ref_name }}"
