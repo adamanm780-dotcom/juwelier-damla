@@ -28,7 +28,9 @@ jobs:
           curl -fsSL "https://d8j0ntlcm91z4.cloudfront.net/user_3EfaPD3NJ6lU9EMsrAcoIvwpUMX/hf_20260712_153510_3de2e1ba-db4a-4a7c-b22e-519bc2233594.mp4" -o /tmp/ring.mp4
           echo "Video: $(stat -c%s /tmp/ring.mp4) bytes"
           mkdir -p /tmp/raw
-          ffmpeg -hide_banner -loglevel error -i /tmp/ring.mp4 -vf "scale=640:640" /tmp/raw/f-%04d.png
+          pip install --quiet imageio-ffmpeg
+          FF=$(python3 -c "import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())")
+          "$FF" -hide_banner -loglevel error -i /tmp/ring.mp4 -vf "scale=640:640" /tmp/raw/f-%04d.png
           ls /tmp/raw | wc -l
 
       - name: Pick 48 frames, normalize white, save as webp
