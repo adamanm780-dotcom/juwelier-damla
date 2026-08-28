@@ -2,7 +2,8 @@
 """Baut index.html um:
    - Ladescreen mit freigestelltem Logo
    - Nav mit Unterseiten-Links, freigestelltes Logo (ohne clip-path)
-   - Hero = zwei Ladenvideos (Front + Innenraum) im Wechsel
+   - Hero = zwei Ladenvideos (Front + Innenraum) im Wechsel,
+     abgedunkelt, davor das freigestellte Logo
    - darunter: Textblock, darunter: Ring-Scroll-Animation
 
 Arbeitet auf index.src.html (Original) und schreibt index.html,
@@ -173,11 +174,44 @@ CSS = """
       }
     }
 
+    /* Dunkelt die Clips ab. Zwei Lagen: ein gleichmaessiger Schleier ueber
+       das ganze Bild und ein weicher Schatten in der Mitte, damit das weisse
+       Logo auch vor der hell beleuchteten Auslage steht. */
+    .hero__shade {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      pointer-events: none;
+      background:
+        radial-gradient(52% 48% at 50% 47%,
+          rgba(18,14,11,0.42) 0%,
+          rgba(18,14,11,0.24) 58%,
+          rgba(18,14,11,0)   100%),
+        linear-gradient(180deg,
+          rgba(18,14,11,0.30) 0%,
+          rgba(18,14,11,0.36) 100%);
+    }
+
+    /* das freigestellte Logo steht mittig vor dem Video */
+    .hero__mark {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      z-index: 5;
+      width: clamp(190px, 22vw, 340px);
+      height: auto;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      filter: drop-shadow(0 6px 22px rgba(0,0,0,0.5));
+      opacity: 0;
+      animation: fadeIn 1.6s ease 0.35s forwards;
+    }
+
     /* haelt die Navbar oben lesbar und blendet unten in die Seite ueber */
     .hero__veil {
       position: absolute;
       inset: 0;
-      z-index: 3;
+      z-index: 4;
       pointer-events: none;
       background: linear-gradient(180deg,
         rgba(255,255,255,0.42) 0%,
@@ -192,7 +226,7 @@ CSS = """
       bottom: 30px;
       left: 50%;
       transform: translateX(-50%);
-      z-index: 4;
+      z-index: 6;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -297,6 +331,7 @@ CSS = """
     @media (max-width: 900px) {
       #ring { height: 170vh; }
       .hero__cue { display: none; }
+      .hero__mark { width: clamp(180px, 52vw, 260px); }
       .intro__title { font-size: clamp(2rem, 8.5vw, 2.7rem); }
       .intro__text { font-size: 0.98rem; margin-bottom: 22px; }
       .intro__actions { flex-direction: column; align-items: stretch; }
@@ -371,7 +406,10 @@ NEW_SECTIONS = """  <!-- ══════════════════�
       <video class="hero__video" src="assets/video/hero-innen.mp4"
              poster="assets/hero-innen.webp" width="2196" height="940"
              muted playsinline preload="auto" aria-hidden="true"></video>
+      <div class="hero__shade" aria-hidden="true"></div>
       <div class="hero__veil" aria-hidden="true"></div>
+      <img src="assets/logo-mark.webp" alt="Juwelier Damla"
+           class="hero__mark" width="900" height="917" fetchpriority="high">
       <div class="hero__cue" id="heroCue" aria-hidden="true">
         <span>Scrollen</span>
         <i></i>
