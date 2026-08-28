@@ -2,7 +2,7 @@
 """Baut index.html um:
    - Ladescreen mit freigestelltem Logo
    - Nav mit Unterseiten-Links, freigestelltes Logo (ohne clip-path)
-   - Hero = NUR das Ladenfront-Video, scroll-gescrubbt
+   - Hero = NUR das Ladenfront-Video, automatischer Ping-Pong-Loop
    - darunter: Textblock, darunter: Ring-Scroll-Animation
 
 Arbeitet auf index.src.html (Original) und schreibt index.html,
@@ -119,11 +119,13 @@ CSS = """
     }
 
     /* ═══════════════════════════════════════════
-       HERO — nur das Video, scroll-gescrubbt
+       HERO — nur das Video, automatischer Loop
     ═══════════════════════════════════════════ */
     /* padding: 0 hebt die Basisregel `section { padding: var(--pad-section) 0 }`
-       auf — sonst schiebt sie den sticky-Block unter der Navbar nach unten. */
-    #hero { height: 230vh; position: relative; padding: 0; }
+       auf — sonst schiebt sie den sticky-Block unter der Navbar nach unten.
+       Volle Viewport-Hoehe (kein Scroll-Runway mehr): das Video spielt jetzt
+       von selbst als Ping-Pong-Loop, unabhaengig vom Scrollen. */
+    #hero { height: 100svh; position: relative; padding: 0; }
 
     .hero__sticky {
       position: sticky;
@@ -280,7 +282,7 @@ CSS = """
     }
 
     @media (max-width: 900px) {
-      #hero { height: 200vh; }
+      #hero { height: 100svh; }
       #ring { height: 170vh; }
       .hero__cue { display: none; }
       .intro__title { font-size: clamp(2rem, 8.5vw, 2.7rem); }
@@ -347,7 +349,7 @@ src = sub1(
 # 5) Hero ersetzen: Video-Hero + Intro + Ring
 # ══════════════════════════════════════════════════════════
 NEW_SECTIONS = """  <!-- ═══════════════════════════════════
-       HERO — nur das Video, scroll-gescrubbt
+       HERO — nur das Video, automatischer Loop
   ═══════════════════════════════════ -->
   <section id="hero" aria-label="Juwelier Damla, Ladengeschäft in der Wellritzstraße">
     <div class="hero__sticky">
@@ -444,7 +446,7 @@ JS = """
       setTimeout(finish, 7000);           // Notausstieg, falls Bilder haengen
     })();
 
-    // ── Hero: Ladenfront-Video als Scroll-Scrub ───────
+    // ── Hero: Ladenfront-Video, automatischer Loop ───────
     (function () {
       const cnv = document.getElementById('heroCanvas');
       const sec = document.getElementById('hero');
@@ -499,27 +501,41 @@ JS = """
 
       for (let i = 0; i < FRAMES; i++) load(i);
 
-      let ticking = false;
-      function update() {
-        ticking = false;
-        fit();
-        const runway = sec.offsetHeight - window.innerHeight;
-        if (runway <= 0) { draw(0); return; }
-        const top = sec.getBoundingClientRect().top;
-        const p = Math.min(1, Math.max(0, -top / runway));
-        const idx = Math.min(FRAMES - 1, Math.round(p * (FRAMES - 1)));
-        if (idx !== current) {
-          let j = idx;
-          while (j >= 0 && !ready(j)) j--;     // naechstes bereits geladenes Frame
-          if (j >= 0 && j !== current) draw(j);
-        }
-        if (cue) cue.style.opacity = Math.max(0, 1 - p * 5).toFixed(2);
+      window.addEventListener('resize', function () {
+        fit(); if (current >= 0) draw(current);
+      });
+
+      // Scroll-Hinweis sanft ausblenden, sobald der Nutzer scrollt.
+      if (cue) {
+        window.addEventListener('scroll', function () {
+          const p = Math.min(1, window.scrollY / (window.innerHeight * 0.5));
+          cue.style.opacity = Math.max(0, 1 - p).toFixed(2);
+        }, { passive: true });
       }
-      window.addEventListener('scroll', function () {
-        if (!ticking) { ticking = true; requestAnimationFrame(update); }
-      }, { passive: true });
-      window.addEventListener('resize', update);
-      update();
+
+      // Automatischer Loop: Frames zeitgesteuert vor- und zurueckspielen
+      // (Ping-Pong — so faellt der harte Sprung am Schleifenende weg, weil das
+      // Ladenfront-Video nicht nahtlos loopt).
+      const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (REDUCED) {
+        fit(); draw(0);              // Ruhebild, keine Bewegung
+      } else {
+        const FPS = 24, stepMs = 1000 / FPS;
+        let pos = 0, dir = 1, last = 0;
+        function tick(t) {
+          if (!last) last = t;
+          if (t - last >= stepMs) {
+            last = t;
+            pos += dir;
+            if (pos >= FRAMES - 1) { pos = FRAMES - 1; dir = -1; }
+            else if (pos <= 0)     { pos = 0;          dir =  1; }
+            fit();
+            if (ready(pos)) draw(pos);
+          }
+          requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      }
     })();
 """% {'hero': N_HERO, 'warm': min(10, N_HERO)}
 
