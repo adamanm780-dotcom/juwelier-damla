@@ -431,29 +431,6 @@ VISIT = """  <section id="visit" aria-labelledby="visitTitle">
 # ══════════════════════════════════════════════════════════
 #  VERLOBUNGSRINGE
 # ══════════════════════════════════════════════════════════
-VR_ED = [
-    ("01", "trauringe.jpg", "Trauringe und Verlobungsringe in der Auslage bei Juwelier Damla",
-     "In Ruhe schauen",
-     "Ein Antrag beginnt lange vor dem Ja. Bei uns dürfen Sie vergleichen, noch einmal "
-     "wiederkommen und sich Zeit lassen – diskret und ohne Termindruck.", False),
-    ("02", "schmuck.jpg", "Feiner Goldschmuck bei Juwelier Damla in Wiesbaden",
-     "Am eigenen Finger",
-     "Ob ein Ring wirkt, sieht man erst an der Hand. Wir zeigen Ihnen die Unterschiede "
-     "zwischen Fassungen, Schliffen und Goldtönen direkt am Stück.", True),
-]
-vr_rows = '\n\n'.join("""        <div class="ed-row%s reveal">
-          <figure class="ed-media">
-            <img src="assets/%s" alt="%s" loading="lazy">
-          </figure>
-          <div class="ed-text">
-            <span class="ed-num">%s</span>
-            <h3 class="ed-title">%s</h3>
-            <div class="gold-bar" role="presentation"></div>
-            <p>%s</p>
-          </div>
-        </div>""" % (' ed-row--flip' if flip else '', img, alt, num, title, txt)
-    for num, img, alt, title, txt, flip in VR_ED)
-
 VR_POINTS = [
     ("Der Stein",
      """<polygon points="24,8 36,20 24,40 12,20"/>
@@ -697,20 +674,6 @@ VR_BODY = """  <section class="sub-hero">
 %s
 
 
-  <section id="momente" aria-labelledby="momenteTitle">
-    <div class="wrap">
-      <div class="sub-head">
-        <span class="eyebrow reveal">Wie es bei uns läuft</span>
-        <h2 class="section-title reveal d1" id="momenteTitle">Zwei Momente<br>bis zum Ring</h2>
-        <div class="gold-bar reveal d2" role="presentation"></div>
-      </div>
-
-%s
-
-    </div>
-  </section>
-
-
   <section id="worauf" class="sub-alt" aria-labelledby="wraufTitle">
     <div class="wrap">
       <div class="sub-head">
@@ -738,7 +701,7 @@ VR_BODY = """  <section class="sub-hero">
 
 
 %s""" % (band('vr-band.mp4', 'Verlobungsring auf einem cremefarbenen Kissen', 'Juwelier Damla · Wiesbaden'),
-         crumb('Verlobungsringe'), VR_MODELLE_SECTION, VR_WEAR_SECTION, vr_rows, vr_cards,
+         crumb('Verlobungsringe'), VR_MODELLE_SECTION, VR_WEAR_SECTION, vr_cards,
          VISIT % ('Beratung',
                   'Kommen Sie<br><em>einfach vorbei</em>',
                   'Ohne Termin, ohne Verpflichtung. Wenn Sie es diskret möchten, rufen Sie kurz an – '
