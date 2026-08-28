@@ -2378,12 +2378,13 @@
       const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (still) { vids[0].classList.add('is-on'); return; }
 
-      let idx = 0, timer = 0, running = false;
+      let idx = 0, timer = 0, guard = 0, nextAt = 0, running = false;
 
       function play(v) {
         // Clip in SLOT ms durchspielen — die Quellen sind gut 5 s lang.
         const d = v.duration;
         if (d && isFinite(d)) v.playbackRate = Math.min(2, Math.max(1, d / (SLOT / 1000)));
+        v.muted = true;                 // iOS startet nur stumme Videos selbst
         const pr = v.play();
         if (pr && pr.catch) pr.catch(function () {});   // Autoplay abgelehnt
       }
@@ -2392,30 +2393,50 @@
         idx = i;
         const next = vids[i];
         if (prev && prev !== next) {
-          // Der neue Clip legt sich waehrend der Blende ueber den alten,
-          // der erst danach ausgeblendet und angehalten wird.
+          // Der neue Clip legt sich waehrend der Blende ueber den alten. Der
+          // alte wird dabei sofort angehalten — er steht durch die angepasste
+          // Geschwindigkeit ohnehin schon auf seinem letzten Bild, und iOS
+          // bricht die Wiedergabe gern ab, wenn zwei Videos gleichzeitig
+          // laufen. Sichtbar bleibt er bis zum Ende der Blende.
+          prev.pause();
           prev.style.zIndex = '1';
           next.style.zIndex = '2';
-          setTimeout(function () {
-            if (vids[idx] !== prev) { prev.classList.remove('is-on'); prev.pause(); }
+          clearTimeout(prev.__fade);
+          prev.__fade = setTimeout(function () {
+            if (vids[idx] !== prev) prev.classList.remove('is-on');
           }, FADE);
         }
         try { next.currentTime = 0; } catch (e) {}
         next.classList.add('is-on');
         play(next);
         clearTimeout(timer);
+        nextAt = Date.now() + SLOT;
         timer = setTimeout(function () { show((i + 1) % vids.length, next); }, SLOT);
+      }
+
+      // Sicherheitsnetz, damit die Schleife wirklich nie endet: iOS haelt
+      // Videos bei Energiesparmodus oder Speicherdruck von sich aus an, und
+      // gedrosselte Timer koennen einen Wechsel verschlafen. Der Waechter
+      // schiebt beides wieder an.
+      function watch() {
+        if (!running) return;
+        const v = vids[idx];
+        if (Date.now() > nextAt + 900) { show((idx + 1) % vids.length, v); return; }
+        if (v.paused && !v.ended) play(v);
       }
 
       function start() {
         if (running) return;
         running = true;
         show(idx, null);
+        clearInterval(guard);
+        guard = setInterval(watch, 1000);
       }
       function stop() {
         if (!running) return;
         running = false;
         clearTimeout(timer);
+        clearInterval(guard);
         vids.forEach(function (v) { v.pause(); });
       }
 
