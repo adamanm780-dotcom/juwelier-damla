@@ -2,7 +2,7 @@
 """Baut index.html um:
    - Ladescreen mit freigestelltem Logo
    - Nav mit Unterseiten-Links, freigestelltes Logo (ohne clip-path)
-   - Hero = NUR das Ladenfront-Video, scroll-gescrubbt
+   - Hero = zwei Ladenvideos (Front + Innenraum) im Wechsel
    - darunter: Textblock, darunter: Ring-Scroll-Animation
 
 Arbeitet auf index.src.html (Original) und schreibt index.html,
@@ -22,9 +22,17 @@ if not os.path.exists(SRC):
 
 src = io.open(SRC, encoding='utf-8').read()
 
-N_HERO = len(glob.glob(os.path.join(DIR, 'assets', 'hero', 'f-*.webp')))
 N_RING = len(glob.glob(os.path.join(DIR, 'assets', 'ring', 'frame-*.webp')))
-assert N_HERO > 0 and N_RING > 0, 'Frames fehlen'
+assert N_RING > 0, 'Ring-Frames fehlen'
+
+# Hero: zwei Clips im Wechsel. SLOT_MS ist die Standzeit je Clip — beide
+# Quellen sind gut 5 s lang und werden per playbackRate darauf gerafft,
+# ein kompletter Durchlauf dauert also SLOT_MS * 2.
+HERO_CLIPS = ['assets/video/hero-front.mp4', 'assets/video/hero-innen.mp4']
+N_CLIPS = len(HERO_CLIPS)
+SLOT_MS = 4000
+for c in HERO_CLIPS:
+    assert os.path.exists(os.path.join(DIR, c)), 'Hero-Video fehlt: ' + c
 
 
 def sub1(pattern, repl, text, flags=0, what=''):
@@ -119,39 +127,45 @@ CSS = """
     }
 
     /* ═══════════════════════════════════════════
-       HERO — nur das Video, scroll-gescrubbt
+       HERO — zwei Ladenvideos im Wechsel
     ═══════════════════════════════════════════ */
     /* padding: 0 hebt die Basisregel `section { padding: var(--pad-section) 0 }`
-       auf — sonst schiebt sie den sticky-Block unter der Navbar nach unten. */
-    #hero { height: 230vh; position: relative; padding: 0; }
+       auf — sonst schiebt sie das Video unter der Navbar nach unten. */
+    #hero { height: 100svh; position: relative; padding: 0; }
 
-    .hero__sticky {
-      position: sticky;
-      top: 0;
-      height: 100svh;
+    .hero__stage {
+      position: relative;
+      height: 100%;
       overflow: hidden;
-      display: block;
-      padding: 0;
       background: #F4F1EB;
     }
 
-    /* Das Video ist 2196x940 (2.34:1). Auf breiten Schirmen bekommt das Canvas
-       genau dieses Seitenverhaeltnis und sitzt mittig — so bleibt die komplette
-       Ladenfront samt Schriftzug im Bild, oben und unten laeuft es in die
-       Seitenfarbe aus. Schmale Schirme fuellen stattdessen die ganze Flaeche,
-       weil ein duennes Band dort verloren wirkt. */
-    #heroCanvas {
+    /* Beide Clips sind 2196x940 (2.34:1). Auf breiten Schirmen bekommt das
+       Video genau dieses Seitenverhaeltnis und sitzt mittig — so bleibt die
+       komplette Ladenfront samt Schriftzug im Bild, oben und unten laeuft es
+       in die Seitenfarbe aus. Schmale Schirme fuellen stattdessen die ganze
+       Flaeche, weil ein duennes Band dort verloren wirkt.
+       Die Clips liegen uebereinander; der einblendende bekommt per JS das
+       hoehere z-index und deckt den laufenden waehrend der Blende ab —
+       so entsteht eine echte Ueberblendung statt eines Durchblicks auf den
+       Seitenhintergrund. */
+    .hero__video {
       position: absolute;
       top: 50%;
       left: 0;
-      transform: translateY(-50%);
+      z-index: 1;
       width: 100%;
       height: auto;
       aspect-ratio: 2196 / 940;
+      transform: translateY(-50%);
       display: block;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 0.8s ease;
     }
+    .hero__video.is-on { opacity: 1; }
     @media (max-width: 900px) {
-      #heroCanvas {
+      .hero__video {
         top: 0;
         transform: none;
         height: 100%;
@@ -163,6 +177,7 @@ CSS = """
     .hero__veil {
       position: absolute;
       inset: 0;
+      z-index: 3;
       pointer-events: none;
       background: linear-gradient(180deg,
         rgba(255,255,255,0.42) 0%,
@@ -177,7 +192,7 @@ CSS = """
       bottom: 30px;
       left: 50%;
       transform: translateX(-50%);
-      z-index: 2;
+      z-index: 4;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -280,7 +295,6 @@ CSS = """
     }
 
     @media (max-width: 900px) {
-      #hero { height: 200vh; }
       #ring { height: 170vh; }
       .hero__cue { display: none; }
       .intro__title { font-size: clamp(2rem, 8.5vw, 2.7rem); }
@@ -347,11 +361,16 @@ src = sub1(
 # 5) Hero ersetzen: Video-Hero + Intro + Ring
 # ══════════════════════════════════════════════════════════
 NEW_SECTIONS = """  <!-- ═══════════════════════════════════
-       HERO — nur das Video, scroll-gescrubbt
+       HERO — Ladenfront und Ladenraum im Wechsel
   ═══════════════════════════════════ -->
   <section id="hero" aria-label="Juwelier Damla, Ladengeschäft in der Wellritzstraße">
-    <div class="hero__sticky">
-      <canvas id="heroCanvas" aria-hidden="true"></canvas>
+    <div class="hero__stage">
+      <video class="hero__video" src="assets/video/hero-front.mp4"
+             poster="assets/hero-front.webp" width="2196" height="940"
+             muted playsinline preload="auto" aria-hidden="true"></video>
+      <video class="hero__video" src="assets/video/hero-innen.mp4"
+             poster="assets/hero-innen.webp" width="2196" height="940"
+             muted playsinline preload="auto" aria-hidden="true"></video>
       <div class="hero__veil" aria-hidden="true"></div>
       <div class="hero__cue" id="heroCue" aria-hidden="true">
         <span>Scrollen</span>
@@ -415,14 +434,14 @@ src = sub1(r'      opacity: 0;\n      animation: fadeIn 1\.4s ease 0\.45s forwar
 # ══════════════════════════════════════════════════════════
 JS = """
     // ── Ladescreen ────────────────────────────────────
-    // Blendet ab, sobald die ersten Hero-Frames stehen.
+    // Blendet ab, sobald die Hero-Videos das erste Bild haben.
     (function () {
       const el  = document.getElementById('loader');
       const bar = document.getElementById('loaderBar');
       if (!el) return;
       document.body.classList.add('is-loading');
 
-      const WARM = %(warm)d;              // so viele Frames vor dem Start
+      const WARM = %(warm)d;              // so viele Clips vor dem Start
       let seen = 0, finished = false;
 
       function finish() {
@@ -444,84 +463,110 @@ JS = """
       setTimeout(finish, 7000);           // Notausstieg, falls Bilder haengen
     })();
 
-    // ── Hero: Ladenfront-Video als Scroll-Scrub ───────
+    // ── Hero: zwei Ladenvideos im Wechsel ─────────────
+    // Ladenfront und Ladenraum laufen abwechselnd, je %(slot).1f s
+    // (leicht beschleunigt, damit ein Durchlauf ~%(cycle).0f s dauert).
     (function () {
-      const cnv = document.getElementById('heroCanvas');
-      const sec = document.getElementById('hero');
-      const cue = document.getElementById('heroCue');
-      if (!cnv || !sec) return;
+      const sec  = document.getElementById('hero');
+      const cue  = document.getElementById('heroCue');
+      const vids = sec ? [].slice.call(sec.querySelectorAll('.hero__video')) : [];
+      if (!sec || !vids.length) return;
 
-      const ctx = cnv.getContext('2d', { alpha: false });
-      const FRAMES = %(hero)d;
-      const SRC = i => 'assets/hero/f-' + String(i + 1).padStart(3, '0') + '.webp';
-      const imgs = new Array(FRAMES);
-      let current = -1;
+      const SLOT = %(slot_ms)d;   // Standzeit je Clip
+      const FADE = 800;      // muss zur CSS-Transition passen
 
-      const ready = i => imgs[i] && imgs[i].complete && imgs[i].naturalWidth;
-
-      function fit() {
-        const dpr = Math.min(window.devicePixelRatio || 1, 2);
-        const w = Math.round(cnv.clientWidth * dpr);
-        const h = Math.round(cnv.clientHeight * dpr);
-        if (w !== cnv.width || h !== cnv.height) {
-          cnv.width = w; cnv.height = h;
-          const keep = current; current = -1;
-          if (keep >= 0) draw(keep);
+      // Fortschritt fuer den Ladescreen: jeder Clip meldet sich einmal.
+      vids.forEach(function (v) {
+        let told = false;
+        function ready() {
+          if (told) return;
+          told = true;
+          if (window.__heroWarm) window.__heroWarm();
         }
-      }
-
-      // wie object-fit: cover
-      function draw(i) {
-        if (!ready(i)) return;
-        const im = imgs[i], cw = cnv.width, ch = cnv.height;
-        if (!cw || !ch) return;
-        const s = Math.max(cw / im.naturalWidth, ch / im.naturalHeight);
-        const w = im.naturalWidth * s, h = im.naturalHeight * s;
-        ctx.drawImage(im, (cw - w) / 2, (ch - h) / 2, w, h);
-        current = i;
-      }
-
-      let warmed = 0;
-      function load(i) {
-        if (imgs[i]) return;
-        const im = new Image();
-        im.decoding = 'async';
-        im.onload = function () {
-          if (i === 0) { fit(); draw(0); }
-          if (warmed < %(warm)d) { warmed++; if (window.__heroWarm) window.__heroWarm(); }
-        };
-        im.onerror = function () {
-          if (warmed < %(warm)d) { warmed++; if (window.__heroWarm) window.__heroWarm(); }
-        };
-        im.src = SRC(i);
-        imgs[i] = im;
-      }
-
-      for (let i = 0; i < FRAMES; i++) load(i);
-
-      let ticking = false;
-      function update() {
-        ticking = false;
-        fit();
-        const runway = sec.offsetHeight - window.innerHeight;
-        if (runway <= 0) { draw(0); return; }
-        const top = sec.getBoundingClientRect().top;
-        const p = Math.min(1, Math.max(0, -top / runway));
-        const idx = Math.min(FRAMES - 1, Math.round(p * (FRAMES - 1)));
-        if (idx !== current) {
-          let j = idx;
-          while (j >= 0 && !ready(j)) j--;     // naechstes bereits geladenes Frame
-          if (j >= 0 && j !== current) draw(j);
+        if (v.readyState >= 2) ready();
+        else {
+          v.addEventListener('loadeddata', ready, { once: true });
+          v.addEventListener('error', ready, { once: true });
         }
-        if (cue) cue.style.opacity = Math.max(0, 1 - p * 5).toFixed(2);
+      });
+
+      // Wer weniger Bewegung moechte, bekommt nur das Standbild.
+      const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (still) { vids[0].classList.add('is-on'); return; }
+
+      let idx = 0, timer = 0, running = false;
+
+      function play(v) {
+        // Clip in SLOT ms durchspielen — die Quellen sind gut 5 s lang.
+        const d = v.duration;
+        if (d && isFinite(d)) v.playbackRate = Math.min(2, Math.max(1, d / (SLOT / 1000)));
+        const pr = v.play();
+        if (pr && pr.catch) pr.catch(function () {});   // Autoplay abgelehnt
       }
-      window.addEventListener('scroll', function () {
-        if (!ticking) { ticking = true; requestAnimationFrame(update); }
-      }, { passive: true });
-      window.addEventListener('resize', update);
-      update();
+
+      function show(i, prev) {
+        idx = i;
+        const next = vids[i];
+        if (prev && prev !== next) {
+          // Der neue Clip legt sich waehrend der Blende ueber den alten,
+          // der erst danach ausgeblendet und angehalten wird.
+          prev.style.zIndex = '1';
+          next.style.zIndex = '2';
+          setTimeout(function () {
+            if (vids[idx] !== prev) { prev.classList.remove('is-on'); prev.pause(); }
+          }, FADE);
+        }
+        try { next.currentTime = 0; } catch (e) {}
+        next.classList.add('is-on');
+        play(next);
+        clearTimeout(timer);
+        timer = setTimeout(function () { show((i + 1) %% vids.length, next); }, SLOT);
+      }
+
+      function start() {
+        if (running) return;
+        running = true;
+        show(idx, null);
+      }
+      function stop() {
+        if (!running) return;
+        running = false;
+        clearTimeout(timer);
+        vids.forEach(function (v) { v.pause(); });
+      }
+
+      // Nur laufen lassen, solange der Hero sichtbar und der Tab aktiv ist.
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(function (es) {
+          es.forEach(function (e) {
+            if (e.isIntersecting && !document.hidden) start(); else stop();
+          });
+        }, { threshold: 0.05 }).observe(sec);
+      } else {
+        start();
+      }
+      document.addEventListener('visibilitychange', function () {
+        if (document.hidden) stop();
+        else if (sec.getBoundingClientRect().bottom > 0) start();
+      });
+      start();
+
+      // Scroll-Hinweis verblasst, sobald es losgeht.
+      if (cue) {
+        let ticking = false;
+        const fade = function () {
+          ticking = false;
+          const p = Math.min(1, window.scrollY / (window.innerHeight * 0.35));
+          cue.style.opacity = (1 - p).toFixed(2);
+        };
+        window.addEventListener('scroll', function () {
+          if (!ticking) { ticking = true; requestAnimationFrame(fade); }
+        }, { passive: true });
+        fade();
+      }
     })();
-"""% {'hero': N_HERO, 'warm': min(10, N_HERO)}
+"""% {'warm': N_CLIPS, 'slot_ms': SLOT_MS, 'slot': SLOT_MS / 1000.0,
+        'cycle': SLOT_MS * N_CLIPS / 1000.0}
 
 src = sub1(r'\n  <script>\n', '\n  <script>\n' + JS, src, 0, 'Script-Anfang')
 
@@ -554,5 +599,5 @@ assert OLD_CONTENT in src, 'heroContent-Block nicht gefunden'
 src = src.replace(OLD_CONTENT, '', 1)
 
 io.open(OUT, 'w', encoding='utf-8').write(src)
-print('index.html gebaut: %.0f KB | Hero-Frames %d | Ring-Frames %d'
-      % (len(src.encode('utf-8')) / 1024.0, N_HERO, N_RING))
+print('index.html gebaut: %.0f KB | Hero-Clips %d a %.1f s | Ring-Frames %d'
+      % (len(src.encode('utf-8')) / 1024.0, N_CLIPS, SLOT_MS / 1000.0, N_RING))
