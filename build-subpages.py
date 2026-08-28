@@ -290,12 +290,66 @@ SUB_CSS = """
       background: linear-gradient(90deg, transparent 0%, var(--border-gold) 50%, transparent 100%);
     }
 
+    /* — Ring-Modelle (freigestellte Stücke) — */
+    .ring-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: clamp(20px, 2.6vw, 40px);
+    }
+    .ring-card {
+      position: relative;
+      text-align: center;
+      padding: clamp(32px, 3vw, 50px) clamp(18px, 2vw, 32px) clamp(30px, 3vw, 42px);
+      background: linear-gradient(165deg, var(--gold-pale) 0%, rgba(255,255,255,0.55) 100%);
+      border: 1px solid var(--border-gold);
+      overflow: hidden;
+    }
+    .ring-card::after {
+      content: '';
+      position: absolute;
+      inset: 10px;
+      border: 1px solid rgba(255,255,255,0.45);
+      pointer-events: none;
+    }
+    .ring-card__img {
+      display: block;
+      width: 100%;
+      max-width: 210px;
+      aspect-ratio: 1 / 1;
+      object-fit: contain;
+      margin: 0 auto clamp(20px, 2.4vw, 30px);
+      filter: drop-shadow(0 16px 24px rgba(150, 116, 42, 0.20));
+      transition: transform 1.1s var(--ease-out);
+    }
+    .ring-card:hover .ring-card__img { transform: translateY(-5px) scale(1.05); }
+    .ring-card__cut {
+      font-family: var(--font-serif);
+      font-size: clamp(1.25rem, 2vw, 1.6rem);
+      font-weight: 400;
+      font-style: italic;
+      color: var(--ink);
+      margin-bottom: 12px;
+    }
+    .ring-card .gold-bar { margin: 0 auto 16px; }
+    .ring-card__desc {
+      font-size: 0.8rem;
+      font-weight: 300;
+      line-height: 1.85;
+      color: var(--ink-soft);
+    }
+
+    /* — Portrait-Variante der Editorial-Reihen — */
+    .ed-media--portrait { max-width: 400px; }
+    .ed-media--portrait img { aspect-ratio: 3 / 4; }
+
     @media (max-width: 900px) {
       .ed-row { grid-template-columns: 1fr; gap: 28px; }
       .ed-row--flip .ed-media { order: 0; justify-self: start; }
       .ed-row--flip .ed-text  { justify-self: start; }
       .ed-media { max-width: 100%; justify-self: start; }
+      .ed-media--portrait { max-width: 100%; }
       .ed-text  { max-width: none; }
+      .ring-grid { grid-template-columns: 1fr; gap: 20px; max-width: 360px; margin: 0 auto; }
       .flow-grid { grid-template-columns: 1fr; gap: 36px; }
       .flow-step + .flow-step::before { display: none; }
       .sub-actions a { width: 100%; text-align: center; }
@@ -398,6 +452,90 @@ vr_cards = '\n\n'.join("""        <article class="service-card reveal%s">
         </article>""" % ('' if i == 0 else ' d%d' % min(i, 3), icon, name, txt)
     for i, (name, icon, txt) in enumerate(VR_POINTS))
 
+# — Freigestellte Ring-Modelle (aur/aur1/aur2) —
+VR_MODELLE = [
+    ("vr-modell-1.webp", "Verlobungsring mit Tropfenschliff und seitlichen Diamanten, Gelbgold",
+     "Der Tropfen",
+     "Ein Diamant im Tropfenschliff, flankiert von zwei feinen Beisteinen. Klassisch "
+     "in der Linie, unverwechselbar in der Wirkung."),
+    ("vr-modell-2.webp", "Verlobungsring mit Smaragdschliff als Solitär in Gelbgold",
+     "Der Smaragdschliff",
+     "Ruhige, klare Facetten auf einer schlichten Schiene. Der Solitär für alle, "
+     "die es reduziert und zeitlos mögen."),
+    ("vr-modell-3.webp", "Verlobungsring mit Ovalschliff als Solitär in Gelbgold",
+     "Der Ovale",
+     "Der ovale Solitär streckt den Finger und fängt das Licht aus jedem Winkel – "
+     "ein wenig Glanz mehr als beim runden Brillanten."),
+]
+vr_modelle = '\n\n'.join("""        <article class="ring-card reveal%s">
+          <img class="ring-card__img" src="assets/%s" alt="%s" loading="lazy" width="760" height="760">
+          <h3 class="ring-card__cut">%s</h3>
+          <div class="gold-bar" role="presentation"></div>
+          <p class="ring-card__desc">%s</p>
+        </article>""" % ('' if i == 0 else ' d%d' % min(i, 3), img, alt, cut, desc)
+    for i, (img, alt, cut, desc) in enumerate(VR_MODELLE))
+
+# — Editorial-Reihen „an der Hand" (flip = Bild rechts) —
+VR_WEAR = [
+    ("vr-getragen-1.webp", "Verlobungsring mit Halo-Fassung an der Hand einer Frau",
+     "01", "So sieht er morgen aus",
+     "Ein Ring lebt am Finger, nicht in der Vitrine. Erst an der Hand zeigt sich, "
+     "ob Fassung, Höhe und Goldton wirklich zu Ihnen passen.", True),
+    ("vr-getragen-2.webp", "Ovaler Verlobungsring an einer Hand, die auf hellem Stoff ruht",
+     "02", "Aus jedem Winkel",
+     "Oval- und Tropfenschliff fangen das Licht anders als ein runder Brillant. "
+     "Bei uns drehen Sie den Ring in Ruhe, bis er sitzt.", False),
+    ("vr-getragen-3.webp", "Verlobungsring mit Radiantschliff und seitlichen Steinen an der Hand",
+     "03", "Für jeden Tag gemacht",
+     "Der schönste Ring ist der, den Sie nicht mehr abnehmen möchten. Wir achten "
+     "mit Ihnen darauf, dass er auch im Alltag angenehm zu tragen bleibt.", True),
+]
+vr_wear = '\n\n'.join("""        <div class="ed-row%s reveal">
+          <figure class="ed-media ed-media--portrait">
+            <img src="assets/%s" alt="%s" loading="lazy">
+          </figure>
+          <div class="ed-text">
+            <span class="ed-num">%s</span>
+            <h3 class="ed-title">%s</h3>
+            <div class="gold-bar" role="presentation"></div>
+            <p>%s</p>
+          </div>
+        </div>""" % (' ed-row--flip' if flip else '', img, alt, num, title, txt)
+    for img, alt, num, title, txt, flip in VR_WEAR)
+
+VR_MODELLE_SECTION = """  <section id="modelle" aria-labelledby="modelleTitle">
+    <div class="wrap">
+      <div class="sub-head">
+        <span class="eyebrow reveal">Unsere Verlobungsringe</span>
+        <h2 class="section-title reveal d1" id="modelleTitle">Drei Schliffe,<br>ein Versprechen</h2>
+        <div class="gold-bar reveal d2" role="presentation"></div>
+        <p class="sub-intro reveal d3">
+          Solitär oder mit seitlichem Funkeln, klar oder verspielt – drei Fassungen,
+          nach denen bei uns am häufigsten gefragt wird. Jede in 585er und 750er Gold.
+        </p>
+      </div>
+
+      <div class="ring-grid">
+
+%s
+
+      </div>
+    </div>
+  </section>""" % vr_modelle
+
+VR_WEAR_SECTION = """  <section id="getragen" class="sub-alt" aria-labelledby="getragenTitle">
+    <div class="wrap">
+      <div class="sub-head">
+        <span class="eyebrow reveal">An der Hand</span>
+        <h2 class="section-title reveal d1" id="getragenTitle">Erst getragen<br>zeigt sich der Ring</h2>
+        <div class="gold-bar reveal d2" role="presentation"></div>
+      </div>
+
+%s
+
+    </div>
+  </section>""" % vr_wear
+
 VR_BODY = """  <section class="sub-hero">
 
 %s
@@ -414,10 +552,16 @@ VR_BODY = """  <section class="sub-hero">
       </p>
       <div class="sub-actions reveal d3">
         <a href="tel:+496115807830" class="btn-solid">Termin vereinbaren</a>
-        <a href="#worauf" class="btn-ghost">Worauf es ankommt</a>
+        <a href="#modelle" class="btn-ghost">Unsere Ringe ansehen</a>
       </div>
     </div>
   </section>
+
+
+%s
+
+
+%s
 
 
   <section id="momente" aria-labelledby="momenteTitle">
@@ -461,7 +605,7 @@ VR_BODY = """  <section class="sub-hero">
 
 
 %s""" % (band('vr-band.mp4', 'Verlobungsring auf einem cremefarbenen Kissen', 'Juwelier Damla · Wiesbaden'),
-         crumb('Verlobungsringe'), vr_rows, vr_cards,
+         crumb('Verlobungsringe'), VR_MODELLE_SECTION, VR_WEAR_SECTION, vr_rows, vr_cards,
          VISIT % ('Beratung',
                   'Kommen Sie<br><em>einfach vorbei</em>',
                   'Ohne Termin, ohne Verpflichtung. Wenn Sie es diskret möchten, rufen Sie kurz an – '
