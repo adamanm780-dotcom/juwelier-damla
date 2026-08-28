@@ -55,8 +55,10 @@ for name in PAGES:
     for i, js in enumerate(re.findall(r'<script>(.*?)</script>', src, re.S)):
         tmp = os.path.join(DIR, '_c%d.js' % i)
         io.open(tmp, 'w', encoding='utf-8').write(js)
+        # ohne shell=True: mit Shell wuerde nur `node` ohne Argumente starten
+        # (die Liste landet in $0/$1) — das haengt an der REPL statt zu pruefen.
         p = subprocess.Popen(['node', '--check', tmp], stdout=subprocess.PIPE,
-                             stderr=subprocess.STDOUT, shell=True)
+                             stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL)
         out = p.communicate()[0].decode('utf-8', 'replace')
         os.remove(tmp)
         if p.returncode == 0:
