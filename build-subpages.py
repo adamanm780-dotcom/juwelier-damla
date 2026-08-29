@@ -748,7 +748,7 @@ RP_SERVICES = [
               <line x1="13" y1="29" x2="21" y2="37"/>
               <line x1="7" y1="43" x2="35" y2="43"/>""",
      "Ein Name, ein Datum, ein kurzes Wort: innen im Ring, auf der Rückseite eines "
-     "Anhängers oder auf dem Gehäuseboden einer Uhr. Auch nachträglich, an einem Stück, "
+     "Anhängers oder an der Schließe eines Armbands. Auch nachträglich, an einem Stück, "
      "das Sie längst tragen."),
     ("Schmuckaufbereitung",
      """<path d="M 19,8 L 21.6,18.4 L 32,21 L 21.6,23.6 L 19,34 L 16.4,23.6 L 6,21 L 16.4,18.4 Z"/>

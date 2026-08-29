@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Juwelier Damla – Schmuck, Uhren & Trauringe in Wiesbaden</title>
-  <meta name="description" content="Juwelier Damla in Wiesbaden – Schmuck, Uhren, Trauringe und persönliche Beratung in der Wellritzstraße 3. Mo–Fr 09:30–19:00, Sa 09:30–17:00." />
+  <title>Juwelier Damla – Schmuck & Trauringe in Wiesbaden</title>
+  <meta name="description" content="Juwelier Damla in Wiesbaden – Schmuck, Trauringe und persönliche Beratung in der Wellritzstraße 3. Mo–Fr 09:30–19:00, Sa 09:30–17:00." />
   <link rel="canonical" href="https://juwelier-damla.de/" />
 
   <!-- Open Graph / Social -->
   <meta property="og:type" content="website" />
   <meta property="og:locale" content="de_DE" />
   <meta property="og:site_name" content="Juwelier Damla" />
-  <meta property="og:title" content="Juwelier Damla – Schmuck, Uhren & Trauringe in Wiesbaden" />
+  <meta property="og:title" content="Juwelier Damla – Schmuck & Trauringe in Wiesbaden" />
   <meta property="og:description" content="Ihr Juwelier in der Wellritzstraße 3, Wiesbaden. Persönliche Beratung, ausgewählte Qualität – Mo–Sa für Sie geöffnet." />
   <meta property="og:url" content="https://juwelier-damla.de/" />
   <meta property="og:image" content="https://juwelier-damla.de/assets/og.jpg" />
@@ -473,46 +473,15 @@
     #about::before { top: 0; }
     #about::after  { bottom: 0; }
 
+    /* Ohne Ladenfoto: einspaltiger, zentrierter Textblock. */
     .about-grid {
       display: grid;
-      grid-template-columns: 0.9fr 1.1fr;
-      gap: clamp(48px, 7vw, 100px);
-      align-items: center;
+      grid-template-columns: 1fr;
+      max-width: 760px;
+      margin: 0 auto;
+      text-align: center;
     }
-
-    .about-figure { position: relative; }
-    .about-img {
-      width: 100%;
-      aspect-ratio: 4 / 4.9;
-      object-fit: cover;
-      box-shadow: var(--shadow-card);
-      border-radius: 999px 999px 10px 10px;  /* Bogen-Form */
-    }
-    .about-figure::after {
-      content: '';
-      position: absolute;
-      inset: -16px 16px 16px -16px;
-      border: 1px solid var(--border-gold);
-      border-radius: 999px 999px 10px 10px;
-      pointer-events: none;
-    }
-    .about-monogram {
-      position: absolute;
-      right: -20px; top: -20px;
-      width: 88px; height: 88px;
-      border-radius: 50%;
-      background: var(--marble);
-      border: 1px solid var(--border-gold);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: var(--font-serif);
-      font-style: italic;
-      font-size: 1.7rem;
-      color: var(--gold);
-      box-shadow: var(--shadow-soft);
-      z-index: 1;
-    }
+    .about-body .gold-bar { margin-left: auto; margin-right: auto; }
 
     .about-body p {
       font-family: var(--font-serif);
@@ -532,6 +501,7 @@
     .about-tags {
       display: flex;
       flex-wrap: wrap;
+      justify-content: center;
       gap: 10px;
       margin-top: 34px;
       list-style: none;
@@ -560,8 +530,12 @@
 
     .collections-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: clamp(18px, 3vw, 32px);
+      /* Zwei Karten: Breite auf das alte Drei-Spalten-Mass begrenzen,
+         damit die Bogen-Form nicht in die Laenge gezogen wird. */
+      max-width: 780px;
+      margin: 0 auto;
     }
 
     .collection-card {
@@ -623,15 +597,19 @@
     .services-header { text-align: center; margin-bottom: 64px; }
     .services-header .gold-bar { margin: 0 auto; }
 
+    /* Flex statt Grid: bei 5 Karten fuellt die letzte Reihe die Breite aus,
+       statt eine leere Zelle in der Hairline-Optik stehen zu lassen. */
     .services-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      display: flex;
+      flex-wrap: wrap;
       gap: 1px;
       background: var(--border-light);
       border: 1px solid var(--border-light);
     }
 
     .service-card {
+      flex: 1 1 calc(33.333% - 1px);
+      min-width: 0;
       background: rgba(253, 252, 249, 0.95);
       padding: clamp(36px, 5vw, 52px) clamp(28px, 4vw, 42px);
       position: relative;
@@ -1263,11 +1241,9 @@
 
       #ringCanvas { width: clamp(240px, 38vh, 400px); }
 
-      .about-grid,
       .contact-grid { grid-template-columns: 1fr; gap: 48px; }
-      .about-figure { max-width: 480px; }
       .collections-grid { grid-template-columns: 1fr 1fr; }
-      .services-grid { grid-template-columns: 1fr 1fr; }
+      .services-grid .service-card { flex-basis: calc(50% - 1px); }
       .gallery-card--wide img { aspect-ratio: 16 / 10; }
       .reviews-grid { grid-template-columns: 1fr 1fr; }
       .footer-grid { grid-template-columns: 1fr 1fr; }
@@ -1302,17 +1278,15 @@
       .hero__badge { margin-top: 18px; padding: 10px 16px; }
       .hero__scroll { display: none; }
 
-      .about-monogram { width: 68px; height: 68px; font-size: 1.3rem; right: -8px; top: -14px; }
-
       .collections-grid { grid-template-columns: 1fr; gap: 16px; }
       .collections-header { margin-bottom: 40px; }
 
       .services-grid {
-        grid-template-columns: 1fr;
         background: transparent;
         gap: 12px;
         border: none;
       }
+      .services-grid .service-card { flex-basis: 100%; }
       .service-card { border: 1px solid var(--border-light); padding: 28px 22px; }
       .services-header { margin-bottom: 40px; }
 
@@ -1429,7 +1403,7 @@
           Zeitlose <strong>Eleganz</strong><br>für besondere Momente
         </h1>
         <p class="hero__text">
-          Schmuck, Uhren und Trauringe – ausgewählt mit Sinn für Qualität,
+          Schmuck und Trauringe – ausgewählt mit Sinn für Qualität,
           begleitet von einer Beratung, die sich Zeit für Sie nimmt.
         </p>
         <div class="hero__actions">
@@ -1466,11 +1440,6 @@
     <div class="wrap">
       <div class="about-grid">
 
-        <div class="about-figure reveal-img">
-          <img src="assets/laden-innen-1.jpg" alt="Verkaufsraum von Juwelier Damla mit Vitrinen und Schmuckpräsentation" class="about-img" width="1000" height="1333" loading="lazy">
-          <div class="about-monogram" aria-hidden="true">JD</div>
-        </div>
-
         <div class="about-body">
           <span class="eyebrow reveal">Über uns</span>
           <h2 class="section-title reveal-lines" id="aboutTitle"><span class="tl__line"><span>Schmuck mit</span></span><span class="tl__line"><span>besonderem Anspruch</span></span></h2>
@@ -1488,7 +1457,6 @@
 
           <ul class="about-tags reveal d5">
             <li class="tag">Schmuck</li>
-            <li class="tag">Uhren</li>
             <li class="tag">Trauringe</li>
             <li class="tag">Beratung</li>
             <li class="tag">Wiesbaden</li>
@@ -1504,14 +1472,12 @@
     <div class="marquee__track">
       <span>Trauringe</span><span class="diamond">◆</span>
       <span>Verlobungsringe</span><span class="diamond">◆</span>
-      <span>Uhren</span><span class="diamond">◆</span>
       <span>Ketten</span><span class="diamond">◆</span>
       <span>Ohrringe</span><span class="diamond">◆</span>
       <span>Armbänder</span><span class="diamond">◆</span>
       <span>Persönliche Beratung</span><span class="diamond">◆</span>
       <span>Trauringe</span><span class="diamond">◆</span>
       <span>Verlobungsringe</span><span class="diamond">◆</span>
-      <span>Uhren</span><span class="diamond">◆</span>
       <span>Ketten</span><span class="diamond">◆</span>
       <span>Ohrringe</span><span class="diamond">◆</span>
       <span>Armbänder</span><span class="diamond">◆</span>
@@ -1540,14 +1506,6 @@
         </figure>
 
         <figure class="collection-card reveal-img d1">
-          <img src="assets/uhren.jpg" alt="Elegante Armbanduhr mit goldenem Gehäuse auf Marmor" width="800" height="1000" loading="lazy">
-          <figcaption>
-            <strong>Uhren</strong>
-            <span>Zeit als Ausdruck von Stil</span>
-          </figcaption>
-        </figure>
-
-        <figure class="collection-card reveal-img d2">
           <img src="assets/schmuck.jpg" alt="Goldschmuck-Stillleben mit Ketten, Ring und Armbändern auf Marmor" width="800" height="1000" loading="lazy">
           <figcaption>
             <strong>Ketten & Schmuck</strong>
@@ -1586,23 +1544,6 @@
         <article class="service-card reveal d1">
           <div class="service-icon" aria-hidden="true">
             <svg viewBox="0 0 48 48">
-              <circle cx="24" cy="26" r="14"/>
-              <circle cx="24" cy="26" r="10"/>
-              <line x1="24" y1="12" x2="24" y2="16"/>
-              <line x1="24" y1="36" x2="24" y2="40"/>
-              <line x1="10" y1="26" x2="14" y2="26"/>
-              <line x1="34" y1="26" x2="38" y2="26"/>
-              <polyline points="24,20 24,27 29,27"/>
-              <line x1="20" y1="8" x2="28" y2="8"/>
-            </svg>
-          </div>
-          <h3 class="service-title">Uhren</h3>
-          <p class="service-text">Zeitmessung als Ausdruck von Persönlichkeit. Eine sorgfältige Auswahl hochwertiger Armbanduhren für jeden Anlass und Stil.</p>
-        </article>
-
-        <article class="service-card reveal d2">
-          <div class="service-icon" aria-hidden="true">
-            <svg viewBox="0 0 48 48">
               <circle cx="16" cy="26" r="8"/>
               <circle cx="32" cy="26" r="8"/>
               <path d="M 22,21 Q 24,16 26,21"/>
@@ -1612,7 +1553,7 @@
           <p class="service-text">Der Ring für das wichtigste Versprechen. Wir begleiten Sie mit Sachverstand und Einfühlungsvermögen auf dem Weg zu Ihrem perfekten Ring.</p>
         </article>
 
-        <article class="service-card reveal">
+        <article class="service-card reveal d2">
           <div class="service-icon" aria-hidden="true">
             <svg viewBox="0 0 48 48">
               <rect x="10" y="20" width="28" height="20" rx="1"/>
@@ -1626,7 +1567,7 @@
           <p class="service-text">Ein Schmuckstück als Geschenk trägt eine Botschaft. Lassen Sie sich inspirieren – wir helfen Ihnen, das Richtige für jeden Moment zu finden.</p>
         </article>
 
-        <article class="service-card reveal d1">
+        <article class="service-card reveal">
           <div class="service-icon" aria-hidden="true">
             <svg viewBox="0 0 48 48">
               <path d="M 24,6 C 14,6 8,13 8,22 C 8,34 24,44 24,44 C 24,44 40,34 40,22 C 40,13 34,6 24,6 Z"/>
@@ -1637,7 +1578,7 @@
           <p class="service-text">Bei Juwelier Damla nehmen wir uns Zeit für Sie. Individuelle Empfehlungen mit echtem Fachverstand – ohne Druck, mit Freude.</p>
         </article>
 
-        <article class="service-card reveal d2">
+        <article class="service-card reveal d1">
           <div class="service-icon" aria-hidden="true">
             <svg viewBox="0 0 48 48">
               <path d="M 36,12 L 30,18 L 22,10 L 28,4 A 10,10 0 0 1 36,12 Z" fill="rgba(201,160,85,0.12)"/>

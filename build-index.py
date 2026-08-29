@@ -45,17 +45,6 @@ def sub1(pattern, repl, text, flags=0, what=''):
 # 1) CSS
 # ══════════════════════════════════════════════════════════
 CSS = """
-    /* Bestand: `.reveal-img img` startet mit scale(1.14) und ragt dadurch
-       seitlich heraus, solange es noch nicht eingeblendet wurde (auf 390px
-       rund 7px, also ein waagerechter Scrollbalken). `clip` schneidet das ab,
-       ohne — anders als `hidden` — einen Scroll-Container zu erzeugen, der die
-       sticky-Bereiche von Hero und Ring brechen wuerde.
-       Nicht auf .reveal-img selbst, weil dort der Zierrahmen
-       `.about-figure::after` bewusst 16px nach aussen ragt — und NICHT auf
-       html/body: dort bricht jedes overflow ausser `visible` die sticky-Heros
-       von #hero und #ring. Deshalb genau auf die Sektion mit dem Bild. */
-    #about { overflow-x: clip; }
-
     /* ═══════════════════════════════════════════
        LADESCREEN
     ═══════════════════════════════════════════ */
@@ -372,7 +361,7 @@ NEW_SECTIONS = """  <!-- ══════════════════�
         Zeitlose <strong>Eleganz</strong><br>für besondere Momente
       </h1>
       <p class="intro__text reveal d2">
-        Schmuck, Uhren und Trauringe – ausgewählt mit Sinn für Qualität,
+        Schmuck und Trauringe – ausgewählt mit Sinn für Qualität,
         begleitet von einer Beratung, die sich Zeit für Sie nimmt.
       </p>
       <div class="intro__actions reveal d3">
