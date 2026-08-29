@@ -4,9 +4,14 @@ import io, os, re, json, subprocess, sys
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 VOID = set('area base br col embed hr img input link meta param source track wbr'.split())
-PAGES = ['index.html', 'verlobungsringe.html', 'reparaturen.html',
+PAGES = ['index.html', 'trauringe.html', 'verlobungsringe.html', 'reparaturen.html',
          'impressum.html', 'datenschutz.html']
 ok = True
+# Nav-Punkte je Seite — geprueft wird nicht eine feste Zahl, sondern dass die
+# Seiten nicht auseinanderlaufen. Genau das war der Fehler, den die Pruefung
+# fangen soll; eine harte 8 muss dagegen bei jedem neuen Menuepunkt nachgezogen
+# werden und schlaegt dann faelschlich Alarm.
+nav_punkte = {}
 
 
 def fail(m):
@@ -78,9 +83,13 @@ for name in PAGES:
     if nav:
         n = len(re.findall(r'<li>', nav.group(0)))
         act = len(re.findall(r'is-active', nav.group(0)))
+        nav_punkte[name] = n
         print('  Nav: %d Punkte, %d aktiv' % (n, act))
-        if n != 8:
-            fail('Nav hat %d statt 8 Punkte' % n)
+
+if len(set(nav_punkte.values())) > 1:
+    print('\n== Navigation ==')
+    fail('Seiten laufen auseinander: '
+         + ', '.join('%s=%d' % (k, v) for k, v in sorted(nav_punkte.items())))
 
 print('\n' + ('ALLES OK' if ok else 'FEHLER GEFUNDEN'))
 sys.exit(0 if ok else 1)
