@@ -1,0 +1,165 @@
+  <!-- ═══════════════════════════════════
+       KOPF
+  ═══════════════════════════════════ -->
+  <section class="sub-hero">
+    <div class="sub-band">
+      <img src="assets/trauringe-atelier.jpg" alt="Drei schmale Trauringe in Weißgold, Gelbgold und Rotgold auf hellem Marmor" width="1920" height="1071" fetchpriority="high">
+      <div class="sub-band__veil" aria-hidden="true"></div>
+      <div class="sub-band__cap" aria-hidden="true">Trauringe · Wellritzstraße 3</div>
+    </div>
+
+    <div class="wrap">
+      <p class="sub-crumb"><a href="index.html">Startseite</a> &nbsp;·&nbsp; <span>Trauring-Konfigurator</span></p>
+
+      <div class="sub-hero__text">
+        <span class="eyebrow reveal">Eheringe konfigurieren</span>
+        <h1 class="sub-hero__title reveal d1">Ihr Paar,<br>Zug um Zug</h1>
+        <div class="gold-bar reveal d2" role="presentation"></div>
+        <p class="sub-hero__sub reveal d3">
+          Legierung, Profil, Breite, Oberfläche, Steinbesatz – Sie stellen Ihre Trauringe
+          hier zusammen und sehen jede Entscheidung sofort am dreidimensionalen Ring.
+          Am Ende nehmen Sie Ihre Konfiguration mit zu uns ins Geschäft.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       KONFIGURATOR
+  ═══════════════════════════════════ -->
+  <section class="kf" aria-labelledby="kfTitel">
+    <h2 id="kfTitel" class="visually-hidden">Trauring-Konfigurator</h2>
+
+    <div class="wrap">
+      <div class="kf-grid">
+
+        <!-- ── Ansicht ─────────────────────────────── -->
+        <div class="kf-view">
+          <div class="kf-stage" id="kfBuehne" role="img"
+               aria-label="Dreidimensionale Ansicht des konfigurierten Ringpaars"></div>
+
+          <p class="kf-fallback" id="kfWebglHinweis" hidden>
+            Ihr Browser zeigt keine 3D-Grafik an. Die Konfiguration und der
+            Preis-Richtwert funktionieren trotzdem – die Zusammenfassung unten
+            können Sie uns direkt schicken.
+          </p>
+
+          <p class="kf-hint" aria-hidden="true">Ziehen zum Drehen · Scrollen zum Zoomen</p>
+
+          <div class="kf-preis">
+            <div class="kf-preis__zeile">
+              <span>Ring 1<em id="kfGewichtEins"></em></span>
+              <strong id="kfPreisEins"></strong>
+            </div>
+            <div class="kf-preis__zeile">
+              <span>Ring 2<em id="kfGewichtZwei"></em></span>
+              <strong id="kfPreisZwei"></strong>
+            </div>
+            <div class="kf-preis__paar">
+              <span>Paar – Richtwert</span>
+              <strong id="kfPreisPaar"></strong>
+            </div>
+            <p class="kf-preis__fuss">
+              Unverbindlicher Richtwert auf Basis von Material, Gewicht und Ausführung.
+              Der verbindliche Preis entsteht im Gespräch bei uns im Geschäft –
+              Tagespreis des Goldes und Ihre Wünsche im Detail entscheiden mit.
+            </p>
+          </div>
+        </div>
+
+        <!-- ── Bedienfeld ──────────────────────────── -->
+        <div class="kf-panel">
+
+          <div class="kf-tabs" role="tablist" aria-label="Welchen Ring bearbeiten">
+            <button type="button" class="kf-tab is-on" data-seite="eins" role="tab" aria-selected="true">Ring 1</button>
+            <button type="button" class="kf-tab" data-seite="zwei" role="tab" aria-selected="false">Ring 2</button>
+          </div>
+
+          <label class="kf-switch">
+            <input type="checkbox" id="kfKoppeln" checked>
+            <span class="kf-switch__track" aria-hidden="true"><span></span></span>
+            <span class="kf-switch__text">
+              Beide Ringe im gleichen Stil
+              <small>Größe, Breite, Steine und Gravur bleiben getrennt</small>
+            </span>
+          </label>
+
+          <fieldset class="kf-feld">
+            <legend>Legierung</legend>
+            <div class="kf-chips" id="kfLegierung"></div>
+            <div class="kf-chips kf-chips--klein" id="kfKarat"></div>
+            <label class="kf-check">
+              <input type="checkbox" id="kfBicolor">
+              <span id="kfBicolorLabel">Bicolor</span>
+            </label>
+          </fieldset>
+
+          <fieldset class="kf-feld">
+            <legend>Profil</legend>
+            <div class="kf-chips" id="kfProfil"></div>
+            <p class="kf-notiz" id="kfProfilHinweis"></p>
+          </fieldset>
+
+          <fieldset class="kf-feld">
+            <legend>Maße</legend>
+            <div class="kf-regler">
+              <label for="kfBreite">Breite <output id="kfBreiteWert"></output></label>
+              <input type="range" id="kfBreite" min="2.5" max="8" step="0.5" value="3.5">
+            </div>
+            <div class="kf-regler">
+              <label for="kfStaerke">Stärke <output id="kfStaerkeWert"></output></label>
+              <input type="range" id="kfStaerke" min="1.2" max="2.4" step="0.1" value="1.6">
+            </div>
+          </fieldset>
+
+          <fieldset class="kf-feld">
+            <legend>Oberfläche</legend>
+            <div class="kf-chips" id="kfOberflaeche"></div>
+          </fieldset>
+
+          <fieldset class="kf-feld">
+            <legend>Steinbesatz</legend>
+            <div class="kf-chips" id="kfBesatz"></div>
+          </fieldset>
+
+          <fieldset class="kf-feld">
+            <legend>Größe &amp; Gravur</legend>
+            <div class="kf-regler">
+              <label for="kfGroesse">Ringgröße <output id="kfGroesseWert"></output></label>
+              <input type="range" id="kfGroesse" min="44" max="70" step="1" value="54" list="kfGroessenListe">
+              <datalist id="kfGroessenListe"></datalist>
+              <p class="kf-notiz">Die Größe ist der Innenumfang in Millimetern. Unsicher? Wir messen bei uns kostenlos.</p>
+            </div>
+            <div class="kf-regler">
+              <label for="kfGravur">Innengravur</label>
+              <input type="text" id="kfGravur" maxlength="24" placeholder="z. B. 12.09.2027 · A &amp; M" autocomplete="off">
+              <p class="kf-notiz">Bis 24 Zeichen. Erscheint in der Vorschau auf der Ringinnenseite.</p>
+            </div>
+          </fieldset>
+
+          <button type="button" class="kf-reset" id="kfReset">Zurücksetzen</button>
+        </div>
+      </div>
+
+      <!-- ── Zusammenfassung & Anfrage ─────────────── -->
+      <div class="kf-abschluss">
+        <div class="kf-abschluss__text">
+          <span class="eyebrow">Ihre Konfiguration</span>
+          <h2 class="kf-abschluss__titel">Nehmen Sie das mit zu uns</h2>
+          <p>
+            Schicken Sie uns Ihre Zusammenstellung vorab oder bringen Sie sie einfach mit.
+            Wir legen Ihnen die Profile in echt auf den Tisch – anfassen entscheidet
+            am Ende doch mehr als jeder Bildschirm.
+          </p>
+          <pre class="kf-summary" id="kfZusammenfassung" aria-live="polite"></pre>
+        </div>
+
+        <div class="kf-aktionen">
+          <button type="button" class="btn-solid" id="kfWhatsapp">Per WhatsApp senden</button>
+          <button type="button" class="btn-ghost" id="kfMail">Per E-Mail senden</button>
+          <button type="button" class="btn-ghost" id="kfKopieren">Konfiguration kopieren</button>
+          <a href="tel:+496115807830" class="kf-anruf">oder anrufen: 0611 5807830</a>
+        </div>
+      </div>
+    </div>
+  </section>

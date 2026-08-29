@@ -220,15 +220,20 @@
       object-fit: contain;
     }
 
+    /* Neun Punkte inklusive Trauringe: Abstand mitwachsen lassen und
+       einen festen Sicherheitsabstand zum Logo halten, sonst klebt der
+       erste Link am Signet. */
     .nav__links {
       display: flex;
       align-items: center;
-      gap: 34px;
+      gap: clamp(17px, 2.1vw, 34px);
+      margin-left: clamp(24px, 3vw, 48px);
       list-style: none;
     }
     .nav__links a {
-      font-size: 0.72rem;
+      font-size: clamp(0.65rem, 0.85vw, 0.72rem);
       font-weight: 500;
+      white-space: nowrap;
       letter-spacing: 0.18em;
       text-transform: uppercase;
       color: var(--ink-soft);
@@ -1270,6 +1275,7 @@
         display: none;
         position: fixed;
         top: var(--nav-h); left: 0; right: 0;
+        margin-left: 0;          /* Desktop-Abstand zum Logo zuruecknehmen */
         background: rgba(249, 247, 243, 0.98);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
@@ -1650,6 +1656,100 @@
       pointer-events: none;
     }
 
+    /* ── Fassungs-Galerie mit Goldton-Umschalter ───────────── */
+    .metall-wahl {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: clamp(30px, 4vw, 48px);
+    }
+    .metall-chip {
+      appearance: none;
+      cursor: pointer;
+      font-family: var(--font-sans);
+      font-size: 0.64rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      background: rgba(255, 254, 252, 0.85);
+      border: 1px solid var(--border-light);
+      border-radius: 999px;
+      padding: 11px 22px 11px 38px;
+      position: relative;
+      transition: border-color 0.3s ease, color 0.3s ease;
+    }
+    /* Farbpunkt zeigt den Goldton, den der Knopf schaltet */
+    .metall-chip::before {
+      content: '';
+      position: absolute;
+      left: 16px; top: 50%;
+      transform: translateY(-50%);
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      box-shadow: inset 0 0 0 1px rgba(27, 25, 22, 0.14);
+    }
+    .metall-chip[data-metall="weiss"]::before { background: linear-gradient(140deg, #FFFFFF, #D9DBDE); }
+    .metall-chip[data-metall="gelb"]::before  { background: linear-gradient(140deg, #F2D89A, #C99B3E); }
+    .metall-chip[data-metall="rose"]::before  { background: linear-gradient(140deg, #F0C3AC, #C98466); }
+    .metall-chip:hover { border-color: var(--gold); color: var(--gold-dark); }
+    .metall-chip.is-on { border-color: var(--gold); background: var(--gold-pale); color: var(--ink); }
+
+    /* Flex statt Grid: bei fuenf Karten fuellt die letzte Reihe die Breite */
+    .fassungen-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: clamp(14px, 2vw, 24px);
+    }
+    .fassung {
+      flex: 1 1 calc(20% - 20px);
+      min-width: 0;
+      background: rgba(255, 254, 252, 0.9);
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      overflow: hidden;
+      transition: border-color 0.4s ease, transform 0.5s var(--ease-out);
+    }
+    .fassung:hover { border-color: var(--border-gold); transform: translateY(-4px); }
+    .fassung img {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      /* Der Wechsel des Goldtons soll nicht springen */
+      transition: opacity 0.35s ease;
+    }
+    .fassung img.is-wechselnd { opacity: 0; }
+    .fassung figcaption { padding: 16px 18px 20px; }
+    .fassung figcaption strong {
+      display: block;
+      font-family: var(--font-serif);
+      font-size: 1.14rem;
+      font-weight: 500;
+      font-style: italic;
+      margin-bottom: 6px;
+    }
+    .fassung figcaption span {
+      display: block;
+      font-size: 0.74rem;
+      line-height: 1.7;
+      color: var(--ink-muted);
+    }
+
+    @media (max-width: 1000px) {
+      .fassung { flex-basis: calc(33.333% - 20px); }
+    }
+    @media (max-width: 640px) {
+      .fassung { flex-basis: calc(50% - 12px); }
+      .fassung figcaption { padding: 12px 14px 16px; }
+      .fassung figcaption strong { font-size: 1rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .fassung img { transition: none; }
+      .fassung:hover { transform: none; }
+    }
+
     .sub-crumb {
       font-size: 0.56rem;
       letter-spacing: 0.28em;
@@ -1930,6 +2030,7 @@
       .sub-band { height: clamp(190px, 32vh, 260px); }
     }
   </style>
+
 </head>
 
 <body>
@@ -1985,6 +2086,7 @@
     <ul class="nav__links" id="navLinks">
       <li><a href="index.html#about">Über uns</a></li>
       <li><a href="index.html#collections">Kollektionen</a></li>
+      <li><a href="trauringe.html">Trauringe</a></li>
       <li><a href="verlobungsringe.html">Verlobungsringe</a></li>
       <li><a href="reparaturen.html" class="is-active" aria-current="page">Reparaturen</a></li>
       <li><a href="index.html#services">Leistungen</a></li>
@@ -2200,6 +2302,7 @@
           <ul>
             <li><a href="index.html#about">Über uns</a></li>
             <li><a href="index.html#collections">Kollektionen</a></li>
+            <li><a href="trauringe.html">Trauringe</a></li>
             <li><a href="verlobungsringe.html">Verlobungsringe</a></li>
             <li><a href="reparaturen.html">Reparaturen</a></li>
             <li><a href="index.html#services">Leistungen</a></li>

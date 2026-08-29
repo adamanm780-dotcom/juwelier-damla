@@ -34,6 +34,7 @@ footer_sub = footer.replace('<a href="#', '<a href="index.html#')
 NAV_ITEMS = [
     ('index.html#about',       'Über uns'),
     ('index.html#collections', 'Kollektionen'),
+    ('trauringe.html',         'Trauringe'),
     ('verlobungsringe.html',   'Verlobungsringe'),
     ('reparaturen.html',       'Reparaturen'),
     ('index.html#services',    'Leistungen'),
@@ -112,6 +113,100 @@ SUB_CSS = """
       text-transform: uppercase;
       color: var(--gold-dark);
       pointer-events: none;
+    }
+
+    /* ── Fassungs-Galerie mit Goldton-Umschalter ───────────── */
+    .metall-wahl {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: clamp(30px, 4vw, 48px);
+    }
+    .metall-chip {
+      appearance: none;
+      cursor: pointer;
+      font-family: var(--font-sans);
+      font-size: 0.64rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      background: rgba(255, 254, 252, 0.85);
+      border: 1px solid var(--border-light);
+      border-radius: 999px;
+      padding: 11px 22px 11px 38px;
+      position: relative;
+      transition: border-color 0.3s ease, color 0.3s ease;
+    }
+    /* Farbpunkt zeigt den Goldton, den der Knopf schaltet */
+    .metall-chip::before {
+      content: '';
+      position: absolute;
+      left: 16px; top: 50%;
+      transform: translateY(-50%);
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      box-shadow: inset 0 0 0 1px rgba(27, 25, 22, 0.14);
+    }
+    .metall-chip[data-metall="weiss"]::before { background: linear-gradient(140deg, #FFFFFF, #D9DBDE); }
+    .metall-chip[data-metall="gelb"]::before  { background: linear-gradient(140deg, #F2D89A, #C99B3E); }
+    .metall-chip[data-metall="rose"]::before  { background: linear-gradient(140deg, #F0C3AC, #C98466); }
+    .metall-chip:hover { border-color: var(--gold); color: var(--gold-dark); }
+    .metall-chip.is-on { border-color: var(--gold); background: var(--gold-pale); color: var(--ink); }
+
+    /* Flex statt Grid: bei fuenf Karten fuellt die letzte Reihe die Breite */
+    .fassungen-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: clamp(14px, 2vw, 24px);
+    }
+    .fassung {
+      flex: 1 1 calc(20% - 20px);
+      min-width: 0;
+      background: rgba(255, 254, 252, 0.9);
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      overflow: hidden;
+      transition: border-color 0.4s ease, transform 0.5s var(--ease-out);
+    }
+    .fassung:hover { border-color: var(--border-gold); transform: translateY(-4px); }
+    .fassung img {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      /* Der Wechsel des Goldtons soll nicht springen */
+      transition: opacity 0.35s ease;
+    }
+    .fassung img.is-wechselnd { opacity: 0; }
+    .fassung figcaption { padding: 16px 18px 20px; }
+    .fassung figcaption strong {
+      display: block;
+      font-family: var(--font-serif);
+      font-size: 1.14rem;
+      font-weight: 500;
+      font-style: italic;
+      margin-bottom: 6px;
+    }
+    .fassung figcaption span {
+      display: block;
+      font-size: 0.74rem;
+      line-height: 1.7;
+      color: var(--ink-muted);
+    }
+
+    @media (max-width: 1000px) {
+      .fassung { flex-basis: calc(33.333% - 20px); }
+    }
+    @media (max-width: 640px) {
+      .fassung { flex-basis: calc(50% - 12px); }
+      .fassung figcaption { padding: 12px 14px 16px; }
+      .fassung figcaption strong { font-size: 1rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .fassung img { transition: none; }
+      .fassung:hover { transform: none; }
     }
 
     .sub-crumb {
@@ -530,6 +625,67 @@ vr_wear = '\n\n'.join("""        <div class="ed-row%s reveal">
 vr_dots = '\n'.join('        <span class="ring-scroll__dot%s"></span>'
                     % (' is-active' if i == 0 else '') for i in range(len(VR_MODELLE)))
 
+# — Fassungs-Galerie mit Goldton-Umschalter —
+VR_FASSUNGEN = [
+    ('solitaer', 'Solitär',
+     'Vier Krappen, ein Brillant, eine schlanke Schiene. Der Ring, an den alle denken.',
+     'Solitär-Verlobungsring mit rundem Brillanten in vier Krappen'),
+    ('zarge', 'Zargenfassung',
+     'Der Stein sitzt tief in einem glatten Rand — geschützt und angenehm im Alltag.',
+     'Verlobungsring mit Zargenfassung, der Brillant von einem glatten Rand umschlossen'),
+    ('pave', 'Pavé-Schiene',
+     'Kleine Steine ziehen sich über die Schiene und lassen den Solitär größer wirken.',
+     'Verlobungsring mit Pavé-besetzter Schiene und rundem Brillanten'),
+    ('trilogie', 'Trilogie',
+     'Drei Steine: einer für gestern, einer für heute, einer für alles danach.',
+     'Trilogie-Verlobungsring mit einem großen und zwei kleineren Brillanten'),
+    ('twist', 'Twist',
+     'Zwei Stränge, die sich umschlingen — die Fassung mit der weichsten Linie.',
+     'Verlobungsring mit verschlungener Twist-Schiene und rundem Brillanten'),
+]
+
+vr_fassungen = '\n\n'.join("""        <figure class="fassung reveal-img%s">
+          <img src="assets/fassung/%s-weiss.webp" data-stil="%s"
+               data-alt="%s"
+               alt="%s in Weißgold" width="900" height="900" loading="lazy">
+          <figcaption>
+            <strong>%s</strong>
+            <span>%s</span>
+          </figcaption>
+        </figure>""" % (' d%d' % (i % 3) if i % 3 else '', stil, stil, alt, alt, name, text)
+    for i, (stil, name, text, alt) in enumerate(VR_FASSUNGEN))
+
+VR_FASSUNG_SECTION = """  <section id="fassungen" aria-labelledby="fassungenTitle">
+    <div class="wrap">
+      <div class="sub-head">
+        <span class="eyebrow reveal">Fassungen</span>
+        <h2 class="section-title reveal d1" id="fassungenTitle">Fünf Fassungen,<br>drei Goldtöne</h2>
+        <div class="gold-bar reveal d2" role="presentation"></div>
+        <p class="sub-intro reveal d3">
+          Der Goldton verändert einen Ring mehr, als die meisten erwarten.
+          Schalten Sie um – alle fünf Fassungen wechseln mit.
+        </p>
+      </div>
+
+      <div class="metall-wahl reveal d3" role="group" aria-label="Goldton wählen">
+        <button type="button" class="metall-chip is-on" data-metall="weiss" aria-pressed="true">Weißgold</button>
+        <button type="button" class="metall-chip" data-metall="gelb" aria-pressed="false">Gelbgold</button>
+        <button type="button" class="metall-chip" data-metall="rose" aria-pressed="false">Rotgold</button>
+      </div>
+
+      <div class="fassungen-grid" id="fassungenGrid">
+
+%s
+
+      </div>
+
+      <p class="sub-note reveal">
+        Jede Fassung fertigen wir in 585er oder 750er Gold – mit dem Stein,
+        den Sie bei uns aussuchen. Die Abbildungen zeigen die Form, nicht den Bestand.
+      </p>
+    </div>
+  </section>""" % vr_fassungen
+
 VR_MODELLE_SECTION = """  <section id="modelle" class="ring-scroll" aria-labelledby="modelleTitle">
     <div class="ring-scroll__pin">
       <div class="ring-scroll__head">
@@ -700,8 +856,12 @@ VR_BODY = """  <section class="sub-hero">
   </section>
 
 
+%s
+
+
 %s""" % (band('vr-band.mp4', 'Verlobungsring auf einem cremefarbenen Kissen', 'Juwelier Damla · Wiesbaden'),
          crumb('Verlobungsringe'), VR_MODELLE_SECTION, VR_WEAR_SECTION, vr_cards,
+         VR_FASSUNG_SECTION,
          VISIT % ('Beratung',
                   'Kommen Sie<br><em>einfach vorbei</em>',
                   'Ohne Termin, ohne Verpflichtung. Wenn Sie es diskret möchten, rufen Sie kurz an – '
@@ -881,6 +1041,7 @@ TEMPLATE = """<!DOCTYPE html>
 
 %(style)s
   <style>%(subcss)s  </style>
+%(extrahead)s
 </head>
 
 <body>
@@ -902,15 +1063,96 @@ TEMPLATE = """<!DOCTYPE html>
 %(footer)s
 
 %(script)s
-
+%(extrabody)s
 </body>
 </html>
 """
 
 import json
 
+# ══════════════════════════════════════════════════════════
+#  Trauring-Konfigurator: Markup, CSS und Modul-Einbindung
+#  liegen in eigenen Dateien, weil die Seite zu gross ist,
+#  um sie hier als Python-String zu pflegen.
+# ══════════════════════════════════════════════════════════
+# Goldton-Umschalter der Fassungs-Galerie. Bewusst klein und ohne Abhaengigkeit:
+# die Bilder liegen bereits als Dateien vor, getauscht wird nur das src-Attribut.
+VR_SKRIPT = """
+  <script>
+  (function () {
+    var wahl = document.querySelectorAll('.metall-chip');
+    var bilder = document.querySelectorAll('#fassungenGrid img');
+    if (!wahl.length || !bilder.length) return;
+
+    var NAME = { weiss: 'Weißgold', gelb: 'Gelbgold', rose: 'Rotgold' };
+    var sanft = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Die anderen Goldtoene vorladen, damit der Wechsel nicht flackert.
+    Object.keys(NAME).forEach(function (m) {
+      bilder.forEach(function (img) {
+        var v = new Image();
+        v.src = 'assets/fassung/' + img.dataset.stil + '-' + m + '.webp';
+      });
+    });
+
+    function setzen(metall) {
+      wahl.forEach(function (b) {
+        var an = b.dataset.metall === metall;
+        b.classList.toggle('is-on', an);
+        b.setAttribute('aria-pressed', String(an));
+      });
+      bilder.forEach(function (img) {
+        var neu = 'assets/fassung/' + img.dataset.stil + '-' + metall + '.webp';
+        var fertig = function () {
+          img.src = neu;
+          img.alt = img.dataset.alt + ' in ' + NAME[metall];
+          img.classList.remove('is-wechselnd');
+        };
+        if (!sanft) { fertig(); return; }
+        img.classList.add('is-wechselnd');
+        var vor = new Image();
+        vor.onload = fertig;
+        vor.onerror = fertig;
+        vor.src = neu;
+      });
+    }
+
+    wahl.forEach(function (b) {
+      b.addEventListener('click', function () { setzen(b.dataset.metall); });
+    });
+  })();
+  </script>
+"""
+
+KF_BODY = io.open(os.path.join(DIR, 'konfigurator.body.html'), encoding='utf-8').read()
+KF_CSS = io.open(os.path.join(DIR, 'konfigurator.css'), encoding='utf-8').read()
+
+KF_HEAD = '  <style>\n%s  </style>' % KF_CSS
+
+# three.js liegt lokal unter assets/vendor — kein CDN, damit die Seite
+# ohne Verbindung zu Dritten auskommt (DSGVO).
+KF_BODY_ENDE = """
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "./assets/vendor/three.module.js",
+      "three/": "./assets/vendor/"
+    }
+  }
+  </script>
+  <script type="module" src="assets/konfigurator.js"></script>
+"""
+
 PAGES = [
+    dict(slug='trauringe.html',
+         title='Trauring-Konfigurator – Eheringe selbst zusammenstellen | Juwelier Damla Wiesbaden',
+         desc='Eheringe und Trauringe online konfigurieren: Legierung, Profil, Breite, '
+              'Oberfläche, Steinbesatz und Gravur live in 3D — mit Preis-Richtwert. '
+              'Beratung bei Juwelier Damla, Wellritzstraße 3 in Wiesbaden.',
+         name='Trauring-Konfigurator', active='trauringe.html', body=KF_BODY,
+         services=None, extrahead=KF_HEAD, extrabody=KF_BODY_ENDE),
     dict(slug='verlobungsringe.html',
+         extrabody=VR_SKRIPT,
          title='Verlobungsringe – Juwelier Damla Wiesbaden',
          desc='Verlobungsringe bei Juwelier Damla in Wiesbaden: Solitäre, Trilogien und '
               'Halo-Fassungen in Gelb-, Weiß- und Rotgold. Persönliche Beratung in der '
@@ -960,7 +1202,8 @@ for page in PAGES:
         title=page['title'], desc=page['desc'], slug=page['slug'], fonts=font_links,
         ld=json.dumps(ld, ensure_ascii=False, indent=2).replace('\n', '\n  '),
         style=style_block, subcss=SUB_CSS, loader=loader, skip=skip, marble=marble,
-        nav=build_nav(page['active']), body=page['body'], footer=footer_sub, script=script)
+        nav=build_nav(page['active']), body=page['body'], footer=footer_sub, script=script,
+        extrahead=page.get('extrahead', ''), extrabody=page.get('extrabody', ''))
 
     out = os.path.join(DIR, page['slug'])
     io.open(out, 'w', encoding='utf-8').write(html)
