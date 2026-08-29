@@ -2067,6 +2067,22 @@
     .kf-stage:active { cursor: grabbing; }
     .kf-stage canvas { display: block; width: 100%; height: 100%; }
 
+    /* Ladehinweis, bis das erste Bild gerendert ist */
+    .kf-laedt {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.58rem;
+      font-weight: 600;
+      letter-spacing: 0.26em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      transition: opacity 0.5s ease;
+    }
+    .kf-stage.is-bereit .kf-laedt { opacity: 0; pointer-events: none; }
+
     .kf-fallback {
       margin-top: 14px;
       padding: 18px 20px;
@@ -2248,6 +2264,84 @@
       color: var(--ink);
     }
     .kf-chips--klein .kf-chip { font-size: 0.66rem; padding: 7px 12px; }
+
+    /* Farbpunkt der Legierung und Querschnitt-Piktogramm des Profils
+       stehen im Knopf vor dem Text. */
+    .kf-chip { display: inline-flex; align-items: center; gap: 8px; }
+    .kf-punkt {
+      flex: 0 0 auto;
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      box-shadow: inset 0 0 0 1px rgba(27, 25, 22, 0.16);
+    }
+    .kf-chips--profil .kf-chip { padding-top: 7px; padding-bottom: 7px; }
+    .kf-pikto {
+      flex: 0 0 auto;
+      width: 30px; height: 13px;
+      overflow: visible;
+    }
+    .kf-pikto path {
+      fill: rgba(160, 120, 56, 0.22);
+      stroke: var(--gold-dark);
+      stroke-width: 0.7;
+      stroke-linejoin: round;
+    }
+    .kf-chip.is-on .kf-pikto path { fill: rgba(160, 120, 56, 0.38); }
+
+    /* ── Massstaebliche Querschnittzeichnung ─────────────── */
+    .kf-querschnitt {
+      margin-top: 22px;
+      padding: 14px 10px 10px;
+      border: 1px solid var(--border-light);
+      border-radius: 6px;
+      background: var(--marble-warm);
+      text-align: center;
+    }
+    .kf-querschnitt svg { width: 100%; height: auto; display: block; }
+    .kf-querschnitt .qs-koerper {
+      fill: rgba(201, 160, 85, 0.20);
+      stroke: var(--gold-dark);
+      stroke-width: 1.1;
+      stroke-linejoin: round;
+    }
+    .kf-querschnitt .qs-mass line {
+      stroke: var(--ink-muted);
+      stroke-width: 0.8;
+    }
+    .kf-querschnitt .qs-mass text {
+      fill: var(--ink-muted);
+      font-family: var(--font-sans);
+      font-size: 11px;
+    }
+    .kf-querschnitt figcaption {
+      margin-top: 6px;
+      font-size: 0.58rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+    }
+
+    /* ── Ringgroessen-Hilfe ──────────────────────────────── */
+    .kf-hilfe { margin-top: 12px; }
+    .kf-hilfe summary {
+      cursor: pointer;
+      font-size: 0.72rem;
+      color: var(--gold-dark);
+      border-bottom: 1px solid var(--border-gold);
+      display: inline-block;
+      padding-bottom: 1px;
+      list-style: none;
+    }
+    .kf-hilfe summary::-webkit-details-marker { display: none; }
+    .kf-hilfe summary::after { content: ' +'; }
+    .kf-hilfe[open] summary::after { content: ' –'; }
+    .kf-hilfe p {
+      margin-top: 10px;
+      font-size: 0.74rem;
+      line-height: 1.75;
+      color: var(--ink-muted);
+    }
 
     .kf-check {
       display: flex;
@@ -2521,7 +2615,9 @@
         <!-- ── Ansicht ─────────────────────────────── -->
         <div class="kf-view">
           <div class="kf-stage" id="kfBuehne" role="img"
-               aria-label="Dreidimensionale Ansicht des konfigurierten Ringpaars"></div>
+               aria-label="Dreidimensionale Ansicht des konfigurierten Ringpaars">
+            <p class="kf-laedt" aria-hidden="true">Ringe werden aufgebaut …</p>
+          </div>
 
           <p class="kf-fallback" id="kfWebglHinweis" hidden>
             Ihr Browser zeigt keine 3D-Grafik an. Die Konfiguration und der
@@ -2581,7 +2677,7 @@
 
           <fieldset class="kf-feld">
             <legend>Profil</legend>
-            <div class="kf-chips" id="kfProfil"></div>
+            <div class="kf-chips kf-chips--profil" id="kfProfil"></div>
             <p class="kf-notiz" id="kfProfilHinweis"></p>
           </fieldset>
 
@@ -2595,6 +2691,11 @@
               <label for="kfStaerke">Stärke <output id="kfStaerkeWert"></output></label>
               <input type="range" id="kfStaerke" min="1.2" max="2.4" step="0.1" value="1.6">
             </div>
+
+            <figure class="kf-querschnitt">
+              <div id="kfQuerschnitt"></div>
+              <figcaption>Querschnitt · maßstäblich vergrößert</figcaption>
+            </figure>
           </fieldset>
 
           <fieldset class="kf-feld">
@@ -2613,7 +2714,25 @@
               <label for="kfGroesse">Ringgröße <output id="kfGroesseWert"></output></label>
               <input type="range" id="kfGroesse" min="44" max="70" step="1" value="54" list="kfGroessenListe">
               <datalist id="kfGroessenListe"></datalist>
-              <p class="kf-notiz">Die Größe ist der Innenumfang in Millimetern. Unsicher? Wir messen bei uns kostenlos.</p>
+              <p class="kf-notiz">Die Größe ist der Innenumfang in Millimetern.</p>
+
+              <details class="kf-hilfe">
+                <summary>Größe selbst herausfinden</summary>
+                <p>
+                  Nehmen Sie einen Ring, der am richtigen Finger gut sitzt, und messen Sie
+                  seinen <strong>Innendurchmesser</strong> in Millimetern. Mal 3,14 ergibt
+                  die Größe: 17,2 mm werden zu Größe 54.
+                </p>
+                <p>
+                  Alternativ einen Papierstreifen um den Finger legen, die Überlappung
+                  markieren und die Länge messen – das ist die Größe direkt.
+                </p>
+                <p>
+                  Messen Sie abends, nicht morgens: Finger sind über den Tag etwas kräftiger.
+                  Am sichersten ist es trotzdem bei uns – wir messen kostenlos und in einer
+                  Minute, und Größen lassen sich später ändern.
+                </p>
+              </details>
             </div>
             <div class="kf-regler">
               <label for="kfGravur">Innengravur</label>
@@ -2643,6 +2762,7 @@
           <button type="button" class="btn-solid" id="kfWhatsapp">Per WhatsApp senden</button>
           <button type="button" class="btn-ghost" id="kfMail">Per E-Mail senden</button>
           <button type="button" class="btn-ghost" id="kfKopieren">Konfiguration kopieren</button>
+          <button type="button" class="btn-ghost" id="kfBild">Ansicht als Bild sichern</button>
           <a href="tel:+496115807830" class="kf-anruf">oder anrufen: 0611 5807830</a>
         </div>
       </div>

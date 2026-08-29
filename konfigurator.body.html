@@ -36,7 +36,9 @@
         <!-- ── Ansicht ─────────────────────────────── -->
         <div class="kf-view">
           <div class="kf-stage" id="kfBuehne" role="img"
-               aria-label="Dreidimensionale Ansicht des konfigurierten Ringpaars"></div>
+               aria-label="Dreidimensionale Ansicht des konfigurierten Ringpaars">
+            <p class="kf-laedt" aria-hidden="true">Ringe werden aufgebaut …</p>
+          </div>
 
           <p class="kf-fallback" id="kfWebglHinweis" hidden>
             Ihr Browser zeigt keine 3D-Grafik an. Die Konfiguration und der
@@ -96,7 +98,7 @@
 
           <fieldset class="kf-feld">
             <legend>Profil</legend>
-            <div class="kf-chips" id="kfProfil"></div>
+            <div class="kf-chips kf-chips--profil" id="kfProfil"></div>
             <p class="kf-notiz" id="kfProfilHinweis"></p>
           </fieldset>
 
@@ -110,6 +112,11 @@
               <label for="kfStaerke">Stärke <output id="kfStaerkeWert"></output></label>
               <input type="range" id="kfStaerke" min="1.2" max="2.4" step="0.1" value="1.6">
             </div>
+
+            <figure class="kf-querschnitt">
+              <div id="kfQuerschnitt"></div>
+              <figcaption>Querschnitt · maßstäblich vergrößert</figcaption>
+            </figure>
           </fieldset>
 
           <fieldset class="kf-feld">
@@ -128,7 +135,25 @@
               <label for="kfGroesse">Ringgröße <output id="kfGroesseWert"></output></label>
               <input type="range" id="kfGroesse" min="44" max="70" step="1" value="54" list="kfGroessenListe">
               <datalist id="kfGroessenListe"></datalist>
-              <p class="kf-notiz">Die Größe ist der Innenumfang in Millimetern. Unsicher? Wir messen bei uns kostenlos.</p>
+              <p class="kf-notiz">Die Größe ist der Innenumfang in Millimetern.</p>
+
+              <details class="kf-hilfe">
+                <summary>Größe selbst herausfinden</summary>
+                <p>
+                  Nehmen Sie einen Ring, der am richtigen Finger gut sitzt, und messen Sie
+                  seinen <strong>Innendurchmesser</strong> in Millimetern. Mal 3,14 ergibt
+                  die Größe: 17,2 mm werden zu Größe 54.
+                </p>
+                <p>
+                  Alternativ einen Papierstreifen um den Finger legen, die Überlappung
+                  markieren und die Länge messen – das ist die Größe direkt.
+                </p>
+                <p>
+                  Messen Sie abends, nicht morgens: Finger sind über den Tag etwas kräftiger.
+                  Am sichersten ist es trotzdem bei uns – wir messen kostenlos und in einer
+                  Minute, und Größen lassen sich später ändern.
+                </p>
+              </details>
             </div>
             <div class="kf-regler">
               <label for="kfGravur">Innengravur</label>
@@ -158,6 +183,7 @@
           <button type="button" class="btn-solid" id="kfWhatsapp">Per WhatsApp senden</button>
           <button type="button" class="btn-ghost" id="kfMail">Per E-Mail senden</button>
           <button type="button" class="btn-ghost" id="kfKopieren">Konfiguration kopieren</button>
+          <button type="button" class="btn-ghost" id="kfBild">Ansicht als Bild sichern</button>
           <a href="tel:+496115807830" class="kf-anruf">oder anrufen: 0611 5807830</a>
         </div>
       </div>

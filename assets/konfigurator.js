@@ -226,15 +226,58 @@ function bandGeometrie(ri, T, W, profil) {
   return new THREE.LatheGeometry(pts, 192);
 }
 
-/** Brillant: flache Krone (Zylinderstumpf) + Pavillon (Kegel), 8-seitig facettiert.
-    Die Krone bleibt flach — ein gefasster Stein steht nur wenig ueber. */
+/**
+ * Brillant nach den ueblichen Proportionen des Rundschliffs:
+ * Tafel 56 %, Kronenhoehe 16 %, Pavillontiefe 43 % des Durchmessers.
+ * 16 Facetten statt 8 — das Feuer entsteht ueber die Kanten, mit acht
+ * Seiten sieht der Stein von der Seite aus wie ein Dreieck.
+ */
 function brillantGeometrie(r) {
-  const krone = new THREE.CylinderGeometry(r * 0.62, r, r * 0.26, 8, 1);
-  krone.translate(0, r * 0.13, 0);
-  const pavillon = new THREE.ConeGeometry(r, r * 1.05, 8, 1);
+  const d = r * 2;
+  const krone = new THREE.CylinderGeometry(r * 0.56, r, d * 0.16, 16, 1);
+  krone.translate(0, d * 0.08, 0);
+  const pavillon = new THREE.ConeGeometry(r, d * 0.43, 16, 1);
   pavillon.rotateX(Math.PI);
-  pavillon.translate(0, -r * 0.525, 0);
+  pavillon.translate(0, -d * 0.215, 0);
   return { krone, pavillon };
+}
+
+/* ══════════════════════════════════════════════════════════════
+   3b) QUERSCHNITT ALS ZEICHNUNG
+   ──────────────────────────────────────────────────────────────
+   Dieselben Profilfunktionen wie fuer die 3D-Geometrie, nur flach
+   gezeichnet — „konkav" oder „bombiert" versteht man am Bild sofort.
+   ══════════════════════════════════════════════════════════════ */
+
+/**
+ * SVG-Pfad des Querschnitts. Breite laeuft waagerecht, Staerke senkrecht;
+ * (0,0) liegt links oben im Kasten.
+ *
+ * @param {object} profil Eintrag aus PROFILE
+ * @param {number} bx     Kastenbreite in px  (entspricht der Ringbreite)
+ * @param {number} by     Kastenhoehe in px   (entspricht der Wandstaerke)
+ */
+function querschnittPfad(profil, bx, by) {
+  const N = 40;
+  const T = 1;                              // normiert, by skaliert
+  const oben = [];
+  const unten = [];
+  for (let i = 0; i <= N; i++) {
+    const t = -1 + (2 * i) / N;
+    const x = ((t + 1) / 2) * bx;
+    oben.push([x, by - profil.aussen(t, T) * by]);
+    unten.push([x, by - profil.innen(t, T) * by]);
+  }
+  const p = oben.map(([x, y], i) => (i ? 'L' : 'M') + x.toFixed(2) + ' ' + y.toFixed(2));
+  unten.reverse().forEach(([x, y]) => p.push('L' + x.toFixed(2) + ' ' + y.toFixed(2)));
+  return p.join(' ') + ' Z';
+}
+
+/** Kleines Piktogramm fuer die Profil-Knoepfe — feste Vergleichsmasse. */
+function profilPiktogramm(profil) {
+  const bx = 30, by = 11;
+  return '<svg class="kf-pikto" viewBox="0 0 ' + bx + ' ' + (by + 2) + '" aria-hidden="true">' +
+         '<path d="' + querschnittPfad(profil, bx, by) + '"/></svg>';
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -370,13 +413,18 @@ function metallMaterial(farbe, oberflaeche) {
   return mat;
 }
 
+/* Ein Brillant ist nicht weiss, sondern fast farblos: was man sieht, sind
+   Spiegelungen. Deshalb hoher Brechungsindex und kraeftige Environment-
+   Intensitaet — mit gedaempfter Reflexion wirken die Steine wie Milchglas. */
 const BRILLANT_MATERIAL = new THREE.MeshPhysicalMaterial({
-  color: 0xffffff,
+  color: 0xf2f6fb,
   metalness: 0.0,
   roughness: 0.0,
+  ior: 2.42,
+  specularIntensity: 1.0,
   clearcoat: 1.0,
   clearcoatRoughness: 0.0,
-  envMapIntensity: 3.4,
+  envMapIntensity: 6.0,
   flatShading: true,
 });
 
@@ -390,6 +438,7 @@ const hinweisWebgl = document.getElementById('kfWebglHinweis');
 let renderer, scene, camera, controls, ringGruppe;
 let letzteInteraktion = 0;
 let laeuft = false;
+let bereit = false;   // erstes gerendertes Bild da -> Ladezustand aus
 
 function webglVerfuegbar() {
   try {
@@ -401,7 +450,11 @@ function webglVerfuegbar() {
 }
 
 function szeneAufbauen() {
-  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  // preserveDrawingBuffer haelt das Bild nach dem Zeichnen im Puffer —
+  // ohne das liefert toDataURL() fuer den Export ein leeres Bild.
+  renderer = new THREE.WebGLRenderer({
+    antialias: true, alpha: true, preserveDrawingBuffer: true,
+  });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setSize(buehne.clientWidth, buehne.clientHeight);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -529,6 +582,36 @@ function tick() {
   controls.autoRotate = performance.now() - letzteInteraktion > 2600;
   controls.update();
   renderer.render(scene, camera);
+  if (!bereit) { bereit = true; buehne.classList.add('is-bereit'); }
+}
+
+/* ── Ansicht als Bild sichern ──────────────────────────────────
+   Die Ringe zweifach aufgeloest rendern, greifen, Groesse zurueck.
+   Kunden speichern sich ihren Entwurf, wir bekommen ihn per Nachricht. */
+function bildSpeichern() {
+  if (!renderer) return;
+  const b = buehne.clientWidth, h = buehne.clientHeight;
+  const pr = renderer.getPixelRatio();
+  renderer.setPixelRatio(Math.min(pr * 2, 4));
+  renderer.setSize(b, h, false);
+  renderer.render(scene, camera);
+
+  let url = '';
+  try {
+    url = renderer.domElement.toDataURL('image/png');
+  } finally {
+    renderer.setPixelRatio(pr);
+    renderer.setSize(b, h);
+    renderer.render(scene, camera);
+  }
+  if (!url) return;
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'trauringe-juwelier-damla.png';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -609,6 +692,10 @@ function ausAdresse() {
   }
 }
 
+/* Merkt sich, was wir selbst geschrieben haben — damit der Lauscher unten
+   den eigenen Schreibvorgang nicht als fremden Link missversteht. */
+let eigenerHash = '';
+
 /* Gedrosselt: an einem Schieberegler feuert `input` dutzende Male, und
    Browser deckeln die Zahl der History-Schreibvorgaenge. */
 let adressTimer = 0;
@@ -618,10 +705,20 @@ function inAdresse() {
     const code = inBase64Url(JSON.stringify({
       a: zustand.eins, b: zustand.zwei, g: zustand.gekoppelt,
     }));
+    eigenerHash = '#k=' + code;
     // replaceState statt hash, damit der Zurueck-Knopf nicht zumuellt
-    history.replaceState(null, '', location.pathname + location.search + '#k=' + code);
+    history.replaceState(null, '', location.pathname + location.search + eigenerHash);
   }, 350);
 }
+
+/* Ein Link, der erst nach dem Laden in die Adresszeile kommt — eingefuegt
+   oder ueber den Zurueck-Knopf — soll genauso greifen wie beim Aufruf.
+   Der eigene replaceState loest kein hashchange aus; der Vergleich faengt
+   trotzdem den Fall ab, dass jemand exakt den aktuellen Stand einfuegt. */
+window.addEventListener('hashchange', () => {
+  if (location.hash === eigenerHash) return;
+  if (ausAdresse()) zeichnen();
+});
 
 /* ══════════════════════════════════════════════════════════════
    RING BAUEN
@@ -689,10 +786,12 @@ function ringBauen(seite) {
   // Brillanten in der Aussenflaeche, mittig auf der Breite
   const anzahl = BESATZ[k.besatz].anzahl;
   if (anzahl > 0) {
-    const rStein = Math.min(1.0, W * 0.26);
+    // Der Stein muss in die Wandstaerke passen, nicht nur auf die Breite:
+    // ein 2-mm-Brillant in einer 1,8 mm starken Schiene gibt es nicht.
+    const rStein = Math.min(W * 0.16, T * 0.42, 0.85);
     const { krone, pavillon } = brillantGeometrie(rStein);
     const rAussen = ri + profil.aussen(0, T);
-    const schritt = (rStein * 2.25) / rAussen;   // Bogenmass zwischen den Steinen
+    const schritt = (rStein * 2.4) / rAussen;   // Bogenmass zwischen den Steinen
     const start = -Math.PI / 2 - ((anzahl - 1) / 2) * schritt;
 
     const hoch = new THREE.Vector3(0, 1, 0);
@@ -706,7 +805,8 @@ function ringBauen(seite) {
       const nach = new THREE.Vector3(Math.cos(phi), 0, Math.sin(phi));
       stein.quaternion.setFromUnitVectors(hoch, nach);
       // tief genug versenkt, dass nur die Krone aus der Flaeche schaut
-      stein.position.copy(nach).multiplyScalar(rAussen - rStein * 0.66);
+      // Rundiste knapp unter der Oberflaeche, nur die Krone schaut heraus
+      stein.position.copy(nach).multiplyScalar(rAussen - rStein * 0.30);
       gruppe.add(stein);
     }
   }
@@ -801,20 +901,89 @@ const euro = (n) =>
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 
-/** Baut eine Gruppe Auswahlknoepfe. */
-function knopfGruppe(container, eintraege, aktuell, beiWahl) {
+/**
+ * Baut eine Gruppe Auswahlknoepfe.
+ * `schmuck(wert)` darf HTML vor das Label setzen — Farbpunkt der Legierung
+ * oder Querschnitt-Piktogramm des Profils.
+ */
+function knopfGruppe(container, eintraege, aktuell, beiWahl, schmuck) {
   container.innerHTML = '';
-  eintraege.forEach(([wert, label, zusatz]) => {
+  eintraege.forEach(([wert, label]) => {
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'kf-chip' + (wert === aktuell ? ' is-on' : '');
     b.setAttribute('aria-pressed', String(wert === aktuell));
-    b.innerHTML = zusatz
-      ? `<span>${label}</span><small>${zusatz}</small>`
-      : `<span>${label}</span>`;
+    b.innerHTML = (schmuck ? schmuck(wert) : '') + '<span>' + label + '</span>';
     b.addEventListener('click', () => beiWahl(wert));
     container.appendChild(b);
   });
+}
+
+/**
+ * Querschnittzeichnung zum aktuellen Ring. 3,5 mm und 6 mm Breite sind als
+ * Zahl schwer zu greifen — als Zeichnung sofort. Der Massstab ist fest, die
+ * Zeichnung waechst also mit den Maßen; Breite und Staerke stehen zueinander
+ * im richtigen Verhaeltnis.
+ *
+ * NICHT in Originalgroesse: CSS-Pixel entsprechen keinem physischen Millimeter,
+ * ein echter 3,5-mm-Schnitt waere nur ein Strich. Die Bildunterschrift sagt das.
+ */
+const MM = 26;   // px je Millimeter in der Zeichnung
+
+function querschnittZeichnen(k) {
+  const flaeche = $('#kfQuerschnitt');
+  if (!flaeche) return;
+
+  const profil = PROFILE[k.profil];
+  const bx = k.breite * MM;
+  const by = k.staerke * MM;
+  const rand = 30;                       // Platz fuer Masslinien
+  const w = 8 * MM + rand * 2;           // feste Buehne: max. Breite 8 mm
+  const h = 2.4 * MM + rand * 2;
+  const x0 = (w - bx) / 2;
+  const y0 = (h - by) / 2;
+
+  const pfad = querschnittPfad(profil, bx, by);
+  const zahl = (n) => n.toFixed(1).replace('.', ',');
+
+  flaeche.innerHTML =
+    '<svg viewBox="0 0 ' + w + ' ' + h + '" role="img" aria-label="Querschnitt: ' +
+      profil.label + ', ' + zahl(k.breite) + ' Millimeter breit, ' +
+      zahl(k.staerke) + ' Millimeter stark">' +
+      '<g transform="translate(' + x0.toFixed(2) + ' ' + y0.toFixed(2) + ')">' +
+        '<path class="qs-koerper" d="' + pfad + '"/>' +
+      '</g>' +
+      // Massline Breite, unter dem Profil
+      '<g class="qs-mass">' +
+        '<line x1="' + x0 + '" y1="' + (y0 + by + 13) + '" x2="' + (x0 + bx) +
+          '" y2="' + (y0 + by + 13) + '"/>' +
+        '<line x1="' + x0 + '" y1="' + (y0 + by + 8) + '" x2="' + x0 +
+          '" y2="' + (y0 + by + 18) + '"/>' +
+        '<line x1="' + (x0 + bx) + '" y1="' + (y0 + by + 8) + '" x2="' + (x0 + bx) +
+          '" y2="' + (y0 + by + 18) + '"/>' +
+        '<text x="' + (w / 2) + '" y="' + (y0 + by + 28) + '" text-anchor="middle">' +
+          zahl(k.breite) + ' mm</text>' +
+      '</g>' +
+      // Massline Staerke, rechts daneben
+      '<g class="qs-mass">' +
+        '<line x1="' + (x0 + bx + 13) + '" y1="' + y0 + '" x2="' + (x0 + bx + 13) +
+          '" y2="' + (y0 + by) + '"/>' +
+        '<line x1="' + (x0 + bx + 8) + '" y1="' + y0 + '" x2="' + (x0 + bx + 18) +
+          '" y2="' + y0 + '"/>' +
+        '<line x1="' + (x0 + bx + 8) + '" y1="' + (y0 + by) + '" x2="' + (x0 + bx + 18) +
+          '" y2="' + (y0 + by) + '"/>' +
+        '<text x="' + (x0 + bx + 23) + '" y="' + (y0 + by / 2 + 4) + '">' +
+          zahl(k.staerke) + '</text>' +
+      '</g>' +
+    '</svg>';
+}
+
+/** Farbpunkt in der Legierungsfarbe — zeigt den Ton vor dem Klick. */
+function metallPunkt(legierung, karat) {
+  const leg = LEGIERUNGEN[legierung];
+  const k = leg.karate[karat] || Object.values(leg.karate)[0];
+  const hex = '#' + k.farbe.toString(16).padStart(6, '0');
+  return '<i class="kf-punkt" style="background:' + hex + '" aria-hidden="true"></i>';
 }
 
 function setzen(feld, wert) {
@@ -856,13 +1025,15 @@ function zeichnen() {
     $('#kfLegierung'),
     Object.entries(LEGIERUNGEN).map(([w, v]) => [w, v.label]),
     k.legierung,
-    (w) => setzen('legierung', w)
+    (w) => setzen('legierung', w),
+    (w) => metallPunkt(w, k.karat)
   );
   knopfGruppe(
     $('#kfKarat'),
     Object.entries(leg.karate).map(([w, v]) => [w, v.label]),
     k.karat,
-    (w) => setzen('karat', w)
+    (w) => setzen('karat', w),
+    (w) => metallPunkt(k.legierung, w)
   );
   $('#kfBicolor').checked = k.bicolor;
   $('#kfBicolorLabel').textContent =
@@ -873,7 +1044,8 @@ function zeichnen() {
     $('#kfProfil'),
     Object.entries(PROFILE).map(([w, v]) => [w, v.label]),
     k.profil,
-    (w) => setzen('profil', w)
+    (w) => setzen('profil', w),
+    (w) => profilPiktogramm(PROFILE[w])
   );
   $('#kfProfilHinweis').textContent = PROFILE[k.profil].hinweis;
 
@@ -882,6 +1054,7 @@ function zeichnen() {
   $('#kfBreiteWert').textContent = k.breite.toFixed(1).replace('.', ',') + ' mm';
   $('#kfStaerke').value = k.staerke;
   $('#kfStaerkeWert').textContent = k.staerke.toFixed(1).replace('.', ',') + ' mm';
+  querschnittZeichnen(k);
 
   // Oberflaeche
   knopfGruppe(
@@ -975,6 +1148,13 @@ function uiVerdrahten() {
   $('#kfStaerke').addEventListener('input', (e) => setzen('staerke', parseFloat(e.target.value)));
   $('#kfGroesse').addEventListener('input', (e) => setzen('groesse', parseInt(e.target.value, 10)));
   $('#kfGravur').addEventListener('input', (e) => setzen('gravur', e.target.value.slice(0, 24)));
+
+  const bildKnopf = $('#kfBild');
+  if (bildKnopf) {
+    // Ohne 3D gibt es kein Bild zu sichern — dann den Knopf gar nicht anbieten.
+    if (!laeuft) bildKnopf.hidden = true;
+    else bildKnopf.addEventListener('click', bildSpeichern);
+  }
 
   $('#kfKopieren').addEventListener('click', async () => {
     const btn = $('#kfKopieren');

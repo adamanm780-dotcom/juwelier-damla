@@ -44,6 +44,22 @@
     .kf-stage:active { cursor: grabbing; }
     .kf-stage canvas { display: block; width: 100%; height: 100%; }
 
+    /* Ladehinweis, bis das erste Bild gerendert ist */
+    .kf-laedt {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.58rem;
+      font-weight: 600;
+      letter-spacing: 0.26em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      transition: opacity 0.5s ease;
+    }
+    .kf-stage.is-bereit .kf-laedt { opacity: 0; pointer-events: none; }
+
     .kf-fallback {
       margin-top: 14px;
       padding: 18px 20px;
@@ -225,6 +241,84 @@
       color: var(--ink);
     }
     .kf-chips--klein .kf-chip { font-size: 0.66rem; padding: 7px 12px; }
+
+    /* Farbpunkt der Legierung und Querschnitt-Piktogramm des Profils
+       stehen im Knopf vor dem Text. */
+    .kf-chip { display: inline-flex; align-items: center; gap: 8px; }
+    .kf-punkt {
+      flex: 0 0 auto;
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      box-shadow: inset 0 0 0 1px rgba(27, 25, 22, 0.16);
+    }
+    .kf-chips--profil .kf-chip { padding-top: 7px; padding-bottom: 7px; }
+    .kf-pikto {
+      flex: 0 0 auto;
+      width: 30px; height: 13px;
+      overflow: visible;
+    }
+    .kf-pikto path {
+      fill: rgba(160, 120, 56, 0.22);
+      stroke: var(--gold-dark);
+      stroke-width: 0.7;
+      stroke-linejoin: round;
+    }
+    .kf-chip.is-on .kf-pikto path { fill: rgba(160, 120, 56, 0.38); }
+
+    /* ── Massstaebliche Querschnittzeichnung ─────────────── */
+    .kf-querschnitt {
+      margin-top: 22px;
+      padding: 14px 10px 10px;
+      border: 1px solid var(--border-light);
+      border-radius: 6px;
+      background: var(--marble-warm);
+      text-align: center;
+    }
+    .kf-querschnitt svg { width: 100%; height: auto; display: block; }
+    .kf-querschnitt .qs-koerper {
+      fill: rgba(201, 160, 85, 0.20);
+      stroke: var(--gold-dark);
+      stroke-width: 1.1;
+      stroke-linejoin: round;
+    }
+    .kf-querschnitt .qs-mass line {
+      stroke: var(--ink-muted);
+      stroke-width: 0.8;
+    }
+    .kf-querschnitt .qs-mass text {
+      fill: var(--ink-muted);
+      font-family: var(--font-sans);
+      font-size: 11px;
+    }
+    .kf-querschnitt figcaption {
+      margin-top: 6px;
+      font-size: 0.58rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+    }
+
+    /* ── Ringgroessen-Hilfe ──────────────────────────────── */
+    .kf-hilfe { margin-top: 12px; }
+    .kf-hilfe summary {
+      cursor: pointer;
+      font-size: 0.72rem;
+      color: var(--gold-dark);
+      border-bottom: 1px solid var(--border-gold);
+      display: inline-block;
+      padding-bottom: 1px;
+      list-style: none;
+    }
+    .kf-hilfe summary::-webkit-details-marker { display: none; }
+    .kf-hilfe summary::after { content: ' +'; }
+    .kf-hilfe[open] summary::after { content: ' –'; }
+    .kf-hilfe p {
+      margin-top: 10px;
+      font-size: 0.74rem;
+      line-height: 1.75;
+      color: var(--ink-muted);
+    }
 
     .kf-check {
       display: flex;
