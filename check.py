@@ -4,7 +4,8 @@ import io, os, re, json, subprocess, sys
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 VOID = set('area base br col embed hr img input link meta param source track wbr'.split())
-PAGES = ['index.html', 'trauringe.html', 'verlobungsringe.html', 'reparaturen.html',
+PAGES = ['index.html', 'trauringe.html', 'trauring-konfigurator.html',
+         'verlobungsringe.html', 'reparaturen.html',
          'impressum.html', 'datenschutz.html']
 ok = True
 # Nav-Punkte je Seite — geprueft wird nicht eine feste Zahl, sondern dass die

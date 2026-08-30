@@ -1,0 +1,184 @@
+    /* ═══════════════════════════════════════════
+       TRAURINGE — Modelle, Bildstrecke, Medaillon
+    ═══════════════════════════════════════════ */
+
+    /* Flex statt Grid: die letzte Reihe fuellt die Breite aus, statt eine
+       Luecke zu lassen — bei zehn Karten in fuenf Spalten geht das auf,
+       bei vier Spalten aber nicht. */
+    .tr-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: clamp(12px, 1.8vw, 22px);
+    }
+
+    .tr-karte {
+      flex: 1 1 calc(20% - 18px);
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      background: rgba(255, 254, 252, 0.86);
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      padding: clamp(14px, 1.8vw, 22px) clamp(12px, 1.6vw, 18px) clamp(18px, 2vw, 24px);
+      transition: border-color 0.4s ease, transform 0.5s var(--ease-out),
+                  box-shadow 0.5s ease;
+    }
+    .tr-karte:hover {
+      border-color: var(--border-gold);
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-soft);
+    }
+
+    /* Feste Bildhoehe mit contain: die Ringe sind unterschiedlich hoch
+       freigestellt, ohne das stehen die Namen auf jeder Karte anders. */
+    .tr-karte__bild {
+      display: block;
+      width: 100%;
+      max-width: 190px;
+      height: clamp(120px, 13vw, 168px);
+      object-fit: contain;
+      margin: 0 auto clamp(10px, 1.4vw, 16px);
+      transition: transform 0.6s var(--ease-out);
+    }
+    .tr-karte:hover .tr-karte__bild { transform: scale(1.06); }
+
+    .tr-karte__name {
+      font-family: var(--font-serif);
+      font-size: clamp(1.05rem, 1.5vw, 1.24rem);
+      font-weight: 500;
+      font-style: italic;
+      text-align: center;
+      margin-bottom: 4px;
+    }
+    .tr-karte__mass {
+      display: block;
+      text-align: center;
+      font-size: 0.56rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold-dark);
+      margin-bottom: 10px;
+    }
+    .tr-karte__text {
+      font-size: 0.74rem;
+      line-height: 1.7;
+      color: var(--ink-muted);
+      text-align: center;
+    }
+
+    /* ── Bildstrecke ueber die volle Breite ──────────────── */
+    .tr-strecke {
+      padding: 0;
+      margin-top: clamp(56px, 8vw, 110px);
+    }
+    .tr-band {
+      position: relative;
+      margin: 0;
+      line-height: 0;
+    }
+    .tr-band img {
+      width: 100%;
+      height: auto;
+      display: block;
+      /* Auf sehr breiten Schirmen wuerde ein 21:9-Bild sonst zum duennen
+         Streifen; ein Mindestverhaeltnis haelt es ansehnlich. */
+      aspect-ratio: 21 / 9;
+      object-fit: cover;
+    }
+    .tr-band--letzt { margin-bottom: clamp(56px, 8vw, 110px); }
+
+    /* Das Medaillon sitzt auf der Naht zwischen zwei Bildern und ragt in
+       beide hinein — deshalb auf top: 100 % und zur Haelfte hochgezogen. */
+    .tr-medaillon {
+      position: absolute;
+      left: 50%;
+      top: 100%;
+      transform: translate(-50%, -50%);
+      z-index: 2;
+      width: min(86vw, 400px);
+      aspect-ratio: 1 / 0.92;
+      border-radius: 50%;
+      background: var(--marble-warm);
+      border: 1px solid var(--border-gold);
+      box-shadow: 0 14px 44px rgba(27, 25, 22, 0.14);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: clamp(26px, 5vw, 48px);
+      line-height: 1.7;
+    }
+    .tr-medaillon__eyebrow {
+      display: block;
+      font-size: 0.52rem;
+      font-weight: 600;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold-dark);
+      margin-bottom: 12px;
+    }
+    .tr-medaillon p {
+      font-family: var(--font-serif);
+      font-size: clamp(0.92rem, 1.5vw, 1.1rem);
+      font-weight: 300;
+      font-style: italic;
+      line-height: 1.65;
+      color: var(--ink-soft);
+      max-width: 24ch;
+    }
+
+    /* ── Konfigurator-Hinweis ────────────────────────────── */
+    .tr-konf {
+      display: grid;
+      grid-template-columns: 1.25fr 0.75fr;
+      gap: clamp(28px, 5vw, 72px);
+      align-items: center;
+    }
+    .tr-konf__text p {
+      font-family: var(--font-serif);
+      font-size: clamp(1rem, 1.4vw, 1.14rem);
+      font-weight: 300;
+      line-height: 1.85;
+      color: var(--ink-soft);
+      max-width: 54ch;
+      margin-bottom: 24px;
+    }
+    .tr-konf__bild {
+      margin: 0;
+      text-align: center;
+    }
+    .tr-konf__bild img {
+      width: 100%;
+      max-width: 260px;
+      height: auto;
+      margin: 0 auto;
+    }
+
+    /* ── Tablet ──────────────────────────────────────────── */
+    @media (max-width: 1100px) {
+      .tr-karte { flex-basis: calc(33.333% - 16px); }
+    }
+    @media (max-width: 860px) {
+      .tr-konf { grid-template-columns: 1fr; }
+      .tr-konf__bild { order: -1; }
+      .tr-konf__bild img { max-width: 190px; }
+    }
+
+    /* ── Mobil ───────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      .tr-karte { flex-basis: calc(50% - 8px); }
+      .tr-karte__bild { max-width: 130px; height: 108px; }
+      .tr-karte__text { font-size: 0.7rem; }
+      /* Hochkant wirkt ein 21:9-Streifen verloren */
+      .tr-band img { aspect-ratio: 4 / 3; }
+      .tr-medaillon { padding: 22px; }
+      .tr-medaillon p { font-size: 0.86rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .tr-karte, .tr-karte__bild { transition: none; }
+      .tr-karte:hover { transform: none; }
+      .tr-karte:hover .tr-karte__bild { transform: none; }
+    }

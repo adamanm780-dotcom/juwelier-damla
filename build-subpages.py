@@ -35,6 +35,7 @@ NAV_ITEMS = [
     ('index.html#about',       'Über uns'),
     ('index.html#collections', 'Kollektionen'),
     ('trauringe.html',         'Trauringe'),
+    ('trauring-konfigurator.html', 'Konfigurator'),
     ('verlobungsringe.html',   'Verlobungsringe'),
     ('reparaturen.html',       'Reparaturen'),
     ('index.html#services',    'Leistungen'),
@@ -1201,6 +1202,60 @@ VR_SKRIPT = """
   </script>
 """
 
+# ══════════════════════════════════════════════════════════
+#  TRAURINGE — Modelle
+#  Die zehn Modelle sind den echten Ringen aus der Vitrine
+#  nachempfunden (Instagram-Story des Hauses). Die Bilder sind
+#  freigestellte Studioaufnahmen, kein Bestandsfoto — die Seite
+#  sagt das unter dem Raster ausdruecklich.
+#  Die Namen sind Vorschlaege und jederzeit austauschbar.
+# ══════════════════════════════════════════════════════════
+TR_MODELLE = [
+    ('Wellritz', '6 mm · Bicolor',
+     'Gebürstetes Weißgoldband zwischen polierten Gelbgoldkanten.',
+     'Trauring in Gelbgold mit gebürstetem Weißgoldband in der Mitte'),
+    ('Carré', '6 mm · Bicolor',
+     'Flache Schiene mit eingelassenem, poliertem Weißgoldfeld.',
+     'Flacher Trauring in Gelbgold mit eingelassenem Weißgoldfeld'),
+    ('Saum', '5 mm · mit Brillanten',
+     'Mattierte Schiene, eine Brillantreihe läuft an einer Kante entlang.',
+     'Mattierter Trauring in Gelbgold mit Brillantreihe an einer Kante'),
+    ('Linie', '5 mm · Weißgold',
+     'Seidenmatte Fläche, eine feine Gelbgoldlinie und eine Rille daneben.',
+     'Trauring in Weißgold, seidenmatt, mit feiner Gelbgoldlinie'),
+    ('Klar', '6 mm · Gelbgold',
+     'Ganz ohne Zutat: hochglanzpoliert und sanft gewölbt.',
+     'Schlichter, polierter Trauring in Gelbgold'),
+    ('Kanal', '5,5 mm · mit Brillanten',
+     'Brillantreihe in einem Weißgoldkanal, beidseitig mattiertes Gold.',
+     'Trauring in Gelbgold mit Brillantreihe in einem Weißgoldkanal'),
+    ('Tafel', '6,5 mm · Bicolor',
+     'Flach und kantig, mit breitem gebürstetem Weißgoldfeld.',
+     'Flacher, kantiger Trauring mit breitem gebürstetem Weißgoldfeld'),
+    ('Pavé', '4,5 mm · mit Brillanten',
+     'Dichte Brillantreihe über die ganze Mitte der Schiene.',
+     'Polierter Trauring in Gelbgold mit dichter Pavé-Brillantreihe'),
+    ('Faden', '5 mm · Gelbgold',
+     'Sanft gewölbt und seidenmatt, mit einer feinen Weißgoldlinie.',
+     'Gewölbter, seidenmatter Trauring in Gelbgold mit feiner Weißgoldlinie'),
+    ('Zart', '3,5 mm · mit Brillanten',
+     'Schmale polierte Schiene, Brillanten an einer Kante.',
+     'Schmaler, polierter Trauring in Gelbgold mit Brillanten an einer Kante'),
+]
+
+tr_karten = '\n\n'.join("""        <article class="tr-karte reveal%s">
+          <img class="tr-karte__bild" src="assets/trauringe/modell-%02d.webp"
+               alt="%s" width="403" height="736" loading="lazy" decoding="async">
+          <h3 class="tr-karte__name">%s</h3>
+          <span class="tr-karte__mass">%s</span>
+          <p class="tr-karte__text">%s</p>
+        </article>""" % (' d%d' % (i % 3) if i % 3 else '', i + 1, alt, name, mass, txt)
+    for i, (name, mass, txt, alt) in enumerate(TR_MODELLE))
+
+TR_BODY_ROH = io.open(os.path.join(DIR, 'trauringe.body.html'), encoding='utf-8').read()
+TR_CSS = io.open(os.path.join(DIR, 'trauringe.css'), encoding='utf-8').read()
+TR_HEAD = '  <style>\n%s  </style>' % TR_CSS
+
 KF_BODY = io.open(os.path.join(DIR, 'konfigurator.body.html'), encoding='utf-8').read()
 KF_CSS = io.open(os.path.join(DIR, 'konfigurator.css'), encoding='utf-8').read()
 
@@ -1222,11 +1277,24 @@ KF_BODY_ENDE = """
 
 PAGES = [
     dict(slug='trauringe.html',
+         title='Trauringe – zehn Modelle aus unserer Vitrine | Juwelier Damla Wiesbaden',
+         desc='Trauringe bei Juwelier Damla in Wiesbaden: zehn Modelle in Gelb-, Weiß- und '
+              'Rotgold, bicolor, mattiert oder mit Brillanten. Dazu der Konfigurator zum '
+              'Selbstzusammenstellen. Wellritzstraße 3, ohne Termin.',
+         name='Trauringe', active='trauringe.html',
+         body=TR_BODY_ROH % (tr_karten, VISIT % (
+             'Anprobieren',
+             'Am Finger<br><em>entscheidet sich alles</em>',
+             'Kommen Sie vorbei und probieren Sie in Ruhe. Wir legen Ihnen die Profile '
+             'auf den Tisch – anfassen sagt mehr als jeder Bildschirm.')),
+         services=None, extrahead=TR_HEAD),
+
+    dict(slug='trauring-konfigurator.html',
          title='Trauring-Konfigurator – Eheringe selbst zusammenstellen | Juwelier Damla Wiesbaden',
          desc='Eheringe und Trauringe online konfigurieren: Legierung, Profil, Breite, '
               'Oberfläche, Steinbesatz und Gravur live in 3D — mit Preis-Richtwert. '
               'Beratung bei Juwelier Damla, Wellritzstraße 3 in Wiesbaden.',
-         name='Trauring-Konfigurator', active='trauringe.html', body=KF_BODY,
+         name='Trauring-Konfigurator', active='trauring-konfigurator.html', body=KF_BODY,
          services=None, extrahead=KF_HEAD, extrabody=KF_BODY_ENDE),
     dict(slug='verlobungsringe.html',
          extrabody=VR_SKRIPT,

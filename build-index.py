@@ -364,6 +364,7 @@ NAV_LINKS = """    <ul class="nav__links" id="navLinks">
       <li><a href="#about">Über uns</a></li>
       <li><a href="#collections">Kollektionen</a></li>
       <li><a href="trauringe.html">Trauringe</a></li>
+      <li><a href="trauring-konfigurator.html">Konfigurator</a></li>
       <li><a href="verlobungsringe.html">Verlobungsringe</a></li>
       <li><a href="reparaturen.html">Reparaturen</a></li>
       <li><a href="#services">Leistungen</a></li>
@@ -378,6 +379,7 @@ src = sub1(
     r'(            <li><a href="#collections">Kollektionen</a></li>\n)',
     '            <li><a href="#collections">Kollektionen</a></li>\n'
     '            <li><a href="trauringe.html">Trauringe</a></li>\n'
+    '            <li><a href="trauring-konfigurator.html">Konfigurator</a></li>\n'
     '            <li><a href="verlobungsringe.html">Verlobungsringe</a></li>\n'
     '            <li><a href="reparaturen.html">Reparaturen</a></li>\n',
     src, 0, 'Footer-Navigation')
