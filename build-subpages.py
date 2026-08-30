@@ -1268,104 +1268,6 @@ TR_BODY_ROH = io.open(os.path.join(DIR, 'trauringe.body.html'), encoding='utf-8'
 TR_CSS = io.open(os.path.join(DIR, 'trauringe.css'), encoding='utf-8').read()
 TR_HEAD = '  <style>\n%s  </style>' % TR_CSS
 
-# Der Stapel faltet rein mit CSS schon richtig — sticky Baender, fester
-# Kreis. Was CSS allein nicht kann, ist die Tiefe: das gehaltene Band
-# soll zurueckweichen, waehrend das naechste darueberzieht. Dafuer
-# rechnet dieses Stueck pro Band drei Werte aus und legt sie als Custom
-# Properties ab; wie es aussieht, steht komplett in trauringe.css.
-TR_SKRIPT = """
-  <script>
-  (function () {
-    var stapel = document.querySelector('.tr-stapel');
-    if (!stapel) return;
-    var baender = Array.prototype.slice.call(stapel.querySelectorAll('.tr-band'));
-    var med = stapel.querySelector('.tr-medaillon');
-    if (baender.length < 2 || !med) return;
-    if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-    var navH = parseFloat(getComputedStyle(document.documentElement)
-                 .getPropertyValue('--nav-h')) || 84;
-    var offen = false;
-
-    /* Nur schreiben, was sich geaendert hat: jedes setProperty stoesst
-       Stil und Anstrich neu an, und drei bildschirmfuellende Masken
-       neu zu rastern ist das Teuerste an der ganzen Seite. */
-    function setz(el, name, wert) {
-      if (el['_' + name] === wert) return;
-      el['_' + name] = wert;
-      el.style.setProperty(name, wert);
-    }
-
-    function zeichnen() {
-      offen = false;
-      var hoehe = innerHeight;
-
-      /* Ausserhalb des Stapels gibt es nichts zu rechnen — die Seite
-         ist lang, und der Rest scrollt sonst gegen dieselbe Rechnung. */
-      var sr = stapel.getBoundingClientRect();
-      if (sr.bottom < -200 || sr.top > hoehe + 200) return;
-
-      var mr = med.getBoundingClientRect();
-      var mx = mr.left + mr.width / 2;
-      var my = mr.top + mr.height / 2;
-
-      for (var i = 0; i < baender.length; i++) {
-        var band = baender[i];
-        var r = band.getBoundingClientRect();
-
-        // p — wie weit das naechste Band dieses hier schon zudeckt.
-        // 0 = steht noch komplett darunter, 1 = deckt es ganz.
-        var p = 0;
-        var n = baender[i + 1];
-        if (n && r.height) {
-          p = (r.bottom - n.getBoundingClientRect().top) / r.height;
-          p = p < 0 ? 0 : (p > 1 ? 1 : p);
-        }
-
-        // Das Zurueckweichen erst ganz zum Schluss: frueher zoege es an
-        // den Seiten einen Streifen Hintergrund auf, und der sieht aus
-        // wie ein Fehler und nicht wie Tiefe.
-        var t = (p - 0.45) / 0.55;
-        t = t < 0 ? 0 : (t > 1 ? 1 : t);
-
-        // ein — wie weit dieses Band noch von unten unterwegs ist.
-        // 1 = gerade am unteren Rand aufgetaucht, 0 = angekommen.
-        // Damit laeuft das Foto im Rahmen ein Stueck nach.
-        var ein = (r.top - navH) / (hoehe - navH);
-        ein = ein < 0 ? 0 : (ein > 1 ? 1 : ein);
-
-        var skal = 1 - 0.055 * t * t;
-
-        /* Die Aussparung: das Loch soll immer genau unter dem Kreis
-           sitzen, der Kreis steht aber fest im Blickfeld, waehrend das
-           Band darunter wegwandert. Also pro Bild ausrechnen, wo der
-           Kreis gerade im Band steht.
-           Das Band ist zusaetzlich skaliert. Unter einer reinen
-           Skalierung gilt Bildschirm = Rahmenoberkante + s * lokal,
-           egal wo der Ursprung liegt — deshalb reicht die Division
-           durch s, um von Bildschirm- auf Bildkoordinaten zu kommen. */
-        setz(band, '--lx', ((mx - r.left) / skal).toFixed(1) + 'px');
-        setz(band, '--ly', ((my - r.top) / skal).toFixed(1) + 'px');
-
-        setz(band, '--p', p.toFixed(3));
-        setz(band, '--s', skal.toFixed(4));
-        setz(band, '--ein', ein.toFixed(3));
-      }
-    }
-
-    function anstossen() {
-      if (offen) return;
-      offen = true;
-      requestAnimationFrame(zeichnen);
-    }
-
-    addEventListener('scroll', anstossen, { passive: true });
-    addEventListener('resize', anstossen);
-    zeichnen();
-  })();
-  </script>"""
-
-
 KF_BODY = io.open(os.path.join(DIR, 'konfigurator.body.html'), encoding='utf-8').read()
 KF_CSS = io.open(os.path.join(DIR, 'konfigurator.css'), encoding='utf-8').read()
 
@@ -1397,7 +1299,7 @@ PAGES = [
              'Am Finger<br><em>entscheidet sich alles</em>',
              'Kommen Sie vorbei und probieren Sie in Ruhe. Wir legen Ihnen die Profile '
              'auf den Tisch – anfassen sagt mehr als jeder Bildschirm.')),
-         services=None, extrahead=TR_HEAD, extrabody=TR_SKRIPT),
+         services=None, extrahead=TR_HEAD),
 
     dict(slug='trauring-konfigurator.html',
          title='Trauring-Konfigurator – Eheringe selbst zusammenstellen | Juwelier Damla Wiesbaden',

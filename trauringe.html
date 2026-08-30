@@ -2439,43 +2439,36 @@
       .tr-kopf__reihe img { height: clamp(72px, 13vh, 110px); }
     }
 
-    /* ── Bildstapel: der Kreis steht, die Bilder falten dahinter ──
-       Frueher wanderte das Medaillon mit dem Textfluss nach oben und die
-       Baender hatten gestaffelte Haltepunkte, damit die Kerbe im Bild den
-       Kreis trifft. Jetzt umgekehrt: das Medaillon haengt vom ersten
-       Moment an fest im Blickfeld und ruehrt sich nicht mehr, alle
-       Baender halten an derselben Stelle und schieben sich nacheinander
-       dahinter. Die Lichtung ringsum traegt das Medaillon selbst — damit
-       passt sich jedes Bild an den Kreis an, egal wie weit es steht. */
+    /* ── Bildstapel: drei Baender, die uebereinander falten ──
+       Alle halten an derselben Stelle und sind gleich hoch, jedes neue
+       deckt das vorige also vollstaendig zu. Kein Versatz, keine
+       Sonderrolle fuer ein einzelnes Band.
+
+       Das Medaillon gehoert zum zweiten Bild: es sitzt in einer echten
+       Aussparung nahe dessen Oberkante und faehrt damit mit ihm herein.
+       Durch das Loch sieht man das Bild darunter — deshalb steht die
+       Schrift wirklich zwischen den beiden Bildern und liegt nicht nur
+       auf einem drauf. Weil Loch und Scheibe am selben Element haengen,
+       koennen sie gar nicht auseinanderlaufen. */
     .tr-stapel {
-      /* Volle Flaeche unter der Leiste: waeren die Baender niedriger,
-         blitzt zwischen dem gehaltenen und dem nachrueckenden Band ein
-         Streifen Seitenhintergrund auf. svh statt dvh, damit die ein-
-         und ausfahrende Browserleiste auf dem Handy den Stapel nicht
-         waehrend des Scrollens neu umbricht. */
       --bandh: calc(100vh - var(--nav-h));
       --bandh: calc(100svh - var(--nav-h));
       --med: min(84vw, 480px);
       --luft: 22px;
-      /* Flex statt Block: im Blockfluss kollabiert der obere Rand des
-         Medaillons mit dem Aussenabstand der Sektion, und der Kreis
-         saesse dann zu hoch. Flex-Kinder kollabieren nie. */
-      display: flex;
-      flex-direction: column;
-      /* Das Standardpolster der Sektionen muss weg: oben verschoebe es
-         den Haltepunkt des Medaillons, unten liesse es die Luecke
-         hinter dem letzten Band stehen. */
+      /* Abstand der Aussparung von der Oberkante des zweiten Bildes.
+         Gross genug, dass die Scheibe vollstaendig unter der Leiste
+         steht, sobald das Band angekommen ist — sonst schoebe sich die
+         obere Haelfte samt Text hinter die Navigation. */
+      --tief: calc(var(--med) / 2 + 26px);
+      /* Das Standardpolster der Sektionen muss weg, sonst bleibt hinter
+         dem letzten Band eine Luecke stehen. */
       padding: 0;
       margin: clamp(56px, 8vw, 110px) 0 0;
     }
 
-    /* Alle Baender halten an derselben Stelle — das ist das normale
-       Falten: jedes neue schiebt sich vollstaendig ueber das vorige.
-       Der z-index muss aufsteigen, sonst bleibt das erste oben liegen. */
     .tr-band {
       position: sticky;
       top: var(--nav-h);
-      flex: none;
       /* Der Abstand nach unten ist der Klebeweg: er verlaengert den Platz,
          den das Band im Fluss einnimmt, ohne es optisch groesser zu machen.
          Ohne ihn erreicht schon das zweite Band seinen Haltepunkt nicht und
@@ -2483,98 +2476,47 @@
       margin: 0 0 40vh;
       height: var(--bandh);
       line-height: 0;
-      overflow: hidden;
-      /* --p, --s, --ein, --lx und --ly setzt das Skript beim Scrollen.
-         Die Vorgaben hier sind der Ruhezustand: ohne Skript, ohne
-         JavaScript und bei reduzierter Bewegung bleibt es beim reinen
-         Schieben, und das Loch sitzt in der Bandmitte. */
-      --p: 0;
-      --s: 1;
-      --ein: 0;
-      --lx: 50%;
-      --ly: 50%;
-      transform: scale(var(--s));
-
-      /* Die Aussparung wird wirklich aus dem Bild geschnitten, nicht
-         mit einer hellen Scheibe zugedeckt: harte Kante, kein weicher
-         Auslauf — sonst sieht es aus wie ein Leuchten und nicht wie
-         ein Loch. Der Radius wird durch die Skalierung geteilt, damit
-         das Loch am Bildschirm unveraendert gross bleibt, waehrend das
-         Band zurueckweicht. */
-      --loch: calc((var(--med) / 2 + var(--luft)) / var(--s));
-      -webkit-mask-image: radial-gradient(circle at var(--lx) var(--ly),
-        transparent var(--loch), #000 calc(var(--loch) + 1px));
-      mask-image: radial-gradient(circle at var(--lx) var(--ly),
-        transparent var(--loch), #000 calc(var(--loch) + 1px));
-      /* Nicht aus der Mitte, sondern aus dem oberen Drittel: das Band
-         weicht dadurch nach hinten und unten zurueck, so wie eine Karte,
-         die unter die naechste rutscht. */
-      transform-origin: 50% 32%;
-      border-radius: calc(var(--p) * 20px);
-    }
-    /* Der Schleier legt sich ueber das zurueckweichende Band. Er liegt
-       ueber dem Foto, aber unter dem naechsten Band — sichtbar ist also
-       immer nur der Streifen, der noch nicht zugedeckt ist. */
-    .tr-band::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: var(--marble);
-      opacity: calc(var(--p) * 0.42);
-      pointer-events: none;
     }
     .tr-band:last-child { margin-bottom: 0; }
-    /* Der Ausgleich fuer das Medaillon sitzt hier und nicht am Medaillon
-       selbst: ein negativer Rand am klebenden Element wuerde seinen
-       Haltebereich um denselben Betrag verlaengern — der Kreis bliebe
-       dann noch 550 px stehen, nachdem das letzte Band schon weg ist,
-       und haenge in die naechste Sektion hinein. */
-    .tr-band:nth-of-type(1) {
-      z-index: 1;
-      margin-top: calc(-1 * (var(--med) + (var(--bandh) - var(--med)) / 2));
-    }
+    /* Aufsteigend, sonst bliebe das erste Bild oben liegen. */
+    .tr-band:nth-child(1) { z-index: 1; }
+    .tr-band:nth-child(2) { z-index: 2; }
+    .tr-band:nth-child(3) { z-index: 3; }
     /* Weicher Schatten an der Oberkante: sonst sieht man beim
        Darueberschieben nicht, dass ein neues Bild kommt. */
-    .tr-band:nth-of-type(2) { z-index: 2; box-shadow: 0 -20px 44px rgba(27, 25, 22, 0.13); }
-    .tr-band:nth-of-type(3) { z-index: 3; box-shadow: 0 -20px 44px rgba(27, 25, 22, 0.13); }
-    /* Etwas groesser als der Rahmen und absolut gesetzt, damit das Foto
-       darin laufen kann: es kommt leicht versetzt herein und wandert
-       weiter, waehrend das Band zugedeckt wird. Prozente bei translateY
-       beziehen sich auf die eigene Hoehe, deshalb die 110 %. */
+    .tr-band:nth-child(2), .tr-band:nth-child(3) {
+      box-shadow: 0 -20px 44px rgba(27, 25, 22, 0.13);
+    }
     .tr-band img {
-      position: absolute;
-      top: -5%;
-      left: 0;
       width: 100%;
-      height: 110%;
+      height: 100%;
       object-fit: cover;
       display: block;
-      transform: translateY(calc(var(--ein) * 4% - var(--p) * 3%));
     }
 
-    /* Oberste Ebene ueber dem ganzen Stapel. Es steht im Fluss vor dem
-       ersten Band, nimmt aber keine Hoehe ein — das erste Band holt sie
-       mit einem negativen Rand wieder zurueck. Der Versatz nach unten
-       ist die halbe Differenz zur Bandhoehe: dadurch sitzt der Kreis von
-       Anfang an mittig auf Band 1 und bleibt in genau dem Moment
-       haengen, in dem Band 1 klebt — er bewegt sich also nie gegen das
-       Blickfeld, die Bilder bewegen sich an ihm vorbei. */
+    /* Die Aussparung: harte Kante, kein weicher Auslauf — sonst liest
+       es sich als Leuchten und nicht als Schnitt. */
+    .tr-band--kerbe img {
+      -webkit-mask-image: radial-gradient(circle at 50% var(--tief),
+        transparent calc(var(--med) / 2 + var(--luft)),
+        #000 calc(var(--med) / 2 + var(--luft) + 1px));
+      mask-image: radial-gradient(circle at 50% var(--tief),
+        transparent calc(var(--med) / 2 + var(--luft)),
+        #000 calc(var(--med) / 2 + var(--luft) + 1px));
+    }
+
+    /* Sitzt genau in dem Loch — gleiche Mitte, nur um die Luft kleiner. */
     .tr-medaillon {
-      position: sticky;
-      z-index: 10;
-      top: calc(var(--nav-h) + (var(--bandh) - var(--med)) / 2);
-      align-self: center;
-      flex: none;
-      margin-top: calc((var(--bandh) - var(--med)) / 2);
+      position: absolute;
+      z-index: 2;
+      left: 50%;
+      top: var(--tief);
+      transform: translate(-50%, -50%);
       width: var(--med);
       height: var(--med);
       border-radius: 50%;
       background: var(--marble-warm);
       border: 1px solid var(--border-gold);
-      /* Kein heller Ring mehr: das Loch im Bild macht die Luft ringsum,
-         durch die Aussparung sieht man den Seitenhintergrund. Bleibt
-         ein weicher Schatten, damit die Scheibe wirklich in dem Loch
-         zu liegen scheint statt darauf. */
       box-shadow: 0 14px 40px rgba(27, 25, 22, 0.12);
       display: flex;
       flex-direction: column;
@@ -2645,12 +2587,9 @@
       .tr-karte { flex-basis: calc(50% - 8px); }
       .tr-karte__bild { max-width: 130px; height: 108px; }
       .tr-karte__text { font-size: 0.7rem; }
-      .tr-stapel { --med: min(72vw, 280px); --luft: 15px; }
+      .tr-stapel { --med: min(72vw, 280px); --luft: 15px; --tief: calc(var(--med) / 2 + 18px); }
       .tr-band { margin-bottom: 34vh; }
-      .tr-medaillon { padding: 26px; box-shadow:
-        0 0 0 var(--luft) var(--marble),
-        0 0 22px 16px var(--marble),
-        inset 0 0 34px rgba(27, 25, 22, 0.05); }
+      .tr-medaillon { padding: 26px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -2875,22 +2814,22 @@
   ═══════════════════════════════════ -->
   <section class="tr-stapel" aria-label="Trauringe in Bildern">
 
-    <!-- Steht vor den Baendern, damit es vom ersten Moment an im Blickfeld
-         haengt: es bewegt sich nicht, die Bilder falten sich dahinter. -->
-    <aside class="tr-medaillon">
-      <span class="tr-medaillon__eyebrow">Wellritzstraße 3</span>
-      <p>
-        Kein Finger ist wie der andere. Wir nehmen uns die Zeit,
-        bis Ihr Ring sitzt – und nicht nur passt.
-      </p>
-    </aside>
-
     <figure class="tr-band">
       <img src="assets/trauringe/breit-1.webp" alt="Zwei schlichte Goldtrauringe nebeneinander auf hellem Marmor" width="2000" height="848" loading="lazy" decoding="async">
     </figure>
 
-    <figure class="tr-band">
+    <!-- Das Medaillon gehoert zu diesem Bild: es sitzt in dessen
+         Aussparung und faehrt mit ihm herein. Durch das Loch sieht man
+         das Bild darunter, die Schrift steht also zwischen den beiden. -->
+    <figure class="tr-band tr-band--kerbe">
       <img src="assets/trauringe/breit-2.webp" alt="Ein polierter Goldtrauring auf champagnerfarbener Seide" width="2000" height="848" loading="lazy" decoding="async">
+      <figcaption class="tr-medaillon">
+        <span class="tr-medaillon__eyebrow">Wellritzstraße 3</span>
+        <p>
+          Kein Finger ist wie der andere. Wir nehmen uns die Zeit,
+          bis Ihr Ring sitzt – und nicht nur passt.
+        </p>
+      </figcaption>
     </figure>
 
     <figure class="tr-band">
@@ -3448,95 +3387,5 @@
 
   </script>
 
-  <script>
-  (function () {
-    var stapel = document.querySelector('.tr-stapel');
-    if (!stapel) return;
-    var baender = Array.prototype.slice.call(stapel.querySelectorAll('.tr-band'));
-    var med = stapel.querySelector('.tr-medaillon');
-    if (baender.length < 2 || !med) return;
-    if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-    var navH = parseFloat(getComputedStyle(document.documentElement)
-                 .getPropertyValue('--nav-h')) || 84;
-    var offen = false;
-
-    /* Nur schreiben, was sich geaendert hat: jedes setProperty stoesst
-       Stil und Anstrich neu an, und drei bildschirmfuellende Masken
-       neu zu rastern ist das Teuerste an der ganzen Seite. */
-    function setz(el, name, wert) {
-      if (el['_' + name] === wert) return;
-      el['_' + name] = wert;
-      el.style.setProperty(name, wert);
-    }
-
-    function zeichnen() {
-      offen = false;
-      var hoehe = innerHeight;
-
-      /* Ausserhalb des Stapels gibt es nichts zu rechnen — die Seite
-         ist lang, und der Rest scrollt sonst gegen dieselbe Rechnung. */
-      var sr = stapel.getBoundingClientRect();
-      if (sr.bottom < -200 || sr.top > hoehe + 200) return;
-
-      var mr = med.getBoundingClientRect();
-      var mx = mr.left + mr.width / 2;
-      var my = mr.top + mr.height / 2;
-
-      for (var i = 0; i < baender.length; i++) {
-        var band = baender[i];
-        var r = band.getBoundingClientRect();
-
-        // p — wie weit das naechste Band dieses hier schon zudeckt.
-        // 0 = steht noch komplett darunter, 1 = deckt es ganz.
-        var p = 0;
-        var n = baender[i + 1];
-        if (n && r.height) {
-          p = (r.bottom - n.getBoundingClientRect().top) / r.height;
-          p = p < 0 ? 0 : (p > 1 ? 1 : p);
-        }
-
-        // Das Zurueckweichen erst ganz zum Schluss: frueher zoege es an
-        // den Seiten einen Streifen Hintergrund auf, und der sieht aus
-        // wie ein Fehler und nicht wie Tiefe.
-        var t = (p - 0.45) / 0.55;
-        t = t < 0 ? 0 : (t > 1 ? 1 : t);
-
-        // ein — wie weit dieses Band noch von unten unterwegs ist.
-        // 1 = gerade am unteren Rand aufgetaucht, 0 = angekommen.
-        // Damit laeuft das Foto im Rahmen ein Stueck nach.
-        var ein = (r.top - navH) / (hoehe - navH);
-        ein = ein < 0 ? 0 : (ein > 1 ? 1 : ein);
-
-        var skal = 1 - 0.055 * t * t;
-
-        /* Die Aussparung: das Loch soll immer genau unter dem Kreis
-           sitzen, der Kreis steht aber fest im Blickfeld, waehrend das
-           Band darunter wegwandert. Also pro Bild ausrechnen, wo der
-           Kreis gerade im Band steht.
-           Das Band ist zusaetzlich skaliert. Unter einer reinen
-           Skalierung gilt Bildschirm = Rahmenoberkante + s * lokal,
-           egal wo der Ursprung liegt — deshalb reicht die Division
-           durch s, um von Bildschirm- auf Bildkoordinaten zu kommen. */
-        setz(band, '--lx', ((mx - r.left) / skal).toFixed(1) + 'px');
-        setz(band, '--ly', ((my - r.top) / skal).toFixed(1) + 'px');
-
-        setz(band, '--p', p.toFixed(3));
-        setz(band, '--s', skal.toFixed(4));
-        setz(band, '--ein', ein.toFixed(3));
-      }
-    }
-
-    function anstossen() {
-      if (offen) return;
-      offen = true;
-      requestAnimationFrame(zeichnen);
-    }
-
-    addEventListener('scroll', anstossen, { passive: true });
-    addEventListener('resize', anstossen);
-    zeichnen();
-  })();
-  </script>
 </body>
 </html>
