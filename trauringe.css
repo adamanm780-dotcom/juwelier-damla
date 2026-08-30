@@ -67,66 +67,123 @@
       text-align: center;
     }
 
-    /* ── Bildstrecke ueber die volle Breite ──────────────── */
-    .tr-strecke {
+    /* ── Kopfband: freigestellte Ringe in einer Reihe ────── */
+    .tr-kopf {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background:
+        radial-gradient(120% 100% at 50% 20%, #FFFFFF 0%, #F9F5EE 55%, #F1EBE1 100%);
+    }
+    .tr-kopf__reihe {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(18px, 4.5vw, 64px);
+      list-style: none;
+      margin: 0;
+      padding: 0 var(--pad-x);
+      height: 100%;
+    }
+    .tr-kopf__reihe li { line-height: 0; }
+    .tr-kopf__reihe img {
+      width: auto;
+      height: clamp(84px, 17vh, 168px);
+      /* Freigestellt: die Ringe stehen ohne Kasten auf dem Verlauf,
+         nur ein weicher Schlagschatten setzt sie ab. */
+      filter: drop-shadow(0 10px 16px rgba(27, 25, 22, 0.16));
+    }
+    /* Alle fuenf bleiben stehen: bei 84 px Hoehe ist ein Ring nur rund
+       46 px breit, fuenf davon plus Abstand passen auch auf 375 px. */
+    @media (max-width: 600px) {
+      .tr-kopf__reihe { gap: 14px; }
+      .tr-kopf__reihe img { height: clamp(72px, 13vh, 110px); }
+    }
+
+    /* ── Bildstapel: die Baender falten sich uebereinander ──
+       Jedes Band klebt an derselben Stelle; das naechste schiebt sich
+       beim Scrollen darueber. Der z-index muss aufsteigen, sonst bleibt
+       das erste Bild oben liegen. */
+    .tr-stapel {
+      position: relative;
       padding: 0;
-      margin-top: clamp(56px, 8vw, 110px);
+      margin: clamp(56px, 8vw, 110px) 0;
     }
     .tr-band {
-      position: relative;
+      position: sticky;
       margin: 0;
+      height: min(76vh, 620px);
+      overflow: visible;
       line-height: 0;
     }
+    /* Gestaffelte Haltepunkte: jedes Band bleibt etwas tiefer stehen, so
+       bleibt vom vorigen ein Streifen sichtbar — sonst deckt das obere
+       das untere vollstaendig zu und der Stapel ist nicht zu erkennen.
+       Der Versatz des zweiten Bandes ist so gewaehlt, dass das Medaillon
+       auf seiner Oberkante vollstaendig unter der Navbar hervorkommt. */
+    .tr-band:nth-child(1) { z-index: 1; top: var(--nav-h); }
+    .tr-band:nth-child(2) { z-index: 2; top: calc(var(--nav-h) + var(--med) / 2 + 14px); }
+    .tr-band:nth-child(3) { z-index: 3; top: calc(var(--nav-h) + var(--med) / 2 + 104px); }
     .tr-band img {
       width: 100%;
-      height: auto;
-      display: block;
-      /* Auf sehr breiten Schirmen wuerde ein 21:9-Bild sonst zum duennen
-         Streifen; ein Mindestverhaeltnis haelt es ansehnlich. */
-      aspect-ratio: 21 / 9;
+      height: 100%;
       object-fit: cover;
+      display: block;
     }
-    .tr-band--letzt { margin-bottom: clamp(56px, 8vw, 110px); }
 
-    /* Das Medaillon sitzt auf der Naht zwischen zwei Bildern und ragt in
-       beide hinein — deshalb auf top: 100 % und zur Haelfte hochgezogen. */
+    /* Groesse des Medaillons — Kerbe und Kreis teilen sich den Wert,
+       damit der Abstand ringsum wirklich gleich bleibt. */
+    .tr-stapel { --med: min(84vw, 480px); --luft: 22px; }
+
+    /* Das obere Bild bekommt eine echte Aussparung, keine Ueberlagerung:
+       das Medaillon sitzt in einem Loch, ringsum bleibt Luft und man
+       sieht das darunterliegende Bild. */
+    .tr-band--kerbe img {
+      -webkit-mask-image: radial-gradient(circle at 50% 0,
+        transparent calc(var(--med) / 2 + var(--luft)),
+        #000 calc(var(--med) / 2 + var(--luft) + 1px));
+      mask-image: radial-gradient(circle at 50% 0,
+        transparent calc(var(--med) / 2 + var(--luft)),
+        #000 calc(var(--med) / 2 + var(--luft) + 1px));
+    }
+
     .tr-medaillon {
       position: absolute;
       left: 50%;
-      top: 100%;
+      top: 0;
       transform: translate(-50%, -50%);
       z-index: 2;
-      width: min(86vw, 400px);
-      aspect-ratio: 1 / 0.92;
+      width: var(--med);
+      height: var(--med);
       border-radius: 50%;
       background: var(--marble-warm);
       border: 1px solid var(--border-gold);
-      box-shadow: 0 14px 44px rgba(27, 25, 22, 0.14);
+      box-shadow: 0 16px 50px rgba(27, 25, 22, 0.16);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       text-align: center;
-      padding: clamp(26px, 5vw, 48px);
+      padding: clamp(34px, 6vw, 62px);
       line-height: 1.7;
     }
     .tr-medaillon__eyebrow {
       display: block;
-      font-size: 0.52rem;
+      font-size: 0.56rem;
       font-weight: 600;
       letter-spacing: 0.3em;
       text-transform: uppercase;
       color: var(--gold-dark);
-      margin-bottom: 12px;
+      margin-bottom: 14px;
     }
     .tr-medaillon p {
       font-family: var(--font-serif);
-      font-size: clamp(0.92rem, 1.5vw, 1.1rem);
+      font-size: clamp(1rem, 1.9vw, 1.32rem);
       font-weight: 300;
       font-style: italic;
-      line-height: 1.65;
+      line-height: 1.6;
       color: var(--ink-soft);
-      max-width: 24ch;
+      max-width: 22ch;
     }
 
     /* ── Konfigurator-Hinweis ────────────────────────────── */
@@ -171,10 +228,9 @@
       .tr-karte { flex-basis: calc(50% - 8px); }
       .tr-karte__bild { max-width: 130px; height: 108px; }
       .tr-karte__text { font-size: 0.7rem; }
-      /* Hochkant wirkt ein 21:9-Streifen verloren */
-      .tr-band img { aspect-ratio: 4 / 3; }
-      .tr-medaillon { padding: 22px; }
-      .tr-medaillon p { font-size: 0.86rem; }
+      .tr-band { height: min(58vh, 420px); }
+      .tr-stapel { --med: min(78vw, 300px); --luft: 14px; }
+      .tr-medaillon { padding: 26px; }
     }
 
     @media (prefers-reduced-motion: reduce) {

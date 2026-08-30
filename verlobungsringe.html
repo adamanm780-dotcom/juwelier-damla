@@ -1844,7 +1844,12 @@
       background: #F4F1EB;
       border-bottom: 1px solid var(--border-gold);
     }
-    .sub-band video {
+    /* Gilt fuer beide Traeger: manche Baender fuehren ein Video, andere
+       ein Bild. Die Regel gehoert deshalb hierher und nicht in das CSS
+       einer einzelnen Seite — dort fehlte sie und das Bild lief nicht
+       ueber die volle Breite. */
+    .sub-band video,
+    .sub-band > img {
       position: absolute;
       inset: 0;
       width: 100%;
