@@ -2433,43 +2433,65 @@
       .tr-kopf__reihe img { height: clamp(72px, 13vh, 110px); }
     }
 
-    /* ── Bildstapel: die Baender falten sich uebereinander ──
-       Jedes Band klebt an derselben Stelle; das naechste schiebt sich
-       beim Scrollen darueber. Der z-index muss aufsteigen, sonst bleibt
-       das erste Bild oben liegen. */
+    /* ── Bildstapel: der Kreis steht, die Bilder falten dahinter ──
+       Frueher wanderte das Medaillon mit dem Textfluss nach oben und die
+       Baender hatten gestaffelte Haltepunkte, damit die Kerbe im Bild den
+       Kreis trifft. Jetzt umgekehrt: das Medaillon haengt vom ersten
+       Moment an fest im Blickfeld und ruehrt sich nicht mehr, alle
+       Baender halten an derselben Stelle und schieben sich nacheinander
+       dahinter. Die Lichtung ringsum traegt das Medaillon selbst — damit
+       passt sich jedes Bild an den Kreis an, egal wie weit es steht. */
     .tr-stapel {
-      position: relative;
+      /* Volle Flaeche unter der Leiste: waeren die Baender niedriger,
+         blitzt zwischen dem gehaltenen und dem nachrueckenden Band ein
+         Streifen Seitenhintergrund auf. svh statt dvh, damit die ein-
+         und ausfahrende Browserleiste auf dem Handy den Stapel nicht
+         waehrend des Scrollens neu umbricht. */
+      --bandh: calc(100vh - var(--nav-h));
+      --bandh: calc(100svh - var(--nav-h));
+      --med: min(84vw, 480px);
+      --luft: 22px;
+      /* Flex statt Block: im Blockfluss kollabiert der obere Rand des
+         Medaillons mit dem Aussenabstand der Sektion, und der Kreis
+         saesse dann zu hoch. Flex-Kinder kollabieren nie. */
+      display: flex;
+      flex-direction: column;
+      /* Das Standardpolster der Sektionen muss weg: oben verschoebe es
+         den Haltepunkt des Medaillons, unten liesse es die Luecke
+         hinter dem letzten Band stehen. */
       padding: 0;
       margin: clamp(56px, 8vw, 110px) 0 0;
     }
+
+    /* Alle Baender halten an derselben Stelle — das ist das normale
+       Falten: jedes neue schiebt sich vollstaendig ueber das vorige.
+       Der z-index muss aufsteigen, sonst bleibt das erste oben liegen. */
     .tr-band {
       position: sticky;
+      top: var(--nav-h);
+      flex: none;
       /* Der Abstand nach unten ist der Klebeweg: er verlaengert den Platz,
          den das Band im Fluss einnimmt, ohne es optisch groesser zu machen.
          Ohne ihn erreicht schon das zweite Band seinen Haltepunkt nicht und
          faellt mit dem dritten zusammen. */
-      margin: 0 0 46vh;
-      height: min(76vh, 620px);
-      overflow: visible;
+      margin: 0 0 40vh;
+      height: var(--bandh);
       line-height: 0;
     }
     .tr-band:last-child { margin-bottom: 0; }
-    /* Gestaffelte Haltepunkte: jedes Band bleibt etwas tiefer stehen, so
-       bleibt vom vorigen ein Streifen sichtbar — sonst deckt das obere
-       das untere vollstaendig zu und der Stapel ist nicht zu erkennen.
-       Der Versatz des zweiten Bandes ist so gewaehlt, dass das Medaillon
-       auf seiner Oberkante vollstaendig unter der Navbar hervorkommt. */
-    /* nth-of-type, nicht nth-child: zwischen den Baendern steht das
-       Medaillon als <aside>, und nth-child wuerde es mitzaehlen — Band 2
-       bekaeme dann den Haltepunkt von Band 3. */
-    .tr-band:nth-of-type(1) { z-index: 1; top: var(--nav-h); }
-    /* Haltepunkt so gelegt, dass die Oberkante genau auf der Mitte des
-       Medaillons liegt — dadurch bleiben Aussparung und Kreis auch im
-       geklebten Zustand konzentrisch. */
-    .tr-band:nth-of-type(2) { z-index: 2; top: calc(var(--nav-h) + var(--med) / 2 + 14px); }
-    /* Das letzte Band schliesst buendig unter der Leiste ab und schiebt
-       sich dabei hinter das Medaillon. */
-    .tr-band:nth-of-type(3) { z-index: 3; top: var(--nav-h); }
+    /* Der Ausgleich fuer das Medaillon sitzt hier und nicht am Medaillon
+       selbst: ein negativer Rand am klebenden Element wuerde seinen
+       Haltebereich um denselben Betrag verlaengern — der Kreis bliebe
+       dann noch 550 px stehen, nachdem das letzte Band schon weg ist,
+       und haenge in die naechste Sektion hinein. */
+    .tr-band:nth-of-type(1) {
+      z-index: 1;
+      margin-top: calc(-1 * (var(--med) + (var(--bandh) - var(--med)) / 2));
+    }
+    /* Weicher Schatten an der Oberkante: sonst sieht man beim
+       Darueberschieben nicht, dass ein neues Bild kommt. */
+    .tr-band:nth-of-type(2) { z-index: 2; box-shadow: 0 -20px 44px rgba(27, 25, 22, 0.13); }
+    .tr-band:nth-of-type(3) { z-index: 3; box-shadow: 0 -20px 44px rgba(27, 25, 22, 0.13); }
     .tr-band img {
       width: 100%;
       height: 100%;
@@ -2477,39 +2499,34 @@
       display: block;
     }
 
-    /* Groesse des Medaillons — Kerbe und Kreis teilen sich den Wert,
-       damit der Abstand ringsum wirklich gleich bleibt. */
-    .tr-stapel { --med: min(84vw, 480px); --luft: 22px; }
-
-    /* Das obere Bild bekommt eine echte Aussparung, keine Ueberlagerung:
-       das Medaillon sitzt in einem Loch, ringsum bleibt Luft und man
-       sieht das darunterliegende Bild. */
-    .tr-band--kerbe img {
-      -webkit-mask-image: radial-gradient(circle at 50% 0,
-        transparent calc(var(--med) / 2 + var(--luft)),
-        #000 calc(var(--med) / 2 + var(--luft) + 1px));
-      mask-image: radial-gradient(circle at 50% 0,
-        transparent calc(var(--med) / 2 + var(--luft)),
-        #000 calc(var(--med) / 2 + var(--luft) + 1px));
-    }
-
-    /* Oberste Ebene ueber dem ganzen Stapel: es klebt an seiner Stelle,
-       waehrend die Baender dahinter uebereinander falten. Deshalb sticky
-       im Stapel und nicht absolut in einem einzelnen Band. */
+    /* Oberste Ebene ueber dem ganzen Stapel. Es steht im Fluss vor dem
+       ersten Band, nimmt aber keine Hoehe ein — das erste Band holt sie
+       mit einem negativen Rand wieder zurueck. Der Versatz nach unten
+       ist die halbe Differenz zur Bandhoehe: dadurch sitzt der Kreis von
+       Anfang an mittig auf Band 1 und bleibt in genau dem Moment
+       haengen, in dem Band 1 klebt — er bewegt sich also nie gegen das
+       Blickfeld, die Bilder bewegen sich an ihm vorbei. */
     .tr-medaillon {
       position: sticky;
       z-index: 10;
-      top: calc(var(--nav-h) + 14px);
-      /* Negative Raender oben und unten: das Medaillon sitzt genau auf der
-         Naht und nimmt im Fluss keine Hoehe ein — sonst schoebe es die
-         Baender auseinander. */
-      margin: calc(var(--med) / -2) auto calc(var(--med) / -2);
+      top: calc(var(--nav-h) + (var(--bandh) - var(--med)) / 2);
+      align-self: center;
+      flex: none;
+      margin-top: calc((var(--bandh) - var(--med)) / 2);
       width: var(--med);
       height: var(--med);
       border-radius: 50%;
       background: var(--marble-warm);
       border: 1px solid var(--border-gold);
-      box-shadow: 0 16px 50px rgba(27, 25, 22, 0.16);
+      /* Die Lichtung: ein Ring in der Seitenfarbe, der nach aussen
+         ausblendet. Aussenschatten werden am eigenen Rand beschnitten,
+         der Kreis selbst bleibt also frei — deshalb braucht das Bild
+         keine eingebaute Aussparung mehr und jedes Band bekommt seine
+         Lichtung genau dort, wo der Kreis steht. */
+      box-shadow:
+        0 0 0 var(--luft) var(--marble),
+        0 0 26px 13px var(--marble),
+        inset 0 0 46px rgba(27, 25, 22, 0.05);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -2579,9 +2596,12 @@
       .tr-karte { flex-basis: calc(50% - 8px); }
       .tr-karte__bild { max-width: 130px; height: 108px; }
       .tr-karte__text { font-size: 0.7rem; }
-      .tr-band { height: min(58vh, 420px); }
-      .tr-stapel { --med: min(78vw, 300px); --luft: 14px; }
-      .tr-medaillon { padding: 26px; }
+      .tr-stapel { --med: min(72vw, 280px); --luft: 15px; }
+      .tr-band { margin-bottom: 34vh; }
+      .tr-medaillon { padding: 26px; box-shadow:
+        0 0 0 var(--luft) var(--marble),
+        0 0 22px 16px var(--marble),
+        inset 0 0 34px rgba(27, 25, 22, 0.05); }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -2806,12 +2826,8 @@
   ═══════════════════════════════════ -->
   <section class="tr-stapel" aria-label="Trauringe in Bildern">
 
-    <figure class="tr-band">
-      <img src="assets/trauringe/breit-1.webp" alt="Zwei schlichte Goldtrauringe nebeneinander auf hellem Marmor" width="2000" height="848" loading="lazy" decoding="async">
-    </figure>
-
-    <!-- Oberste Ebene: erscheint an der Naht und bleibt dann stehen,
-         waehrend die Baender dahinter uebereinander falten. -->
+    <!-- Steht vor den Baendern, damit es vom ersten Moment an im Blickfeld
+         haengt: es bewegt sich nicht, die Bilder falten sich dahinter. -->
     <aside class="tr-medaillon">
       <span class="tr-medaillon__eyebrow">Wellritzstraße 3</span>
       <p>
@@ -2820,7 +2836,11 @@
       </p>
     </aside>
 
-    <figure class="tr-band tr-band--kerbe">
+    <figure class="tr-band">
+      <img src="assets/trauringe/breit-1.webp" alt="Zwei schlichte Goldtrauringe nebeneinander auf hellem Marmor" width="2000" height="848" loading="lazy" decoding="async">
+    </figure>
+
+    <figure class="tr-band">
       <img src="assets/trauringe/breit-2.webp" alt="Ein polierter Goldtrauring auf champagnerfarbener Seide" width="2000" height="848" loading="lazy" decoding="async">
     </figure>
 
