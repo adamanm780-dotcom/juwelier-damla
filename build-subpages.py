@@ -115,6 +115,73 @@ SUB_CSS = """
       pointer-events: none;
     }
 
+    /* ── Reparatur-Karten mit Werkstattmotiv ───────────────── */
+    .service-card--foto {
+      position: relative;
+      overflow: hidden;
+      background: #14110D;      /* traegt auch, wenn das Bild fehlt */
+      isolation: isolate;
+    }
+    /* Inhalt ueber Bild und Schleier heben */
+    .service-card--foto > .service-icon,
+    .service-card--foto > .service-title,
+    .service-card--foto > .service-text { position: relative; z-index: 2; }
+
+    .rp-foto {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+      transform: scale(1.02);
+      transition: transform 1s var(--ease-out);
+    }
+
+    /* Der Schleier haelt die Schrift lesbar — nach unten dichter, weil
+       dort der laengere Fliesstext steht. */
+    .service-card--foto::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background: linear-gradient(180deg,
+        rgba(16, 13, 10, 0.70) 0%,
+        rgba(16, 13, 10, 0.80) 52%,
+        rgba(16, 13, 10, 0.88) 100%);
+      transition: opacity 0.55s ease;
+    }
+    /* Die goldene Kante der Basisklasse liegt sonst unter dem Schleier. */
+    .service-card--foto::after { z-index: 3; }
+
+    .service-card--foto .service-title { color: #F8F4EC; }
+    .service-card--foto .service-text { color: rgba(248, 244, 236, 0.86); }
+    .service-card--foto .service-icon svg { stroke: var(--gold-light); }
+    .service-card--foto .service-icon {
+      transition: transform 0.6s var(--ease-out);
+    }
+
+    /* Hover: das Motiv faehrt heran, der Schleier gibt etwas frei,
+       das Zeichen hebt sich. Die goldene Kante waechst ueber die
+       Basisklasse ohnehin schon ein. */
+    .service-card--foto:hover,
+    .service-card--foto:focus-within { background: #14110D; }
+    .service-card--foto:hover .rp-foto,
+    .service-card--foto:focus-within .rp-foto { transform: scale(1.11); }
+    .service-card--foto:hover::before,
+    .service-card--foto:focus-within::before { opacity: 0.82; }
+    .service-card--foto:hover .service-icon,
+    .service-card--foto:focus-within .service-icon { transform: translateY(-4px); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .rp-foto { transition: none; }
+      .service-card--foto:hover .rp-foto,
+      .service-card--foto:focus-within .rp-foto { transform: scale(1.02); }
+      .service-card--foto .service-icon { transition: none; }
+      .service-card--foto:hover .service-icon,
+      .service-card--foto:focus-within .service-icon { transform: none; }
+    }
+
     /* ── Fassungs-Galerie mit Goldton-Umschalter ───────────── */
     .metall-wahl {
       display: flex;
@@ -917,7 +984,17 @@ RP_SERVICES = [
      "Aufbereitung wirkt ein Schmuckstück oft wieder so, wie Sie es in Erinnerung haben."),
 ]
 DELAYS = ['', ' d1', ' d2', '', ' d1', ' d2']
-rp_cards = '\n\n'.join("""        <article class="service-card reveal%s">
+# Zu jedem Dienst ein Werkstattmotiv. Die Bilder sind bewusst dunkel
+# erzeugt (mittlere Helligkeit 21-41 von 255), die Abdunkelung darueber
+# muss also nur noch wenig arbeiten, damit die Schrift sicher steht.
+# Die Bilder illustrieren nur die Ueberschrift daneben und sind damit
+# schmueckend — leeres alt, sonst liest der Screenreader alles doppelt.
+RP_BILDER = ['rhodinieren', 'vergolden', 'loetarbeiten',
+             'ringweite', 'gravuren', 'aufbereitung']
+
+rp_cards = '\n\n'.join("""        <article class="service-card service-card--foto reveal%s">
+          <img class="rp-foto" src="assets/reparaturen/%s.webp" alt="" aria-hidden="true"
+               width="900" height="675" loading="lazy" decoding="async">
           <div class="service-icon" aria-hidden="true">
             <svg viewBox="0 0 48 48">
               %s
@@ -925,7 +1002,7 @@ rp_cards = '\n\n'.join("""        <article class="service-card reveal%s">
           </div>
           <h3 class="service-title">%s</h3>
           <p class="service-text">%s</p>
-        </article>""" % (DELAYS[i], icon, name, txt)
+        </article>""" % (DELAYS[i], RP_BILDER[i], icon, name, txt)
     for i, (name, icon, txt) in enumerate(RP_SERVICES))
 
 RP_FLOW = [
