@@ -106,16 +106,25 @@
        das erste Bild oben liegen. */
     .tr-stapel {
       position: relative;
-      padding: 0;
-      margin: clamp(56px, 8vw, 110px) 0;
+      /* Klebeweg fuer das letzte Band. Ohne diesen Nachlauf endet der
+         Container genau an seiner Unterkante — dann hat es null Weg und
+         schiebt sich beim Weiterscrollen ungewollt nach oben, statt an
+         seinem Haltepunkt stehen zu bleiben. */
+      padding: 0 0 min(60vh, 520px);
+      margin: clamp(56px, 8vw, 110px) 0 0;
     }
     .tr-band {
       position: sticky;
-      margin: 0;
+      /* Der Abstand nach unten ist der Klebeweg: er verlaengert den Platz,
+         den das Band im Fluss einnimmt, ohne es optisch groesser zu machen.
+         Ohne ihn erreicht schon das zweite Band seinen Haltepunkt nicht und
+         faellt mit dem dritten zusammen. */
+      margin: 0 0 46vh;
       height: min(76vh, 620px);
       overflow: visible;
       line-height: 0;
     }
+    .tr-band:last-child { margin-bottom: 0; }
     /* Gestaffelte Haltepunkte: jedes Band bleibt etwas tiefer stehen, so
        bleibt vom vorigen ein Streifen sichtbar — sonst deckt das obere
        das untere vollstaendig zu und der Stapel ist nicht zu erkennen.
@@ -123,7 +132,9 @@
        auf seiner Oberkante vollstaendig unter der Navbar hervorkommt. */
     .tr-band:nth-child(1) { z-index: 1; top: var(--nav-h); }
     .tr-band:nth-child(2) { z-index: 2; top: calc(var(--nav-h) + var(--med) / 2 + 14px); }
-    .tr-band:nth-child(3) { z-index: 3; top: calc(var(--nav-h) + var(--med) / 2 + 104px); }
+    /* Das letzte Band schliesst buendig unter der Leiste ab — es muss
+       keinen Streifen mehr freilassen, weil nichts mehr darueber kommt. */
+    .tr-band:nth-child(3) { z-index: 3; top: var(--nav-h); }
     .tr-band img {
       width: 100%;
       height: 100%;
