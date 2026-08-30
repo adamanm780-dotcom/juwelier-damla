@@ -1945,7 +1945,7 @@
     .service-card--foto {
       position: relative;
       overflow: hidden;
-      background: #14110D;      /* traegt auch, wenn das Bild fehlt */
+      background: var(--marble-warm);   /* traegt auch, wenn das Bild fehlt */
       isolation: isolate;
     }
     /* Inhalt ueber Bild und Schleier heben */
@@ -1965,24 +1965,27 @@
     }
 
     /* Der Schleier haelt die Schrift lesbar — nach unten dichter, weil
-       dort der laengere Fliesstext steht. */
+       dort der laengere Fliesstext steht. Oben bleibt er duenn, damit
+       das Motiv sichtbar ist; die Karte soll hell wirken und nicht wie
+       ein abgedunkeltes Foto. */
     .service-card--foto::before {
       content: '';
       position: absolute;
       inset: 0;
       z-index: 1;
       background: linear-gradient(180deg,
-        rgba(16, 13, 10, 0.70) 0%,
-        rgba(16, 13, 10, 0.80) 52%,
-        rgba(16, 13, 10, 0.88) 100%);
+        rgba(253, 251, 246, 0.30) 0%,
+        rgba(253, 251, 246, 0.66) 34%,
+        rgba(253, 251, 246, 0.90) 62%,
+        rgba(253, 251, 246, 0.96) 100%);
       transition: opacity 0.55s ease;
     }
     /* Die goldene Kante der Basisklasse liegt sonst unter dem Schleier. */
     .service-card--foto::after { z-index: 3; }
 
-    .service-card--foto .service-title { color: #F8F4EC; }
-    .service-card--foto .service-text { color: rgba(248, 244, 236, 0.86); }
-    .service-card--foto .service-icon svg { stroke: var(--gold-light); }
+    .service-card--foto .service-title { color: var(--ink); }
+    .service-card--foto .service-text { color: var(--ink-soft); }
+    .service-card--foto .service-icon svg { stroke: var(--gold-dark); }
     .service-card--foto .service-icon {
       transition: transform 0.6s var(--ease-out);
     }
@@ -1991,7 +1994,7 @@
        das Zeichen hebt sich. Die goldene Kante waechst ueber die
        Basisklasse ohnehin schon ein. */
     .service-card--foto:hover,
-    .service-card--foto:focus-within { background: #14110D; }
+    .service-card--foto:focus-within { background: var(--marble-warm); }
     .service-card--foto:hover .rp-foto,
     .service-card--foto:focus-within .rp-foto { transform: scale(1.11); }
     .service-card--foto:hover::before,

@@ -140,6 +140,30 @@
       margin: 0 0 40vh;
       height: var(--bandh);
       line-height: 0;
+      overflow: hidden;
+      /* --p, --s und --ein setzt das Skript beim Scrollen. Die Vorgaben
+         hier sind der Ruhezustand: ohne Skript, ohne JavaScript und bei
+         reduzierter Bewegung bleibt es beim reinen Schieben. */
+      --p: 0;
+      --s: 1;
+      --ein: 0;
+      transform: scale(var(--s));
+      /* Nicht aus der Mitte, sondern aus dem oberen Drittel: das Band
+         weicht dadurch nach hinten und unten zurueck, so wie eine Karte,
+         die unter die naechste rutscht. */
+      transform-origin: 50% 32%;
+      border-radius: calc(var(--p) * 20px);
+    }
+    /* Der Schleier legt sich ueber das zurueckweichende Band. Er liegt
+       ueber dem Foto, aber unter dem naechsten Band — sichtbar ist also
+       immer nur der Streifen, der noch nicht zugedeckt ist. */
+    .tr-band::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--marble);
+      opacity: calc(var(--p) * 0.42);
+      pointer-events: none;
     }
     .tr-band:last-child { margin-bottom: 0; }
     /* Der Ausgleich fuer das Medaillon sitzt hier und nicht am Medaillon
@@ -155,11 +179,19 @@
        Darueberschieben nicht, dass ein neues Bild kommt. */
     .tr-band:nth-of-type(2) { z-index: 2; box-shadow: 0 -20px 44px rgba(27, 25, 22, 0.13); }
     .tr-band:nth-of-type(3) { z-index: 3; box-shadow: 0 -20px 44px rgba(27, 25, 22, 0.13); }
+    /* Etwas groesser als der Rahmen und absolut gesetzt, damit das Foto
+       darin laufen kann: es kommt leicht versetzt herein und wandert
+       weiter, waehrend das Band zugedeckt wird. Prozente bei translateY
+       beziehen sich auf die eigene Hoehe, deshalb die 110 %. */
     .tr-band img {
+      position: absolute;
+      top: -5%;
+      left: 0;
       width: 100%;
-      height: 100%;
+      height: 110%;
       object-fit: cover;
       display: block;
+      transform: translateY(calc(var(--ein) * 4% - var(--p) * 3%));
     }
 
     /* Oberste Ebene ueber dem ganzen Stapel. Es steht im Fluss vor dem

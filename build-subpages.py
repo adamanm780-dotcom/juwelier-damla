@@ -125,7 +125,7 @@ SUB_CSS = """
     .service-card--foto {
       position: relative;
       overflow: hidden;
-      background: #14110D;      /* traegt auch, wenn das Bild fehlt */
+      background: var(--marble-warm);   /* traegt auch, wenn das Bild fehlt */
       isolation: isolate;
     }
     /* Inhalt ueber Bild und Schleier heben */
@@ -145,24 +145,27 @@ SUB_CSS = """
     }
 
     /* Der Schleier haelt die Schrift lesbar — nach unten dichter, weil
-       dort der laengere Fliesstext steht. */
+       dort der laengere Fliesstext steht. Oben bleibt er duenn, damit
+       das Motiv sichtbar ist; die Karte soll hell wirken und nicht wie
+       ein abgedunkeltes Foto. */
     .service-card--foto::before {
       content: '';
       position: absolute;
       inset: 0;
       z-index: 1;
       background: linear-gradient(180deg,
-        rgba(16, 13, 10, 0.70) 0%,
-        rgba(16, 13, 10, 0.80) 52%,
-        rgba(16, 13, 10, 0.88) 100%);
+        rgba(253, 251, 246, 0.30) 0%,
+        rgba(253, 251, 246, 0.66) 34%,
+        rgba(253, 251, 246, 0.90) 62%,
+        rgba(253, 251, 246, 0.96) 100%);
       transition: opacity 0.55s ease;
     }
     /* Die goldene Kante der Basisklasse liegt sonst unter dem Schleier. */
     .service-card--foto::after { z-index: 3; }
 
-    .service-card--foto .service-title { color: #F8F4EC; }
-    .service-card--foto .service-text { color: rgba(248, 244, 236, 0.86); }
-    .service-card--foto .service-icon svg { stroke: var(--gold-light); }
+    .service-card--foto .service-title { color: var(--ink); }
+    .service-card--foto .service-text { color: var(--ink-soft); }
+    .service-card--foto .service-icon svg { stroke: var(--gold-dark); }
     .service-card--foto .service-icon {
       transition: transform 0.6s var(--ease-out);
     }
@@ -171,7 +174,7 @@ SUB_CSS = """
        das Zeichen hebt sich. Die goldene Kante waechst ueber die
        Basisklasse ohnehin schon ein. */
     .service-card--foto:hover,
-    .service-card--foto:focus-within { background: #14110D; }
+    .service-card--foto:focus-within { background: var(--marble-warm); }
     .service-card--foto:hover .rp-foto,
     .service-card--foto:focus-within .rp-foto { transform: scale(1.11); }
     .service-card--foto:hover::before,
@@ -990,9 +993,10 @@ RP_SERVICES = [
      "Aufbereitung wirkt ein Schmuckstück oft wieder so, wie Sie es in Erinnerung haben."),
 ]
 DELAYS = ['', ' d1', ' d2', '', ' d1', ' d2']
-# Zu jedem Dienst ein Werkstattmotiv. Die Bilder sind bewusst dunkel
-# erzeugt (mittlere Helligkeit 21-41 von 255), die Abdunkelung darueber
-# muss also nur noch wenig arbeiten, damit die Schrift sicher steht.
+# Zu jedem Dienst ein Motiv, bewusst hell und luftig erzeugt. Darueber
+# liegt kein Abdunkeln mehr, sondern ein heller Schleier, und die
+# Schrift ist dunkel — die Karten sollen zum Rest der Seite passen und
+# nicht wie sechs schwarze Kacheln wirken.
 # Die Bilder illustrieren nur die Ueberschrift daneben und sind damit
 # schmueckend — leeres alt, sonst liest der Screenreader alles doppelt.
 RP_BILDER = ['rhodinieren', 'vergolden', 'loetarbeiten',
@@ -1261,6 +1265,71 @@ TR_BODY_ROH = io.open(os.path.join(DIR, 'trauringe.body.html'), encoding='utf-8'
 TR_CSS = io.open(os.path.join(DIR, 'trauringe.css'), encoding='utf-8').read()
 TR_HEAD = '  <style>\n%s  </style>' % TR_CSS
 
+# Der Stapel faltet rein mit CSS schon richtig — sticky Baender, fester
+# Kreis. Was CSS allein nicht kann, ist die Tiefe: das gehaltene Band
+# soll zurueckweichen, waehrend das naechste darueberzieht. Dafuer
+# rechnet dieses Stueck pro Band drei Werte aus und legt sie als Custom
+# Properties ab; wie es aussieht, steht komplett in trauringe.css.
+TR_SKRIPT = """
+  <script>
+  (function () {
+    var stapel = document.querySelector('.tr-stapel');
+    if (!stapel) return;
+    var baender = Array.prototype.slice.call(stapel.querySelectorAll('.tr-band'));
+    if (baender.length < 2) return;
+    if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    var navH = parseFloat(getComputedStyle(document.documentElement)
+                 .getPropertyValue('--nav-h')) || 84;
+    var offen = false;
+
+    function zeichnen() {
+      offen = false;
+      var hoehe = innerHeight;
+      for (var i = 0; i < baender.length; i++) {
+        var band = baender[i];
+        var r = band.getBoundingClientRect();
+
+        // p — wie weit das naechste Band dieses hier schon zudeckt.
+        // 0 = steht noch komplett darunter, 1 = deckt es ganz.
+        var p = 0;
+        var n = baender[i + 1];
+        if (n && r.height) {
+          p = (r.bottom - n.getBoundingClientRect().top) / r.height;
+          p = p < 0 ? 0 : (p > 1 ? 1 : p);
+        }
+
+        // Das Zurueckweichen erst ganz zum Schluss: frueher zoege es an
+        // den Seiten einen Streifen Hintergrund auf, und der sieht aus
+        // wie ein Fehler und nicht wie Tiefe.
+        var t = (p - 0.45) / 0.55;
+        t = t < 0 ? 0 : (t > 1 ? 1 : t);
+
+        // ein — wie weit dieses Band noch von unten unterwegs ist.
+        // 1 = gerade am unteren Rand aufgetaucht, 0 = angekommen.
+        // Damit laeuft das Foto im Rahmen ein Stueck nach.
+        var ein = (r.top - navH) / (hoehe - navH);
+        ein = ein < 0 ? 0 : (ein > 1 ? 1 : ein);
+
+        band.style.setProperty('--p', p.toFixed(3));
+        band.style.setProperty('--s', (1 - 0.055 * t * t).toFixed(4));
+        band.style.setProperty('--ein', ein.toFixed(3));
+      }
+    }
+
+    function anstossen() {
+      if (offen) return;
+      offen = true;
+      requestAnimationFrame(zeichnen);
+    }
+
+    addEventListener('scroll', anstossen, { passive: true });
+    addEventListener('resize', anstossen);
+    zeichnen();
+  })();
+  </script>"""
+
+
 KF_BODY = io.open(os.path.join(DIR, 'konfigurator.body.html'), encoding='utf-8').read()
 KF_CSS = io.open(os.path.join(DIR, 'konfigurator.css'), encoding='utf-8').read()
 
@@ -1292,7 +1361,7 @@ PAGES = [
              'Am Finger<br><em>entscheidet sich alles</em>',
              'Kommen Sie vorbei und probieren Sie in Ruhe. Wir legen Ihnen die Profile '
              'auf den Tisch – anfassen sagt mehr als jeder Bildschirm.')),
-         services=None, extrahead=TR_HEAD),
+         services=None, extrahead=TR_HEAD, extrabody=TR_SKRIPT),
 
     dict(slug='trauring-konfigurator.html',
          title='Trauring-Konfigurator – Eheringe selbst zusammenstellen | Juwelier Damla Wiesbaden',
