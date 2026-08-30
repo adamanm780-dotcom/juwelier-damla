@@ -188,7 +188,7 @@ for (let g = 44; g <= 70; g++) RINGGROESSEN.push(g);
  */
 function ringGeometrie(ri, T, W, profil) {
   const N = 64;                               // Abtastung ueber die Breite
-  const er = Math.min(0.16, T * 0.3, W * 0.14); // Kantenradius
+  const er = Math.min(0.13, T * 0.26, W * 0.12); // Kantenradius
   const tf = 1 - (2 * er) / W;                // Beginn der Kantenfase
   const y = (t) => (t * W) / 2;
   const rAussen = (t) => ri + profil.aussen(t, T);
@@ -207,8 +207,8 @@ function ringGeometrie(ri, T, W, profil) {
   pts.push(new THREE.Vector2(rOben - er, y(1)));
 
   // Kantenfase oben (Viertelbogen, nach aussen einlaufend)
-  for (let i = 1; i <= 8; i++) {
-    const a = (Math.PI / 2) * (1 - i / 8);
+  for (let i = 1; i <= 14; i++) {
+    const a = (Math.PI / 2) * (1 - i / 14);
     pts.push(new THREE.Vector2(rOben - er * (1 - Math.cos(a)), y(tf) + er * Math.sin(a)));
   }
 
@@ -220,15 +220,17 @@ function ringGeometrie(ri, T, W, profil) {
 
   // Kantenfase unten
   const rUnten = rAussen(-tf);
-  for (let i = 1; i <= 8; i++) {
-    const a = (Math.PI / 2) * (i / 8);
+  for (let i = 1; i <= 14; i++) {
+    const a = (Math.PI / 2) * (i / 14);
     pts.push(new THREE.Vector2(rUnten - er * (1 - Math.cos(a)), y(-tf) - er * Math.sin(a)));
   }
 
   // Seitenflaeche unten: zurueck nach innen, Kontur schliessen
   pts.push(new THREE.Vector2(rInnen(-1), y(-1)));
 
-  const geo = new THREE.LatheGeometry(pts, 192);
+  // 320 statt 192 Segmente: bei poliertem Gold zeichnet die Silhouette
+  // sonst sichtbare Facetten, gerade auf grossen Bildschirmen.
+  const geo = new THREE.LatheGeometry(pts, 320);
   geo.computeVertexNormals();
   return geo;
 }
@@ -495,11 +497,15 @@ function hammerMap() {
 
 function metallMaterial(farbe, oberflaeche) {
   const o = OBERFLAECHEN[oberflaeche];
+  // Poliertes Gold ist nie mathematisch glatt: eine Grundrauheit und ein
+  // duenner Clearcoat geben den weichen, tiefen Glanz statt Chromspiegel.
   const mat = new THREE.MeshPhysicalMaterial({
     color: farbe,
     metalness: 1.0,
-    roughness: o.rauheit,
-    envMapIntensity: 1.35,
+    roughness: Math.max(0.08, o.rauheit),
+    envMapIntensity: 1.55,
+    clearcoat: o.textur ? 0.0 : 0.45,
+    clearcoatRoughness: 0.08,
   });
   if (o.textur === 'hammer') {
     mat.normalMap = hammerMap();
@@ -555,7 +561,7 @@ function szeneAufbauen() {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setSize(buehne.clientWidth, buehne.clientHeight);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.05;
+  renderer.toneMappingExposure = 0.95;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   buehne.appendChild(renderer.domElement);
 
@@ -565,18 +571,24 @@ function szeneAufbauen() {
 
   // Studio-Environment ohne externe HDR-Datei
   const pmrem = new THREE.PMREMGenerator(renderer);
-  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  // Kleinerer Sigma-Wert = schaerfere Spiegelungen im Metall. Der Ring
+  // bekommt dadurch definierte Lichtkanten statt eines diffusen Schimmers.
+  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.02).texture;
 
   camera = new THREE.PerspectiveCamera(32, buehne.clientWidth / buehne.clientHeight, 1, 400);
   // Dreiviertelblick: frontal sieht man nur den Kreis, hier auch das Profil
   camera.position.set(30, 21, 70);
 
-  // gerichtetes Licht fuer definierte Glanzkanten auf den Fasen
-  const key = new THREE.DirectionalLight(0xfff6e8, 1.5);
+  // Dreipunktlicht: Fuehrung von links oben, weiche Aufhellung von rechts,
+  // Kante von hinten. Mit nur zwei Lichtern blieb die abgewandte Seite tot.
+  const key = new THREE.DirectionalLight(0xfff6e8, 1.35);
   key.position.set(-18, 26, 34);
   scene.add(key);
-  const rim = new THREE.DirectionalLight(0xffffff, 0.7);
-  rim.position.set(24, -10, -22);
+  const fill = new THREE.DirectionalLight(0xfffaf2, 0.55);
+  fill.position.set(26, 8, 20);
+  scene.add(fill);
+  const rim = new THREE.DirectionalLight(0xffffff, 0.85);
+  rim.position.set(10, 14, -30);
   scene.add(rim);
 
   ringGruppe = new THREE.Group();
@@ -1212,7 +1224,11 @@ function preisZeichnen() {
   const pZwei = ringPreis('zwei');
   $('#kfPreisEins').textContent = euro(pEins.summe);
   $('#kfPreisZwei').textContent = euro(pZwei.summe);
-  $('#kfPreisPaar').textContent = euro(pEins.summe + pZwei.summe);
+  const paar = euro(pEins.summe + pZwei.summe);
+  $('#kfPreisPaar').textContent = paar;
+  // Dieselbe Zahl in der klebenden Leiste auf schmalen Schirmen
+  const leiste = $('#kfPreisLeiste');
+  if (leiste) leiste.textContent = paar;
   $('#kfGewichtEins').textContent = pEins.gramm.toFixed(1).replace('.', ',') + ' g';
   $('#kfGewichtZwei').textContent = pZwei.gramm.toFixed(1).replace('.', ',') + ' g';
   $('#kfZusammenfassung').textContent = zusammenfassung();

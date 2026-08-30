@@ -35,6 +35,9 @@
 
         <!-- ── Ansicht ─────────────────────────────── -->
         <div class="kf-view">
+          <!-- Nur dieser Block klebt auf schmalen Schirmen — die
+               ausfuehrliche Preistafel darunter soll mitscrollen. -->
+          <div class="kf-view__oben">
           <div class="kf-stage" id="kfBuehne" role="img"
                aria-label="Dreidimensionale Ansicht des konfigurierten Ringpaars">
             <p class="kf-laedt" aria-hidden="true">Ringe werden aufgebaut …</p>
@@ -45,6 +48,13 @@
             Preis-Richtwert funktionieren trotzdem – die Zusammenfassung unten
             können Sie uns direkt schicken.
           </p>
+
+          <p class="kf-preisleiste">
+            <span>Paar &middot; Richtwert</span>
+            <strong id="kfPreisLeiste"></strong>
+          </p>
+
+          </div>
 
           <p class="kf-hint" aria-hidden="true">Ziehen zum Drehen · Scrollen zum Zoomen</p>
 
@@ -87,7 +97,7 @@
           </label>
 
           <fieldset class="kf-feld">
-            <legend>Legierung</legend>
+            <legend><i>1</i> Legierung</legend>
             <div class="kf-chips" id="kfLegierung"></div>
             <div class="kf-chips kf-chips--klein" id="kfKarat"></div>
             <label class="kf-check">
@@ -97,13 +107,13 @@
           </fieldset>
 
           <fieldset class="kf-feld">
-            <legend>Profil</legend>
+            <legend><i>2</i> Profil</legend>
             <div class="kf-chips kf-chips--profil" id="kfProfil"></div>
             <p class="kf-notiz" id="kfProfilHinweis"></p>
           </fieldset>
 
           <fieldset class="kf-feld">
-            <legend>Maße</legend>
+            <legend><i>3</i> Maße</legend>
             <div class="kf-regler">
               <label for="kfBreite">Breite <output id="kfBreiteWert"></output></label>
               <input type="range" id="kfBreite" min="2.5" max="8" step="0.5" value="3.5">
@@ -120,23 +130,23 @@
           </fieldset>
 
           <fieldset class="kf-feld">
-            <legend>Oberfläche</legend>
+            <legend><i>4</i> Oberfläche</legend>
             <div class="kf-chips" id="kfOberflaeche"></div>
           </fieldset>
 
           <fieldset class="kf-feld">
-            <legend>Steinbesatz</legend>
+            <legend><i>5</i> Steinbesatz</legend>
             <div class="kf-chips" id="kfBesatz"></div>
-          </fieldset>
 
-          <fieldset class="kf-feld" id="kfLageFeld" hidden>
-            <legend>Steinlage</legend>
+          <div class="kf-unterfeld" id="kfLageFeld" hidden>
+            <span class="kf-unterfeld__titel">Steinlage</span>
             <div class="kf-chips" id="kfLage"></div>
             <p class="kf-notiz" id="kfLageHinweis"></p>
+          </div>
           </fieldset>
 
           <fieldset class="kf-feld">
-            <legend>Größe &amp; Gravur</legend>
+            <legend><i>6</i> Größe &amp; Gravur</legend>
             <div class="kf-regler">
               <label for="kfGroesse">Ringgröße <output id="kfGroesseWert"></output></label>
               <input type="range" id="kfGroesse" min="44" max="70" step="1" value="54" list="kfGroessenListe">
