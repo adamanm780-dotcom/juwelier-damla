@@ -2484,13 +2484,28 @@
       height: var(--bandh);
       line-height: 0;
       overflow: hidden;
-      /* --p, --s und --ein setzt das Skript beim Scrollen. Die Vorgaben
-         hier sind der Ruhezustand: ohne Skript, ohne JavaScript und bei
-         reduzierter Bewegung bleibt es beim reinen Schieben. */
+      /* --p, --s, --ein, --lx und --ly setzt das Skript beim Scrollen.
+         Die Vorgaben hier sind der Ruhezustand: ohne Skript, ohne
+         JavaScript und bei reduzierter Bewegung bleibt es beim reinen
+         Schieben, und das Loch sitzt in der Bandmitte. */
       --p: 0;
       --s: 1;
       --ein: 0;
+      --lx: 50%;
+      --ly: 50%;
       transform: scale(var(--s));
+
+      /* Die Aussparung wird wirklich aus dem Bild geschnitten, nicht
+         mit einer hellen Scheibe zugedeckt: harte Kante, kein weicher
+         Auslauf — sonst sieht es aus wie ein Leuchten und nicht wie
+         ein Loch. Der Radius wird durch die Skalierung geteilt, damit
+         das Loch am Bildschirm unveraendert gross bleibt, waehrend das
+         Band zurueckweicht. */
+      --loch: calc((var(--med) / 2 + var(--luft)) / var(--s));
+      -webkit-mask-image: radial-gradient(circle at var(--lx) var(--ly),
+        transparent var(--loch), #000 calc(var(--loch) + 1px));
+      mask-image: radial-gradient(circle at var(--lx) var(--ly),
+        transparent var(--loch), #000 calc(var(--loch) + 1px));
       /* Nicht aus der Mitte, sondern aus dem oberen Drittel: das Band
          weicht dadurch nach hinten und unten zurueck, so wie eine Karte,
          die unter die naechste rutscht. */
@@ -2556,15 +2571,11 @@
       border-radius: 50%;
       background: var(--marble-warm);
       border: 1px solid var(--border-gold);
-      /* Die Lichtung: ein Ring in der Seitenfarbe, der nach aussen
-         ausblendet. Aussenschatten werden am eigenen Rand beschnitten,
-         der Kreis selbst bleibt also frei — deshalb braucht das Bild
-         keine eingebaute Aussparung mehr und jedes Band bekommt seine
-         Lichtung genau dort, wo der Kreis steht. */
-      box-shadow:
-        0 0 0 var(--luft) var(--marble),
-        0 0 26px 13px var(--marble),
-        inset 0 0 46px rgba(27, 25, 22, 0.05);
+      /* Kein heller Ring mehr: das Loch im Bild macht die Luft ringsum,
+         durch die Aussparung sieht man den Seitenhintergrund. Bleibt
+         ein weicher Schatten, damit die Scheibe wirklich in dem Loch
+         zu liegen scheint statt darauf. */
+      box-shadow: 0 14px 40px rgba(27, 25, 22, 0.12);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -3442,16 +3453,36 @@
     var stapel = document.querySelector('.tr-stapel');
     if (!stapel) return;
     var baender = Array.prototype.slice.call(stapel.querySelectorAll('.tr-band'));
-    if (baender.length < 2) return;
+    var med = stapel.querySelector('.tr-medaillon');
+    if (baender.length < 2 || !med) return;
     if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
     var navH = parseFloat(getComputedStyle(document.documentElement)
                  .getPropertyValue('--nav-h')) || 84;
     var offen = false;
 
+    /* Nur schreiben, was sich geaendert hat: jedes setProperty stoesst
+       Stil und Anstrich neu an, und drei bildschirmfuellende Masken
+       neu zu rastern ist das Teuerste an der ganzen Seite. */
+    function setz(el, name, wert) {
+      if (el['_' + name] === wert) return;
+      el['_' + name] = wert;
+      el.style.setProperty(name, wert);
+    }
+
     function zeichnen() {
       offen = false;
       var hoehe = innerHeight;
+
+      /* Ausserhalb des Stapels gibt es nichts zu rechnen — die Seite
+         ist lang, und der Rest scrollt sonst gegen dieselbe Rechnung. */
+      var sr = stapel.getBoundingClientRect();
+      if (sr.bottom < -200 || sr.top > hoehe + 200) return;
+
+      var mr = med.getBoundingClientRect();
+      var mx = mr.left + mr.width / 2;
+      var my = mr.top + mr.height / 2;
+
       for (var i = 0; i < baender.length; i++) {
         var band = baender[i];
         var r = band.getBoundingClientRect();
@@ -3477,9 +3508,22 @@
         var ein = (r.top - navH) / (hoehe - navH);
         ein = ein < 0 ? 0 : (ein > 1 ? 1 : ein);
 
-        band.style.setProperty('--p', p.toFixed(3));
-        band.style.setProperty('--s', (1 - 0.055 * t * t).toFixed(4));
-        band.style.setProperty('--ein', ein.toFixed(3));
+        var skal = 1 - 0.055 * t * t;
+
+        /* Die Aussparung: das Loch soll immer genau unter dem Kreis
+           sitzen, der Kreis steht aber fest im Blickfeld, waehrend das
+           Band darunter wegwandert. Also pro Bild ausrechnen, wo der
+           Kreis gerade im Band steht.
+           Das Band ist zusaetzlich skaliert. Unter einer reinen
+           Skalierung gilt Bildschirm = Rahmenoberkante + s * lokal,
+           egal wo der Ursprung liegt — deshalb reicht die Division
+           durch s, um von Bildschirm- auf Bildkoordinaten zu kommen. */
+        setz(band, '--lx', ((mx - r.left) / skal).toFixed(1) + 'px');
+        setz(band, '--ly', ((my - r.top) / skal).toFixed(1) + 'px');
+
+        setz(band, '--p', p.toFixed(3));
+        setz(band, '--s', skal.toFixed(4));
+        setz(band, '--ein', ein.toFixed(3));
       }
     }
 

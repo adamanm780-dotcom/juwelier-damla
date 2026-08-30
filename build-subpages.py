@@ -1279,16 +1279,36 @@ TR_SKRIPT = """
     var stapel = document.querySelector('.tr-stapel');
     if (!stapel) return;
     var baender = Array.prototype.slice.call(stapel.querySelectorAll('.tr-band'));
-    if (baender.length < 2) return;
+    var med = stapel.querySelector('.tr-medaillon');
+    if (baender.length < 2 || !med) return;
     if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
     var navH = parseFloat(getComputedStyle(document.documentElement)
                  .getPropertyValue('--nav-h')) || 84;
     var offen = false;
 
+    /* Nur schreiben, was sich geaendert hat: jedes setProperty stoesst
+       Stil und Anstrich neu an, und drei bildschirmfuellende Masken
+       neu zu rastern ist das Teuerste an der ganzen Seite. */
+    function setz(el, name, wert) {
+      if (el['_' + name] === wert) return;
+      el['_' + name] = wert;
+      el.style.setProperty(name, wert);
+    }
+
     function zeichnen() {
       offen = false;
       var hoehe = innerHeight;
+
+      /* Ausserhalb des Stapels gibt es nichts zu rechnen — die Seite
+         ist lang, und der Rest scrollt sonst gegen dieselbe Rechnung. */
+      var sr = stapel.getBoundingClientRect();
+      if (sr.bottom < -200 || sr.top > hoehe + 200) return;
+
+      var mr = med.getBoundingClientRect();
+      var mx = mr.left + mr.width / 2;
+      var my = mr.top + mr.height / 2;
+
       for (var i = 0; i < baender.length; i++) {
         var band = baender[i];
         var r = band.getBoundingClientRect();
@@ -1314,9 +1334,22 @@ TR_SKRIPT = """
         var ein = (r.top - navH) / (hoehe - navH);
         ein = ein < 0 ? 0 : (ein > 1 ? 1 : ein);
 
-        band.style.setProperty('--p', p.toFixed(3));
-        band.style.setProperty('--s', (1 - 0.055 * t * t).toFixed(4));
-        band.style.setProperty('--ein', ein.toFixed(3));
+        var skal = 1 - 0.055 * t * t;
+
+        /* Die Aussparung: das Loch soll immer genau unter dem Kreis
+           sitzen, der Kreis steht aber fest im Blickfeld, waehrend das
+           Band darunter wegwandert. Also pro Bild ausrechnen, wo der
+           Kreis gerade im Band steht.
+           Das Band ist zusaetzlich skaliert. Unter einer reinen
+           Skalierung gilt Bildschirm = Rahmenoberkante + s * lokal,
+           egal wo der Ursprung liegt — deshalb reicht die Division
+           durch s, um von Bildschirm- auf Bildkoordinaten zu kommen. */
+        setz(band, '--lx', ((mx - r.left) / skal).toFixed(1) + 'px');
+        setz(band, '--ly', ((my - r.top) / skal).toFixed(1) + 'px');
+
+        setz(band, '--p', p.toFixed(3));
+        setz(band, '--s', skal.toFixed(4));
+        setz(band, '--ein', ein.toFixed(3));
       }
     }
 

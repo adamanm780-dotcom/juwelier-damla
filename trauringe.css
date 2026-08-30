@@ -141,13 +141,28 @@
       height: var(--bandh);
       line-height: 0;
       overflow: hidden;
-      /* --p, --s und --ein setzt das Skript beim Scrollen. Die Vorgaben
-         hier sind der Ruhezustand: ohne Skript, ohne JavaScript und bei
-         reduzierter Bewegung bleibt es beim reinen Schieben. */
+      /* --p, --s, --ein, --lx und --ly setzt das Skript beim Scrollen.
+         Die Vorgaben hier sind der Ruhezustand: ohne Skript, ohne
+         JavaScript und bei reduzierter Bewegung bleibt es beim reinen
+         Schieben, und das Loch sitzt in der Bandmitte. */
       --p: 0;
       --s: 1;
       --ein: 0;
+      --lx: 50%;
+      --ly: 50%;
       transform: scale(var(--s));
+
+      /* Die Aussparung wird wirklich aus dem Bild geschnitten, nicht
+         mit einer hellen Scheibe zugedeckt: harte Kante, kein weicher
+         Auslauf — sonst sieht es aus wie ein Leuchten und nicht wie
+         ein Loch. Der Radius wird durch die Skalierung geteilt, damit
+         das Loch am Bildschirm unveraendert gross bleibt, waehrend das
+         Band zurueckweicht. */
+      --loch: calc((var(--med) / 2 + var(--luft)) / var(--s));
+      -webkit-mask-image: radial-gradient(circle at var(--lx) var(--ly),
+        transparent var(--loch), #000 calc(var(--loch) + 1px));
+      mask-image: radial-gradient(circle at var(--lx) var(--ly),
+        transparent var(--loch), #000 calc(var(--loch) + 1px));
       /* Nicht aus der Mitte, sondern aus dem oberen Drittel: das Band
          weicht dadurch nach hinten und unten zurueck, so wie eine Karte,
          die unter die naechste rutscht. */
@@ -213,15 +228,11 @@
       border-radius: 50%;
       background: var(--marble-warm);
       border: 1px solid var(--border-gold);
-      /* Die Lichtung: ein Ring in der Seitenfarbe, der nach aussen
-         ausblendet. Aussenschatten werden am eigenen Rand beschnitten,
-         der Kreis selbst bleibt also frei — deshalb braucht das Bild
-         keine eingebaute Aussparung mehr und jedes Band bekommt seine
-         Lichtung genau dort, wo der Kreis steht. */
-      box-shadow:
-        0 0 0 var(--luft) var(--marble),
-        0 0 26px 13px var(--marble),
-        inset 0 0 46px rgba(27, 25, 22, 0.05);
+      /* Kein heller Ring mehr: das Loch im Bild macht die Luft ringsum,
+         durch die Aussparung sieht man den Seitenhintergrund. Bleibt
+         ein weicher Schatten, damit die Scheibe wirklich in dem Loch
+         zu liegen scheint statt darauf. */
+      box-shadow: 0 14px 40px rgba(27, 25, 22, 0.12);
       display: flex;
       flex-direction: column;
       align-items: center;
