@@ -665,6 +665,11 @@ POPUP_CSS = """
     /* ═══════════════════════════════════════════
        TRAURING-POPUP
     ═══════════════════════════════════════════ */
+    /* `display: grid` wuerde das hidden-Attribut aushebeln (die
+       Browserregel [hidden]{display:none} ist schwaecher als eine
+       Klasse) — deshalb ausdruecklich zuruecknehmen. */
+    .jd-pop[hidden] { display: none; }
+
     .jd-pop {
       position: fixed;
       inset: 0;
@@ -989,9 +994,11 @@ POPUP_JS = """
         vorherFokus = document.activeElement;
         pop.hidden = false;
         document.body.style.overflow = 'hidden';
-        requestAnimationFrame(function () {
-          requestAnimationFrame(function () { pop.classList.add('is-auf'); });
-        });
+        /* Reflow erzwingen statt requestAnimationFrame: in einem Hintergrund-
+           Tab laeuft rAF nicht, dann bliebe das Popup unsichtbar — waehrend
+           der Seiten-Scroll schon gesperrt waere. */
+        void pop.offsetWidth;
+        pop.classList.add('is-auf');
         setTimeout(function () { cta.focus({ preventScroll: true }); }, 620);
         document.addEventListener('keydown', taste);
       }
@@ -1008,11 +1015,21 @@ POPUP_JS = """
       var start = function () { setTimeout(oeffnen, 900); };
       var loader = document.getElementById('loader');
       if (loader && !loader.classList.contains('is-done')) {
+        var schonGestartet = false;
+        var einmalStarten = function () {
+          if (schonGestartet) return;
+          schonGestartet = true;
+          beobachter.disconnect();
+          start();
+        };
         var beobachter = new MutationObserver(function () {
-          if (loader.classList.contains('is-done')) { beobachter.disconnect(); start(); }
+          if (loader.classList.contains('is-done')) einmalStarten();
         });
         beobachter.observe(loader, { attributes: true, attributeFilter: ['class'] });
-        setTimeout(function () { beobachter.disconnect(); }, 9000);
+        /* Notbremse: bei langsamer Verbindung braucht der Ladescreen laenger.
+           Dann trotzdem zeigen — vorher hat der Abbruch nach 9 s das Popup
+           still verschluckt, statt es spaeter nachzuholen. */
+        setTimeout(einmalStarten, 9000);
       } else {
         start();
       }
