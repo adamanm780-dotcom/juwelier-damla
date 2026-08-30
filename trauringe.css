@@ -11,23 +11,19 @@
       gap: clamp(12px, 1.8vw, 22px);
     }
 
+    /* Ohne Kasten: die Ringe sind freigestellt und sollen frei auf dem
+       Seitenhintergrund stehen, nicht in einer Karte sitzen. */
     .tr-karte {
       flex: 1 1 calc(20% - 18px);
       min-width: 0;
       display: flex;
       flex-direction: column;
-      background: rgba(255, 254, 252, 0.86);
-      border: 1px solid var(--border-light);
-      border-radius: 8px;
-      padding: clamp(14px, 1.8vw, 22px) clamp(12px, 1.6vw, 18px) clamp(18px, 2vw, 24px);
-      transition: border-color 0.4s ease, transform 0.5s var(--ease-out),
-                  box-shadow 0.5s ease;
+      background: none;
+      border: 0;
+      padding: clamp(10px, 1.4vw, 16px) clamp(6px, 1vw, 12px) clamp(16px, 2vw, 22px);
+      transition: transform 0.5s var(--ease-out);
     }
-    .tr-karte:hover {
-      border-color: var(--border-gold);
-      transform: translateY(-5px);
-      box-shadow: var(--shadow-soft);
-    }
+    .tr-karte:hover { transform: translateY(-5px); }
 
     /* Feste Bildhoehe mit contain: die Ringe sind unterschiedlich hoch
        freigestellt, ohne das stehen die Namen auf jeder Karte anders. */
@@ -106,11 +102,7 @@
        das erste Bild oben liegen. */
     .tr-stapel {
       position: relative;
-      /* Klebeweg fuer das letzte Band. Ohne diesen Nachlauf endet der
-         Container genau an seiner Unterkante — dann hat es null Weg und
-         schiebt sich beim Weiterscrollen ungewollt nach oben, statt an
-         seinem Haltepunkt stehen zu bleiben. */
-      padding: 0 0 min(60vh, 520px);
+      padding: 0;
       margin: clamp(56px, 8vw, 110px) 0 0;
     }
     .tr-band {
@@ -130,11 +122,17 @@
        das untere vollstaendig zu und der Stapel ist nicht zu erkennen.
        Der Versatz des zweiten Bandes ist so gewaehlt, dass das Medaillon
        auf seiner Oberkante vollstaendig unter der Navbar hervorkommt. */
-    .tr-band:nth-child(1) { z-index: 1; top: var(--nav-h); }
-    .tr-band:nth-child(2) { z-index: 2; top: calc(var(--nav-h) + var(--med) / 2 + 14px); }
-    /* Das letzte Band schliesst buendig unter der Leiste ab — es muss
-       keinen Streifen mehr freilassen, weil nichts mehr darueber kommt. */
-    .tr-band:nth-child(3) { z-index: 3; top: var(--nav-h); }
+    /* nth-of-type, nicht nth-child: zwischen den Baendern steht das
+       Medaillon als <aside>, und nth-child wuerde es mitzaehlen — Band 2
+       bekaeme dann den Haltepunkt von Band 3. */
+    .tr-band:nth-of-type(1) { z-index: 1; top: var(--nav-h); }
+    /* Haltepunkt so gelegt, dass die Oberkante genau auf der Mitte des
+       Medaillons liegt — dadurch bleiben Aussparung und Kreis auch im
+       geklebten Zustand konzentrisch. */
+    .tr-band:nth-of-type(2) { z-index: 2; top: calc(var(--nav-h) + var(--med) / 2 + 14px); }
+    /* Das letzte Band schliesst buendig unter der Leiste ab und schiebt
+       sich dabei hinter das Medaillon. */
+    .tr-band:nth-of-type(3) { z-index: 3; top: var(--nav-h); }
     .tr-band img {
       width: 100%;
       height: 100%;
@@ -158,12 +156,17 @@
         #000 calc(var(--med) / 2 + var(--luft) + 1px));
     }
 
+    /* Oberste Ebene ueber dem ganzen Stapel: es klebt an seiner Stelle,
+       waehrend die Baender dahinter uebereinander falten. Deshalb sticky
+       im Stapel und nicht absolut in einem einzelnen Band. */
     .tr-medaillon {
-      position: absolute;
-      left: 50%;
-      top: 0;
-      transform: translate(-50%, -50%);
-      z-index: 2;
+      position: sticky;
+      z-index: 10;
+      top: calc(var(--nav-h) + 14px);
+      /* Negative Raender oben und unten: das Medaillon sitzt genau auf der
+         Naht und nimmt im Fluss keine Hoehe ein — sonst schoebe es die
+         Baender auseinander. */
+      margin: calc(var(--med) / -2) auto calc(var(--med) / -2);
       width: var(--med);
       height: var(--med);
       border-radius: 50%;

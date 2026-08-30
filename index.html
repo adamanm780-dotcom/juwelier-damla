@@ -531,15 +531,19 @@
     }
     .collections-header .gold-bar { margin: 0 auto; }
 
+    /* Drei Karten, die mittlere gross: Verlobungsringe stehen im
+       Mittelpunkt, Schmuck und Trauringe flankieren sie. */
     .collections-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: clamp(18px, 3vw, 32px);
-      /* Zwei Karten: Breite auf das alte Drei-Spalten-Mass begrenzen,
-         damit die Bogen-Form nicht in die Laenge gezogen wird. */
-      max-width: 780px;
+      grid-template-columns: 0.82fr 1.34fr 0.82fr;
+      gap: clamp(16px, 2.4vw, 30px);
+      align-items: center;
+      max-width: 1120px;
       margin: 0 auto;
     }
+    .collection-card a { display: block; color: inherit; }
+    .collection-card--gross img { aspect-ratio: 4 / 5.8; }
+    .collection-card--gross figcaption strong { font-size: 1.5rem; }
 
     .collection-card {
       position: relative;
@@ -1246,7 +1250,9 @@
       #ringCanvas { width: clamp(240px, 38vh, 400px); }
 
       .contact-grid { grid-template-columns: 1fr; gap: 48px; }
-      .collections-grid { grid-template-columns: 1fr 1fr; }
+      .collections-grid { grid-template-columns: 1fr 1fr; max-width: 780px; }
+      .collection-card--gross { grid-column: span 2; }
+      .collection-card--gross img { aspect-ratio: 16 / 10; }
       .services-grid .service-card { flex-basis: calc(50% - 1px); }
       .gallery-card--wide img { aspect-ratio: 16 / 10; }
       .reviews-grid { grid-template-columns: 1fr 1fr; }
@@ -1282,7 +1288,13 @@
       .hero__badge { margin-top: 18px; padding: 10px 16px; }
       .hero__scroll { display: none; }
 
+      /* Untereinander werden die Bogen sonst sehr hoch — drei Karten
+         a 520 px sind ein halber Bildschirm zu viel Scrollweg. */
       .collections-grid { grid-template-columns: 1fr; gap: 16px; }
+      .collection-card--gross { grid-column: auto; }
+      .collection-card img { aspect-ratio: 4 / 4.5; }
+      .collection-card--gross img { aspect-ratio: 4 / 5; }
+      .collection-card--gross figcaption strong { font-size: 1.35rem; }
       .collections-header { margin-bottom: 40px; }
 
       .services-grid {
@@ -2038,19 +2050,31 @@
 
       <div class="collections-grid">
         <figure class="collection-card reveal-img">
-          <img src="assets/trauringe.jpg" alt="Zwei goldene Trauringe auf Marmor" width="800" height="1000" loading="lazy">
-          <figcaption>
-            <strong>Trauringe & Verlobung</strong>
-            <span>Für das wichtigste Versprechen</span>
-          </figcaption>
-        </figure>
-
-        <figure class="collection-card reveal-img d1">
           <img src="assets/schmuck.jpg" alt="Goldschmuck-Stillleben mit Ketten, Ring und Armbändern auf Marmor" width="800" height="1000" loading="lazy">
           <figcaption>
             <strong>Ketten & Schmuck</strong>
             <span>Fein, hochwertig, zeitlos</span>
           </figcaption>
+        </figure>
+
+        <figure class="collection-card collection-card--gross reveal-img d1">
+          <a href="verlobungsringe.html">
+            <img src="assets/kollektion-verlobung.webp" alt="Zwei Verlobungsringe mit Solitär-Brillanten in Gelb- und Weißgold auf Marmor" width="900" height="1305" loading="lazy">
+            <figcaption>
+              <strong>Verlobungsringe</strong>
+              <span>Für die Frage, die alles ändert</span>
+            </figcaption>
+          </a>
+        </figure>
+
+        <figure class="collection-card reveal-img d2">
+          <a href="trauringe.html">
+            <img src="assets/kollektion-trauringe.webp" alt="Zwei schlichte goldene Trauringe auf hellem Marmor" width="800" height="1000" loading="lazy">
+            <figcaption>
+              <strong>Trauringe</strong>
+              <span>Für das wichtigste Versprechen</span>
+            </figcaption>
+          </a>
         </figure>
       </div>
     </div>
