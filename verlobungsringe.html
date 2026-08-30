@@ -2776,7 +2776,13 @@
       if (!el) return;
       document.body.classList.add('is-loading');
 
-      const WARM = 2;              // so viele Clips vor dem Start
+      // Nur der erste Clip wird abgewartet. Frueher waren es beide — dann
+      // haengt der Ladescreen an 1,1 MB Video, obwohl die Seite laengst
+      // steht und die Poster den Hero ohnehin korrekt zeigen.
+      // (Beide Clips behalten preload="auto": mit "metadata" verliert der
+      // zweite nach dem Abspielen seine Puffer und zeigt bei jedem
+      // Durchlauf kurz sein Poster.)
+      const WARM = 1;              // so viele Clips vor dem Start
       let seen = 0, finished = false;
 
       function finish() {
@@ -2795,7 +2801,9 @@
         if (seen >= WARM) finish();
       };
       window.addEventListener('load', function () { setTimeout(finish, 500); });
-      setTimeout(finish, 7000);           // Notausstieg, falls Bilder haengen
+      // Der Ladescreen ist Schmuck; das Markup steht mit dem Inline-CSS
+      // sofort. Laenger als gut zwei Sekunden darf er niemanden aufhalten.
+      setTimeout(finish, 2500);           // Notausstieg, falls Bilder haengen
     })();
 
     // ── Hero: zwei Ladenvideos im Wechsel ─────────────
