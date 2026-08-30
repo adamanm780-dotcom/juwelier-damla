@@ -1949,8 +1949,11 @@
     .service-card--foto:focus-within { background: var(--marble-warm); }
     .service-card--foto:hover .rp-foto,
     .service-card--foto:focus-within .rp-foto { transform: scale(1.11); }
+    /* Beim Hover gibt der Schleier etwas frei, aber nur so viel, dass
+       der Fliesstext ueber allen sechs Motiven noch auf mindestens
+       4,5:1 kommt — bei 0.86 rutschte die Ringweiten-Karte auf 4,36. */
     .service-card--foto:hover::before,
-    .service-card--foto:focus-within::before { opacity: 0.82; }
+    .service-card--foto:focus-within::before { opacity: 0.92; }
     .service-card--foto:hover .service-icon,
     .service-card--foto:focus-within .service-icon { transform: translateY(-4px); }
 
