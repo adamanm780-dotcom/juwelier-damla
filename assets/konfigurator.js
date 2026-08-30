@@ -121,12 +121,30 @@ const OBERFLAECHEN = {
 };
 
 /* Steinbesatz — Brillanten in der Aussenflaeche, mittig auf der Breite. */
+/* `anzahl` = feste Zahl fuer einen Akzent. `anteil` = Bruchteil des
+   Umfangs, der besetzt wird; die Steinzahl ergibt sich dann aus der
+   Ringgroesse — eine Vollmemoire in Groesse 62 traegt mehr Steine als
+   eine in 48, genau wie in echt. */
 const BESATZ = {
-  ohne:    { label: 'Ohne Stein',        anzahl: 0,  karat: 0 },
-  eins:    { label: '1 Brillant',        anzahl: 1,  karat: 0.03 },
-  drei:    { label: '3 Brillanten',      anzahl: 3,  karat: 0.03 },
-  fuenf:   { label: '5 Brillanten',      anzahl: 5,  karat: 0.02 },
-  memoire: { label: 'Memoire-Reihe (11)', anzahl: 11, karat: 0.015 },
+  ohne:   { label: 'Ohne Stein',    anzahl: 0,  karat: 0 },
+  eins:   { label: '1 Brillant',    anzahl: 1,  karat: 0.03 },
+  drei:   { label: '3 Brillanten',  anzahl: 3,  karat: 0.03 },
+  fuenf:  { label: '5 Brillanten',  anzahl: 5,  karat: 0.02 },
+  sieben: { label: '7 Brillanten',  anzahl: 7,  karat: 0.02 },
+  drittel:{ label: 'Drittelmemoire', anteil: 0.34, karat: 0.015, memoire: true },
+  halb:   { label: 'Halbmemoire',   anteil: 0.5,  karat: 0.015, memoire: true },
+  voll:   { label: 'Vollmemoire — rundum', anteil: 1, karat: 0.015, memoire: true },
+};
+
+/* Wo die Steine ueber die Ringbreite sitzen. `reihen` sind Positionen in
+   t (-1 = eine Kante, 0 = Mitte, +1 = andere Kante).
+   Zwei Reihen gibt es nur bei den Memoire-Besaetzen — ein Akzent aus drei
+   Steinen wird in der Werkstatt nicht auf zwei Reihen verteilt. */
+const STEINLAGE = {
+  mitte: { label: 'Mittig',      hinweis: 'mittig auf der Schiene', reihen: [0] },
+  rand:  { label: 'Am Rand',     hinweis: 'an einer Kante',         reihen: [0.5] },
+  zwei:  { label: 'Zwei Reihen', hinweis: 'auf beiden Kanten',      reihen: [-0.5, 0.5],
+           nurMemoire: true },
 };
 
 /* ══════════════════════════════════════════════════════════════
@@ -240,6 +258,85 @@ function brillantGeometrie(r) {
   pavillon.rotateX(Math.PI);
   pavillon.translate(0, -d * 0.215, 0);
   return { krone, pavillon };
+}
+
+/**
+ * Wo sitzt welcher Stein? Eine Quelle fuer Darstellung UND Preis — sonst
+ * zeigt der Ring eine andere Zahl an, als die Rechnung ansetzt.
+ *
+ * Liefert den Steinradius und je Stein Winkel, Position und Flaechen-
+ * normale. Die Normale ist noetig, weil ein Stein am Rand einer bombierten
+ * Schiene nicht radial nach aussen zeigt, sondern gekippt sitzt.
+ */
+function steinPlan(k) {
+  const b = BESATZ[k.besatz];
+  const profil = PROFILE[k.profil];
+  const lage = erlaubteLage(k);
+  const reihen = STEINLAGE[lage].reihen;
+  const ri = k.groesse / (2 * Math.PI);
+  const T = k.staerke;
+  const W = k.breite;
+
+  const punkte = [];
+  if (!b.anzahl && !b.anteil) return { rStein: 0, punkte };
+
+  // Der Stein muss in die Wandstaerke passen und in die Breite, die in
+  // seiner Reihe noch frei ist — am Rand ist das weniger als in der Mitte.
+  const engsteReihe = Math.max.apply(null, reihen.map(Math.abs));
+  const rStein = Math.min(
+    (W * (1 - engsteReihe)) / 2 - 0.05,
+    T * 0.42,
+    0.85
+  );
+  if (rStein <= 0.12) return { rStein: 0, punkte };
+
+  // 2.6 statt 2.4: bei einer Vollmemoire stossen die Steine sonst fast
+  // aneinander und es bleibt kein Metall dazwischen stehen.
+  const abstand = rStein * 2.6;                 // Bogenlaenge zwischen Steinen
+
+  reihen.forEach((t) => {
+    const y = (t * W) / 2;
+    const rA = ri + profil.aussen(t, T);
+
+    // Flaechennormale aus der Steigung des Aussenprofils an dieser Stelle
+    const h = 0.01;
+    const dr = (profil.aussen(t + h, T) - profil.aussen(t - h, T)) / (2 * h);
+    const dy = W / 2;                            // dy/dt
+    const len = Math.hypot(dy, dr) || 1;
+    const nR = dy / len;                         // radialer Anteil
+    const nY = -dr / len;                        // axialer Anteil
+
+    let n, schritt, start;
+    if (b.anteil) {
+      n = Math.max(1, Math.floor((b.anteil * 2 * Math.PI * rA) / abstand));
+      if (b.anteil >= 1) {
+        // Rundum: exakt gleichmaessig, damit sich Anfang und Ende treffen
+        schritt = (2 * Math.PI) / n;
+        start = -Math.PI / 2;
+      } else {
+        schritt = abstand / rA;
+        start = -Math.PI / 2 - ((n - 1) / 2) * schritt;
+      }
+    } else {
+      n = b.anzahl;
+      schritt = abstand / rA;
+      start = -Math.PI / 2 - ((n - 1) / 2) * schritt;
+    }
+
+    for (let i = 0; i < n; i++) {
+      const phi = start + i * schritt;
+      punkte.push({ phi, y, rA, nR, nY });
+    }
+  });
+
+  return { rStein, punkte };
+}
+
+/** Zwei Reihen gibt es nur bei Memoire — sonst auf mittig zurueckfallen. */
+function erlaubteLage(k) {
+  const lage = STEINLAGE[k.steinlage] ? k.steinlage : 'mitte';
+  if (STEINLAGE[lage].nurMemoire && !BESATZ[k.besatz].memoire) return 'mitte';
+  return lage;
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -628,6 +725,7 @@ const standard = () => ({
   staerke: 1.6,
   oberflaeche: 'poliert',
   besatz: 'ohne',
+  steinlage: 'mitte',
   groesse: 54,
   gravur: '',
 });
@@ -641,7 +739,7 @@ const zustand = {
 
 /* Diese Felder bleiben beim Koppeln individuell — Groesse und Gravur
    sind pro Person, alles andere macht ein Paar erst zum Paar. */
-const NICHT_KOPPELN = ['groesse', 'gravur', 'breite', 'besatz'];
+const NICHT_KOPPELN = ['groesse', 'gravur', 'breite', 'besatz', 'steinlage'];
 
 /* ── Konfiguration in der Adresszeile ──────────────────────────
    Damit ist ein Entwurf teilbar und wiederfindbar: der Link, den
@@ -670,6 +768,7 @@ function pruefen(k) {
   if (PROFILE[k.profil]) s.profil = k.profil;
   if (OBERFLAECHEN[k.oberflaeche]) s.oberflaeche = k.oberflaeche;
   if (BESATZ[k.besatz]) s.besatz = k.besatz;
+  if (STEINLAGE[k.steinlage]) s.steinlage = k.steinlage;
   s.bicolor = !!k.bicolor;
   s.breite = Math.min(8, Math.max(2.5, Number(k.breite) || s.breite));
   s.staerke = Math.min(2.4, Math.max(1.2, Number(k.staerke) || s.staerke));
@@ -783,32 +882,35 @@ function ringBauen(seite) {
     gruppe.add(band);
   }
 
-  // Brillanten in der Aussenflaeche, mittig auf der Breite
-  const anzahl = BESATZ[k.besatz].anzahl;
-  if (anzahl > 0) {
-    // Der Stein muss in die Wandstaerke passen, nicht nur auf die Breite:
-    // ein 2-mm-Brillant in einer 1,8 mm starken Schiene gibt es nicht.
-    const rStein = Math.min(W * 0.16, T * 0.42, 0.85);
-    const { krone, pavillon } = brillantGeometrie(rStein);
-    const rAussen = ri + profil.aussen(0, T);
-    const schritt = (rStein * 2.4) / rAussen;   // Bogenmass zwischen den Steinen
-    const start = -Math.PI / 2 - ((anzahl - 1) / 2) * schritt;
-
+  // Brillanten in der Aussenflaeche — Zahl und Lage kommen aus steinPlan
+  const plan = steinPlan(k);
+  if (plan.punkte.length) {
+    const { krone, pavillon } = brillantGeometrie(plan.rStein);
     const hoch = new THREE.Vector3(0, 1, 0);
-    for (let i = 0; i < anzahl; i++) {
-      const phi = start + i * schritt;
+
+    plan.punkte.forEach((pkt) => {
       const stein = new THREE.Group();
       stein.add(new THREE.Mesh(krone, BRILLANT_MATERIAL));
       stein.add(new THREE.Mesh(pavillon, BRILLANT_MATERIAL));
-      // Die Steinachse (lokales +Y) auf die Flaechennormale drehen,
-      // damit die Tafel buendig liegt und der Pavillon nach innen zeigt.
-      const nach = new THREE.Vector3(Math.cos(phi), 0, Math.sin(phi));
-      stein.quaternion.setFromUnitVectors(hoch, nach);
-      // tief genug versenkt, dass nur die Krone aus der Flaeche schaut
-      // Rundiste knapp unter der Oberflaeche, nur die Krone schaut heraus
-      stein.position.copy(nach).multiplyScalar(rAussen - rStein * 0.30);
+
+      // Die Steinachse (lokales +Y) auf die Flaechennormale drehen. Am Rand
+      // einer bombierten Schiene zeigt die nicht radial nach aussen — ohne
+      // die Kippung stuende der Stein schief in der Flaeche.
+      const norm = new THREE.Vector3(
+        pkt.nR * Math.cos(pkt.phi), pkt.nY, pkt.nR * Math.sin(pkt.phi)
+      ).normalize();
+      stein.quaternion.setFromUnitVectors(hoch, norm);
+
+      // Rundiste unter der Oberflaeche, nur die flache Krone schaut heraus.
+      // Weniger tief und die Steine durchbrechen die Silhouette des Rings.
+      const tief = plan.rStein * 0.44;
+      stein.position.set(
+        Math.cos(pkt.phi) * pkt.rA - norm.x * tief,
+        pkt.y - norm.y * tief,
+        Math.sin(pkt.phi) * pkt.rA - norm.z * tief
+      );
       gruppe.add(stein);
-    }
+    });
   }
 
   // Innengravur
@@ -880,12 +982,16 @@ function ringPreis(seite) {
   const material = gramm * (PREISE.grammpreis[k.karat] || PREISE.grammpreis['585']);
   const oberflaeche = OBERFLAECHEN[k.oberflaeche].aufpreis;
   const bicolor = k.bicolor ? PREISE.bicolor : 0;
-  const steine = BESATZ[k.besatz].anzahl * PREISE.stein;
+  // Dieselbe Quelle wie die 3D-Darstellung: die angezeigte Steinzahl und
+  // die berechnete koennen dadurch nicht auseinanderlaufen.
+  const steinzahl = steinPlan(k).punkte.length;
+  const steine = steinzahl * PREISE.stein;
   const gravur = k.gravur.trim() ? PREISE.gravur : 0;
 
   const summe = PREISE.grundpreis + material + oberflaeche + bicolor + steine + gravur;
   return {
     gramm,
+    steinzahl,
     posten: { material, grundpreis: PREISE.grundpreis, oberflaeche, bicolor, steine, gravur },
     summe: Math.round(summe / PREISE.rundung) * PREISE.rundung,
   };
@@ -1072,6 +1178,25 @@ function zeichnen() {
     (w) => setzen('besatz', w)
   );
 
+  // Steinlage — nur zeigen, wenn es ueberhaupt Steine gibt. Zwei Reihen
+  // stehen nur bei den Memoire-Besaetzen zur Wahl.
+  const hatSteine = !!(BESATZ[k.besatz].anzahl || BESATZ[k.besatz].anteil);
+  $('#kfLageFeld').hidden = !hatSteine;
+  if (hatSteine) {
+    const moeglich = Object.entries(STEINLAGE)
+      .filter(([, v]) => !v.nurMemoire || BESATZ[k.besatz].memoire);
+    knopfGruppe(
+      $('#kfLage'),
+      moeglich.map(([w, v]) => [w, v.label]),
+      erlaubteLage(k),
+      (w) => setzen('steinlage', w)
+    );
+    const zahl = ringPreis(zustand.aktiv).steinzahl;
+    $('#kfLageHinweis').textContent =
+      zahl + (zahl === 1 ? ' Brillant' : ' Brillanten')
+      + ' · ' + STEINLAGE[erlaubteLage(k)].hinweis;
+  }
+
   // Groesse + Gravur
   $('#kfGroesse').value = k.groesse;
   $('#kfGroesseWert').textContent = 'Größe ' + k.groesse;
@@ -1093,6 +1218,16 @@ function preisZeichnen() {
   $('#kfZusammenfassung').textContent = zusammenfassung();
 }
 
+/** Besatz im Klartext: Etikett, echte Steinzahl und Lage. */
+function steinText(seite) {
+  const k = zustand[seite];
+  const b = BESATZ[k.besatz];
+  if (!b.anzahl && !b.anteil) return b.label;
+  const zahl = steinPlan(k).punkte.length;
+  return b.label + ' (' + zahl + ' Steine, '
+       + STEINLAGE[erlaubteLage(k)].hinweis + ')';
+}
+
 function ringText(seite) {
   const k = zustand[seite];
   const leg = LEGIERUNGEN[k.legierung];
@@ -1104,7 +1239,7 @@ function ringText(seite) {
     k.breite.toFixed(1).replace('.', ',') + ' mm breit',
     k.staerke.toFixed(1).replace('.', ',') + ' mm stark',
     OBERFLAECHEN[k.oberflaeche].label,
-    BESATZ[k.besatz].label,
+    steinText(seite),
     'Größe ' + k.groesse,
     k.gravur.trim() ? 'Gravur: „' + k.gravur.trim() + '“' : null,
   ].filter(Boolean);
