@@ -651,3 +651,379 @@ src = src.replace(OLD_CONTENT, '', 1)
 io.open(OUT, 'w', encoding='utf-8').write(src)
 print('index.html gebaut: %.0f KB | Hero-Clips %d a %.1f s | Ring-Frames %d'
       % (len(src.encode('utf-8')) / 1024.0, N_CLIPS, SLOT_MS / 1000.0, N_RING))
+
+
+# ══════════════════════════════════════════════════════════
+# 9) Trauring-Popup beim ersten Besuch
+# ──────────────────────────────────────────────────────────
+# Gestalterisch an einer Referenz orientiert: ein mattierter
+# Glasbogen liegt ueber einem Produktfoto, die Ringe schimmern
+# unscharf hindurch. Serifen-Display in Roman + Kursiv, Pillen-
+# Knopf mit wanderndem Pfeil.
+# ══════════════════════════════════════════════════════════
+POPUP_CSS = """
+    /* ═══════════════════════════════════════════
+       TRAURING-POPUP
+    ═══════════════════════════════════════════ */
+    .jd-pop {
+      position: fixed;
+      inset: 0;
+      z-index: 950;
+      display: grid;
+      place-items: center;
+      padding: clamp(16px, 4vw, 40px);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+    .jd-pop.is-auf { opacity: 1; visibility: visible; }
+
+    .jd-pop__grund {
+      position: absolute;
+      inset: 0;
+      background: rgba(24, 21, 17, 0.52);
+      -webkit-backdrop-filter: blur(7px);
+      backdrop-filter: blur(7px);
+      border: 0;
+      padding: 0;
+      cursor: pointer;
+    }
+
+    /* Die Karte traegt die Bogenform, die auf der Seite ohnehin
+       das wiederkehrende Motiv ist. */
+    .jd-pop__karte {
+      position: relative;
+      width: min(92vw, 440px);
+      max-height: calc(100vh - 32px);
+      overflow-x: hidden;
+      overflow-y: auto;
+      border-radius: 220px 220px 14px 14px;
+      background: var(--marble-warm);
+      box-shadow: 0 30px 90px rgba(24, 21, 17, 0.32);
+      padding-top: clamp(104px, 27vw, 172px);
+      padding-bottom: clamp(46px, 12vw, 76px);
+      transform: translateY(26px) scale(0.965);
+      opacity: 0;
+      transition: transform 0.75s var(--ease-out), opacity 0.6s ease;
+      scrollbar-width: none;
+    }
+    .jd-pop__karte::-webkit-scrollbar { display: none; }
+    .jd-pop.is-auf .jd-pop__karte { transform: none; opacity: 1; }
+
+    /* Der Schatten liegt auf dem Wrapper, nicht auf dem geclippten
+       Element — so folgt er der Bogenkante statt dem Rechteck. */
+    .jd-pop__glashuelle {
+      position: relative;
+      z-index: 1;
+      filter: drop-shadow(0 10px 26px rgba(24, 21, 17, 0.16));
+    }
+
+    .jd-pop__bild {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+    }
+
+    /* Mattierter Glasbogen. Die Ringe liegen im Foto darunter und
+       schimmern unscharf durch — das ist der eigentliche Effekt. */
+    .jd-pop__glas {
+      position: relative;
+      z-index: 1;
+      margin: 0 clamp(18px, 5vw, 30px);
+      padding: clamp(38px, 8vw, 58px) clamp(20px, 4.6vw, 30px) clamp(24px, 5vw, 34px);
+      text-align: center;
+      background: rgba(255, 253, 250, 0.86);
+      -webkit-clip-path: url(#jdBogen);
+      clip-path: url(#jdBogen);
+    }
+    @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+      /* Bewusst durchlaessig: die Ringe im Foto sollen als warmer
+         Schimmer hinter dem Glas stehen bleiben, nicht verschwinden. */
+      .jd-pop__glas {
+        background: rgba(255, 253, 250, 0.42);
+        -webkit-backdrop-filter: blur(12px) saturate(1.25);
+        backdrop-filter: blur(12px) saturate(1.25);
+      }
+    }
+
+    /* Ruhigeres Bett fuer den Text, ohne die Bogenkanten milchig zu
+       machen: oben und unten bleibt das Glas klar. */
+    .jd-pop__glas::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(180deg,
+        rgba(255,253,250,0)    0%,
+        rgba(255,253,250,0.34) 30%,
+        rgba(255,253,250,0.34) 76%,
+        rgba(255,253,250,0)    100%);
+    }
+
+    /* Einmaliger Lichtstreifen ueber das Glas, sobald es steht. */
+    .jd-pop__glas::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(105deg,
+        rgba(255,255,255,0) 38%,
+        rgba(255,255,255,0.55) 50%,
+        rgba(255,255,255,0) 62%);
+      transform: translateX(-120%);
+    }
+    .jd-pop.is-auf .jd-pop__glas::after {
+      animation: jdSchimmer 1.5s var(--ease-out) 0.55s 1;
+    }
+    @keyframes jdSchimmer {
+      to { transform: translateX(120%); }
+    }
+
+    /* Inhalt staffelt sich ein */
+    .jd-pop__stufe {
+      position: relative;   /* ueber dem Verlauf im Glas */
+      z-index: 1;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 0.6s ease, transform 0.7s var(--ease-out);
+    }
+    .jd-pop.is-auf .jd-pop__stufe { opacity: 1; transform: none; }
+    .jd-pop.is-auf .jd-pop__stufe:nth-child(1) { transition-delay: 0.26s; }
+    .jd-pop.is-auf .jd-pop__stufe:nth-child(2) { transition-delay: 0.34s; }
+    .jd-pop.is-auf .jd-pop__stufe:nth-child(3) { transition-delay: 0.42s; }
+    .jd-pop.is-auf .jd-pop__stufe:nth-child(4) { transition-delay: 0.50s; }
+    .jd-pop.is-auf .jd-pop__stufe:nth-child(5) { transition-delay: 0.58s; }
+
+    .jd-pop__eyebrow {
+      display: block;
+      font-size: 0.55rem;
+      font-weight: 600;
+      letter-spacing: 0.34em;
+      text-transform: uppercase;
+      color: var(--gold-dark);
+      margin-bottom: 14px;
+    }
+    .jd-pop__titel {
+      font-family: var(--font-serif);
+      font-size: clamp(1.75rem, 6.4vw, 2.3rem);
+      font-weight: 300;
+      line-height: 1.14;
+      color: var(--ink);
+      margin-bottom: 14px;
+    }
+    .jd-pop__titel em { font-style: italic; color: var(--gold-dark); }
+    .jd-pop__text {
+      font-family: var(--font-serif);
+      font-size: clamp(0.95rem, 3.4vw, 1.04rem);
+      font-weight: 300;
+      line-height: 1.75;
+      color: var(--ink-soft);
+      margin-bottom: 22px;
+    }
+
+    /* Pillen-Knopf, der Pfeil wandert beim Zeigen */
+    .jd-pop__cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--gold);
+      color: #fff;
+      border-radius: 999px;
+      padding: 13px 26px;
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      transition: background 0.35s ease, box-shadow 0.35s ease;
+      box-shadow: 0 6px 22px rgba(160, 120, 56, 0.28);
+    }
+    .jd-pop__cta:hover { background: var(--gold-dark); }
+    .jd-pop__cta svg { width: 15px; height: 9px; transition: transform 0.35s var(--ease-out); }
+    .jd-pop__cta:hover svg { transform: translateX(5px); }
+
+    .jd-pop__spaeter {
+      display: block;
+      margin: 15px auto 0;
+      background: none;
+      border: 0;
+      cursor: pointer;
+      font-family: var(--font-sans);
+      font-size: 0.66rem;
+      color: var(--ink-muted);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      transition: color 0.3s ease;
+    }
+    .jd-pop__spaeter:hover { color: var(--gold-dark); }
+
+    /* Am Overlay, nicht an der Karte: der Bogenradius schneidet die
+       obere Ecke weg, dort waere der Knopf unsichtbar. */
+    .jd-pop__zu {
+      position: absolute;
+      top: clamp(12px, 3vw, 26px);
+      right: clamp(12px, 3vw, 26px);
+      z-index: 3;
+      width: 40px; height: 40px;
+      display: grid;
+      place-items: center;
+      border: 0;
+      border-radius: 50%;
+      cursor: pointer;
+      background: rgba(255, 253, 250, 0.82);
+      color: var(--ink-soft);
+      font-size: 1.15rem;
+      line-height: 1;
+      box-shadow: 0 2px 12px rgba(24, 21, 17, 0.24);
+      transition: background 0.3s ease, color 0.3s ease, transform 0.3s ease;
+    }
+    .jd-pop__zu:hover { background: #fff; color: var(--gold-dark); transform: rotate(90deg); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .jd-pop__karte { transform: none; transition: opacity 0.3s ease; }
+      .jd-pop__stufe { transform: none; }
+      .jd-pop.is-auf .jd-pop__glas::after { animation: none; }
+    }
+"""
+src = sub1(r'\n  </style>', POPUP_CSS + '\n  </style>', src, 0, 'Popup-CSS')
+
+
+POPUP_HTML = """
+  <!-- Bogen-Maske fuer das Glas; objectBoundingBox skaliert mit -->
+  <svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+    <defs>
+      <clipPath id="jdBogen" clipPathUnits="objectBoundingBox">
+        <path d="M0.5,0 C0.60,0.020 0.70,0.052 0.79,0.079 C0.91,0.113 1,0.128 1,0.176 L1,0.965 Q1,1 0.955,1 L0.045,1 Q0,1 0,0.965 L0,0.176 C0,0.128 0.09,0.113 0.21,0.079 C0.30,0.052 0.40,0.020 0.5,0 Z"/>
+      </clipPath>
+    </defs>
+  </svg>
+
+  <div class="jd-pop" id="jdPop" role="dialog" aria-modal="true"
+       aria-labelledby="jdPopTitel" aria-describedby="jdPopText" hidden>
+    <button type="button" class="jd-pop__grund" id="jdPopGrund" tabindex="-1" aria-label="Hinweis schließen"></button>
+    <button type="button" class="jd-pop__zu" id="jdPopZu" aria-label="Schließen">&#215;</button>
+
+    <div class="jd-pop__karte" id="jdPopKarte">
+      <img class="jd-pop__bild" src="assets/popup-trauringe.webp"
+           alt="Zwei goldene Trauringe auf champagnerfarbener Seide"
+           width="900" height="1200" decoding="async">
+
+      <div class="jd-pop__glashuelle">
+      <div class="jd-pop__glas">
+        <span class="jd-pop__eyebrow jd-pop__stufe">Neu bei Juwelier Damla</span>
+        <h2 class="jd-pop__titel jd-pop__stufe" id="jdPopTitel">Ihre Trauringe,<br><em>Zug um Zug</em></h2>
+        <p class="jd-pop__text jd-pop__stufe" id="jdPopText">
+          Legierung, Profil, Breite, Oberfläche – stellen Sie Ihr Paar
+          selbst zusammen und sehen Sie jede Entscheidung sofort am Ring.
+        </p>
+        <a class="jd-pop__cta jd-pop__stufe" href="trauringe.html" id="jdPopCta">
+          Konfigurator öffnen
+          <svg viewBox="0 0 15 9" fill="none" aria-hidden="true">
+            <path d="M0 4.5h13M9.5 1l3.5 3.5L9.5 8" stroke="currentColor" stroke-width="1.2"/>
+          </svg>
+        </a>
+        <button type="button" class="jd-pop__spaeter jd-pop__stufe" id="jdPopSpaeter">Vielleicht später</button>
+      </div>
+      </div>
+    </div>
+  </div>
+"""
+# Vor den Skriptblock, nicht vor </body>: das Seitenskript laeuft waehrend
+# des Parsens, und ein Popup, das danach im Dokument steht, existiert dort
+# noch nicht — getElementById kaeme leer zurueck und die Funktion stiege
+# still aus.
+src = sub1(r'\n  <script>\n', POPUP_HTML + '\n  <script>\n', src, 0, 'Popup-Markup')
+
+
+POPUP_JS = """
+    /* ── Trauring-Popup ───────────────────────────────────────
+       Zeigt sich einmal je Besucher, nachdem der Ladescreen weg
+       ist. Wer es wegklickt, sieht es 30 Tage nicht wieder — ein
+       Hinweis, der bei jedem Aufruf wiederkommt, aergert nur. */
+    (function () {
+      var pop = document.getElementById('jdPop');
+      if (!pop) return;
+
+      var SCHLUESSEL = 'jd-trauring-popup';
+      var RUHE_TAGE = 30;
+
+      var gesehen = null;
+      try { gesehen = localStorage.getItem(SCHLUESSEL); } catch (e) { gesehen = null; }
+      if (gesehen && Date.now() - Number(gesehen) < RUHE_TAGE * 864e5) return;
+
+      var karte = document.getElementById('jdPopKarte');
+      var cta = document.getElementById('jdPopCta');
+      var zu = document.getElementById('jdPopZu');
+      var spaeter = document.getElementById('jdPopSpaeter');
+      var vorherFokus = null;
+
+      function merken() {
+        try { localStorage.setItem(SCHLUESSEL, String(Date.now())); } catch (e) {}
+      }
+
+      function schliessen() {
+        pop.classList.remove('is-auf');
+        document.body.style.overflow = '';
+        merken();
+        setTimeout(function () { pop.hidden = true; }, 520);
+        if (vorherFokus && vorherFokus.focus) vorherFokus.focus();
+        document.removeEventListener('keydown', taste);
+      }
+
+      /* Escape schliesst, Tab bleibt im Dialog gefangen. */
+      function taste(e) {
+        if (e.key === 'Escape') { schliessen(); return; }
+        if (e.key !== 'Tab') return;
+        var ziele = [zu, cta, spaeter];
+        var i = ziele.indexOf(document.activeElement);
+        e.preventDefault();
+        var naechster = e.shiftKey
+          ? ziele[(i <= 0 ? ziele.length : i) - 1]
+          : ziele[(i + 1) % ziele.length];
+        naechster.focus();
+      }
+
+      function oeffnen() {
+        vorherFokus = document.activeElement;
+        pop.hidden = false;
+        document.body.style.overflow = 'hidden';
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () { pop.classList.add('is-auf'); });
+        });
+        setTimeout(function () { cta.focus({ preventScroll: true }); }, 620);
+        document.addEventListener('keydown', taste);
+      }
+
+      zu.addEventListener('click', schliessen);
+      document.getElementById('jdPopGrund').addEventListener('click', schliessen);
+      spaeter.addEventListener('click', schliessen);
+      /* Wer den Konfigurator oeffnet, hat den Hinweis erledigt. */
+      cta.addEventListener('click', merken);
+      karte.addEventListener('click', function (e) { e.stopPropagation(); });
+
+      /* Erst zeigen, wenn der Ladescreen fertig ist — sonst liegen
+         zwei Overlays uebereinander. */
+      var start = function () { setTimeout(oeffnen, 900); };
+      var loader = document.getElementById('loader');
+      if (loader && !loader.classList.contains('is-done')) {
+        var beobachter = new MutationObserver(function () {
+          if (loader.classList.contains('is-done')) { beobachter.disconnect(); start(); }
+        });
+        beobachter.observe(loader, { attributes: true, attributeFilter: ['class'] });
+        setTimeout(function () { beobachter.disconnect(); }, 9000);
+      } else {
+        start();
+      }
+    })();
+"""
+# Achtung: das erste `</script>` im Dokument schliesst den JSON-LD-Block.
+# Deshalb gezielt an das LETZTE anhaengen — das ist das Seitenskript.
+ENDE = '\n  </script>'
+i = src.rfind(ENDE)
+assert i > 0, 'Seitenskript-Ende nicht gefunden'
+src = src[:i] + POPUP_JS + src[i:]
+
+io.open(OUT, 'w', encoding='utf-8').write(src)
+print('Popup eingebaut')
