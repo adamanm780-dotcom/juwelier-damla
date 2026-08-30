@@ -1219,7 +1219,7 @@
       .marquee__track { animation: none; }
       #cursorGlow { display: none; }
       .hero__eyebrow, .hero__title, .hero__text,
-      .hero__actions, #ringCanvas,
+      .hero__actions, #kastenCanvas,
       .hero__badge, .hero__scroll { opacity: 1; }
     }
 
@@ -1246,7 +1246,7 @@
       .nav__links.open { display: flex; }
       .nav__burger     { display: flex; }
 
-      #ringCanvas { width: clamp(240px, 38vh, 400px); }
+      #kastenCanvas { width: clamp(260px, 40vh, 420px); }
 
       .contact-grid { grid-template-columns: 1fr; gap: 48px; }
       .collections-grid { grid-template-columns: 1fr 1fr; max-width: 780px; }
@@ -1283,7 +1283,7 @@
         gap: 10px;
       }
       .hero__actions a { padding: 13px 24px; }
-      #ringCanvas { width: clamp(210px, 34vh, 320px); }
+      #kastenCanvas { width: clamp(230px, 36vh, 340px); }
       .hero__badge { margin-top: 18px; padding: 10px 16px; }
       .hero__scroll { display: none; }
 
@@ -1590,6 +1590,31 @@
       padding: calc(var(--nav-h) + 20px) var(--pad-x) 0;
     }
     .ring__stage { position: relative; }
+    #kastenCanvas {
+      display: block;
+      width: clamp(280px, 44vh, 560px);
+      height: auto;
+      aspect-ratio: 900 / 969;
+      filter: drop-shadow(0 26px 44px rgba(120, 92, 48, 0.22));
+      transform-origin: 50% 62%;   /* der Kasten steht unten auf */
+    }
+    /* Der Schimmer wandert beim Scrollen gegen die Leserichtung.
+       Grosszuegig ueber den Kasten hinaus, sonst sieht man die
+       Bewegung an den Raendern abreissen. */
+    .kasten__glanz {
+      position: absolute;
+      inset: -22% -18%;
+      z-index: -1;
+      pointer-events: none;
+      background: radial-gradient(ellipse 62% 52% at 50% 52%,
+        rgba(201, 160, 85, 0.20) 0%,
+        rgba(201, 160, 85, 0.09) 42%,
+        transparent 72%);
+      will-change: transform;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .kasten__glanz { transform: none !important; }
+    }
     .ring__caption {
       margin-top: clamp(20px, 3vh, 34px);
       font-size: 0.6rem;
@@ -3197,17 +3222,18 @@
       }
     })();
 
-    // ── Ring-Scroll-Animation (Frame-Scrubbing) ──────
-    // 48 vorgerenderte Frames (Higgsfield-Video), per Scroll
-    // gescrubbt. mix-blend-mode: multiply entfernt den weißen
-    // Video-Hintergrund optisch. Läuft auch auf Mobile.
+    // ── Schmuckkästchen: Scroll-Animation (Frame-Scrubbing) ──
+    // 50 Frames aus einem Greenscreen-Video, beim Freistellen schon
+    // mit Alphakanal versehen. Deshalb hier kein Keying mehr pro Bild
+    // wie beim alten Ring — das Canvas zeichnet nur noch.
     (function () {
-      const canvas = document.getElementById('ringCanvas');
-      const hero = document.getElementById('ring');
-      if (!canvas || !hero) return;
+      const canvas  = document.getElementById('kastenCanvas');
+      const sektion = document.getElementById('ring');
+      const schimmer = document.getElementById('kastenGlanz');
+      if (!canvas || !sektion) return;
       const ctx = canvas.getContext('2d');
-      const FRAMES = 48;
-      const SRC = i => 'assets/ring/frame-' + String(i + 1).padStart(3, '0') + '.webp';
+      const FRAMES = 50;
+      const SRC = i => 'assets/kasten/kasten-' + String(i + 1).padStart(3, '0') + '.webp';
       const imgs = new Array(FRAMES);
       const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -3216,19 +3242,8 @@
 
       function draw(i) {
         if (!ready(i)) return;
-        const w = canvas.width, h = canvas.height;
-        ctx.clearRect(0, 0, w, h);
-        ctx.drawImage(imgs[i], 0, 0, w, h);
-        // Weiß-Keying: heller Video-Hintergrund wird transparent,
-        // mit weichem Übergang an den Kanten des Rings
-        const id = ctx.getImageData(0, 0, w, h);
-        const d = id.data;
-        for (let p = 0; p < d.length; p += 4) {
-          const m = Math.min(d[p], d[p + 1], d[p + 2]);
-          if (m > 246)      d[p + 3] = 0;
-          else if (m > 230) d[p + 3] = Math.max(0, 255 - (m - 230) * 16);
-        }
-        ctx.putImageData(id, 0, 0);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(imgs[i], 0, 0, canvas.width, canvas.height);
         current = i;
       }
       function load(i, cb) {
@@ -3240,25 +3255,38 @@
         imgs[i] = im;
       }
 
+      if (reduced) {                       // offener Kasten genügt
+        load(FRAMES - 1, () => draw(FRAMES - 1));
+        return;
+      }
+
       load(0, () => draw(0));
-      if (reduced) return;                        // statisches Bild genügt
-      for (let i = 1; i < FRAMES; i++) load(i);   // restliche Frames vorladen
+      // Die restlichen Bilder sind zusammen gut zwei Megabyte. Erst
+      // laden, wenn die Seite steht — sonst nehmen sie dem Hero-Video
+      // die Leitung weg.
+      const rest = () => { for (let i = 1; i < FRAMES; i++) load(i); };
+      if (document.readyState === 'complete') rest();
+      else window.addEventListener('load', rest, { once: true });
 
       let ticking = false;
       function update() {
         ticking = false;
-        const runway = hero.offsetHeight - window.innerHeight;
+        const runway = sektion.offsetHeight - window.innerHeight;
         if (runway <= 0) return;
-        const top = hero.getBoundingClientRect().top;
-        const p = Math.min(1, Math.max(0, -top / runway));
+        const p = Math.min(1, Math.max(0, -sektion.getBoundingClientRect().top / runway));
         const idx = Math.min(FRAMES - 1, Math.round(p * (FRAMES - 1)));
         if (idx !== current) {
           let j = idx;
           while (j >= 0 && !ready(j)) j--;        // nächstes geladenes Frame
           if (j >= 0 && j !== current) draw(j);
         }
-        canvas.style.transform = 'scale(' + (0.94 + p * 0.1).toFixed(4) + ')';
-
+        canvas.style.transform = 'scale(' + (0.95 + p * 0.08).toFixed(4) + ')';
+        // Gegenbewegung: der Schimmer wandert nach unten, während die
+        // Seite nach oben läuft. Bewusst klein gehalten — er soll Tiefe
+        // geben und nicht selbst auffallen.
+        if (schimmer) {
+          schimmer.style.transform = 'translateY(' + ((p - 0.5) * 96).toFixed(1) + 'px)';
+        }
       }
       window.addEventListener('scroll', () => {
         if (!ticking) { ticking = true; requestAnimationFrame(update); }

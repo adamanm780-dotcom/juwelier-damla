@@ -23,8 +23,8 @@ if not os.path.exists(SRC):
 
 src = io.open(SRC, encoding='utf-8').read()
 
-N_RING = len(glob.glob(os.path.join(DIR, 'assets', 'ring', 'frame-*.webp')))
-assert N_RING > 0, 'Ring-Frames fehlen'
+N_RING = len(glob.glob(os.path.join(DIR, 'assets', 'kasten', 'kasten-*.webp')))
+assert N_RING == 50, 'Kasten-Frames fehlen oder es sind nicht 50'
 
 # Hero: zwei Clips im Wechsel. SLOT_MS ist die Standzeit je Clip — beide
 # Quellen sind gut 5 s lang und werden per playbackRate darauf gerafft,
@@ -308,6 +308,31 @@ CSS = """
       padding: calc(var(--nav-h) + 20px) var(--pad-x) 0;
     }
     .ring__stage { position: relative; }
+    #kastenCanvas {
+      display: block;
+      width: clamp(280px, 44vh, 560px);
+      height: auto;
+      aspect-ratio: 900 / 969;
+      filter: drop-shadow(0 26px 44px rgba(120, 92, 48, 0.22));
+      transform-origin: 50% 62%;   /* der Kasten steht unten auf */
+    }
+    /* Der Schimmer wandert beim Scrollen gegen die Leserichtung.
+       Grosszuegig ueber den Kasten hinaus, sonst sieht man die
+       Bewegung an den Raendern abreissen. */
+    .kasten__glanz {
+      position: absolute;
+      inset: -22% -18%;
+      z-index: -1;
+      pointer-events: none;
+      background: radial-gradient(ellipse 62% 52% at 50% 52%,
+        rgba(201, 160, 85, 0.20) 0%,
+        rgba(201, 160, 85, 0.09) 42%,
+        transparent 72%);
+      will-change: transform;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .kasten__glanz { transform: none !important; }
+    }
     .ring__caption {
       margin-top: clamp(20px, 3vh, 34px);
       font-size: 0.6rem;
@@ -441,11 +466,11 @@ NEW_SECTIONS = """  <!-- ══════════════════�
   <!-- ═══════════════════════════════════
        RING — Scroll-Animation
   ═══════════════════════════════════ -->
-  <section id="ring" aria-label="Trauring, langsam gedreht">
+  <section id="ring" aria-label="Ein Schmuckkästchen öffnet sich beim Scrollen">
     <div class="ring__sticky">
       <div class="ring__stage" id="ringStage" aria-hidden="true">
-        <div class="hero__ring-glow"></div>
-        <canvas id="ringCanvas" width="640" height="640"></canvas>
+        <div class="kasten__glanz" id="kastenGlanz"></div>
+        <canvas id="kastenCanvas" width="900" height="969"></canvas>
       </div>
       <div class="ring__caption">Handwerk · Wellritzstraße 3</div>
     </div>
@@ -630,36 +655,8 @@ JS = """
 
 src = sub1(r'\n  <script>\n', '\n  <script>\n' + JS, src, 0, 'Script-Anfang')
 
-# ── Ring-JS auf die eigene Sektion umstellen ──────────────
-OLD_RING_HEAD = """      const canvas = document.getElementById('ringCanvas');
-      const hero = document.getElementById('hero');
-      const content = document.getElementById('heroContent');
-      if (!canvas || !hero) return;"""
-NEW_RING_HEAD = """      const canvas = document.getElementById('ringCanvas');
-      const hero = document.getElementById('ring');
-      if (!canvas || !hero) return;"""
-assert OLD_RING_HEAD in src, 'Ring-JS-Kopf nicht gefunden'
-src = src.replace(OLD_RING_HEAD, NEW_RING_HEAD, 1)
-
-# Fortschritt jetzt relativ zur Ring-Sektion (die steht nicht mehr bei scrollY 0)
-OLD_P = """        const runway = hero.offsetHeight - window.innerHeight;
-        if (runway <= 0) return;
-        const p = Math.min(1, Math.max(0, window.scrollY / runway));"""
-NEW_P = """        const runway = hero.offsetHeight - window.innerHeight;
-        if (runway <= 0) return;
-        const top = hero.getBoundingClientRect().top;
-        const p = Math.min(1, Math.max(0, -top / runway));"""
-assert OLD_P in src, 'Ring-Fortschritt nicht gefunden'
-src = src.replace(OLD_P, NEW_P, 1)
-
-# heroContent gibt es nicht mehr
-OLD_CONTENT = """        content.style.opacity = Math.max(0, 1 - Math.max(0, p - 0.55) * 1.8).toFixed(3);
-        content.style.transform = 'translateY(' + (-p * 26).toFixed(1) + 'px)';"""
-assert OLD_CONTENT in src, 'heroContent-Block nicht gefunden'
-src = src.replace(OLD_CONTENT, '', 1)
-
 io.open(OUT, 'w', encoding='utf-8').write(src)
-print('index.html gebaut: %.0f KB | Hero-Clips %d a %.1f s | Ring-Frames %d'
+print('index.html gebaut: %.0f KB | Hero-Clips %d a %.1f s | Kasten-Frames %d'
       % (len(src.encode('utf-8')) / 1024.0, N_CLIPS, SLOT_MS / 1000.0, N_RING))
 
 
