@@ -638,6 +638,7 @@ vr_cards = '\n\n'.join("""        <article class="service-card reveal%s">
           </div>
           <h3 class="service-title">%s</h3>
           <p class="service-text">%s</p>
+          <span class="jd-glanz" aria-hidden="true"></span>
         </article>""" % ('' if i == 0 else ' d%d' % min(i, 3), icon, name, txt)
     for i, (name, icon, txt) in enumerate(VR_POINTS))
 
