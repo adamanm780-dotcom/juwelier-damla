@@ -1,0 +1,104 @@
+  <div class="sh-hinweis"><b>Entwurf</b> &nbsp;·&nbsp; Gestaltungsvorschlag für einen Onlineshop &nbsp;·&nbsp; Preise sind Platzhalter</div>
+
+  <!-- ═══════════════════════════════════
+       AUFTAKT
+  ═══════════════════════════════════ -->
+  <section class="sh-auftakt" aria-labelledby="shopTitel">
+    <div class="wrap">
+      <div class="sh-auftakt__raster">
+
+        <figure class="sh-film reveal-img">
+          <video autoplay muted loop playsinline preload="metadata"
+                 poster="assets/shop/werkstatt-poster.webp"
+                 aria-label="Nahaufnahme aus der Werkstatt: ein Ring wird gelötet, gefeilt und gefasst">
+            <source src="assets/shop/werkstatt.mp4" type="video/mp4">
+          </video>
+          <div class="sh-film__schleier" aria-hidden="true"></div>
+          <figcaption class="sh-film__cap">In unserer Werkstatt · Wellritzstraße 3</figcaption>
+        </figure>
+
+        <div class="sh-auftakt__text">
+          <span class="eyebrow reveal">Onlineshop</span>
+          <h1 class="reveal d1" id="shopTitel">Handarbeit,<br><em>die man trägt</em></h1>
+          <div class="gold-bar reveal d2" role="presentation"></div>
+          <p class="sh-auftakt__lead reveal d2">
+            Jedes Stück entsteht bei uns im Haus – gelötet, gefeilt, gefasst und poliert.
+            Was Sie hier sehen, können Sie online aussuchen und bei uns in der
+            Wellritzstraße anprobieren, ändern lassen oder gravieren.
+          </p>
+          <div class="sub-actions reveal d3">
+            <a href="#trauringe" class="btn-solid">Trauringe ansehen</a>
+            <a href="#verlobung" class="btn-ghost">Verlobungsringe</a>
+          </div>
+
+          <ul class="sh-zusagen reveal d4">
+            <li><strong>In Wiesbaden gefertigt</strong><span>Änderungen, Gravuren und Reparaturen in der eigenen Werkstatt.</span></li>
+            <li><strong>Erst anprobieren</strong><span>Online aussuchen, im Geschäft an den Finger legen. Ohne Termin.</span></li>
+            <li><strong>Größe inklusive</strong><span>Wir messen kostenlos und passen die Weite später jederzeit an.</span></li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       KATEGORIEN
+  ═══════════════════════════════════ -->
+  <section aria-labelledby="katTitel">
+    <div class="wrap">
+      <div class="sh-leiste">
+        <h2 id="katTitel">Wonach suchen Sie?</h2>
+        <p>Fünf Bereiche</p>
+      </div>
+      <nav class="sh-kat reveal" aria-label="Warengruppen">
+%(kategorien)s
+      </nav>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       TRAURINGE
+  ═══════════════════════════════════ -->
+  <section id="trauringe" aria-labelledby="trTitel">
+    <div class="wrap">
+      <div class="sh-leiste">
+        <h2 id="trTitel">Trauringe</h2>
+        <p>Zehn Modelle · in Gelb-, Weiß- und Rotgold</p>
+      </div>
+      <div class="sh-raster">
+%(trauringe)s
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       BAND
+  ═══════════════════════════════════ -->
+  <figure class="sh-band reveal-img">
+    <img src="assets/trauringe/breit-2.webp" alt="Ein polierter Goldtrauring auf champagnerfarbener Seide" width="2000" height="848" loading="lazy">
+    <figcaption class="sh-band__text">
+      <strong>Jeder Ring geht durch dieselben Hände</strong>
+      <span>Löten · Feilen · Fassen · Polieren</span>
+    </figcaption>
+  </figure>
+
+  <!-- ═══════════════════════════════════
+       VERLOBUNGSRINGE
+  ═══════════════════════════════════ -->
+  <section id="verlobung" aria-labelledby="vrTitel">
+    <div class="wrap">
+      <div class="sh-leiste">
+        <h2 id="vrTitel">Verlobungsringe</h2>
+        <p>Fünf Fassungen · Stein nach Wunsch</p>
+      </div>
+      <div class="sh-raster">
+%(fassungen)s
+      </div>
+      <p class="sub-note reveal">
+        Die Preise gelten für die Fassung. Den Stein suchen wir gemeinsam aus –
+        Größe, Farbe und Reinheit bestimmen am Ende den Preis, und den sagen wir
+        Ihnen vorher offen.
+      </p>
+    </div>
+  </section>

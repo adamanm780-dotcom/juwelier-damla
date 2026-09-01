@@ -1,0 +1,2907 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trauring Wellritz (Entwurf) – Juwelier Damla Wiesbaden</title>
+  <meta name="description" content="Trauring Wellritz: Gelbgold mit gebürstetem Weißgoldband. Entwurf einer Produktseite für Juwelier Damla in Wiesbaden.">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="assets/logo-mark.webp" type="image/webp">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Raleway:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ═══════════════════════════════════════════
+       DESIGN TOKENS
+    ═══════════════════════════════════════════ */
+    :root {
+      --marble:       #FEFEFE;
+      --marble-warm:  #F8F5EF;
+      --gold:         #C9A055;
+      --gold-light:   #DFC082;
+      --gold-dark:    #A07838;
+      --gold-pale:    #F3EAD6;
+      --ink:          #1B1916;
+      --ink-soft:     #4E4840;
+      --ink-muted:    #857B70;
+      --border-gold:  rgba(201, 160, 85, 0.24);
+      --border-light: rgba(180, 172, 160, 0.20);
+      --shadow-soft:  0 2px 32px rgba(27, 25, 22, 0.06);
+      --shadow-card:  0 12px 48px rgba(27, 25, 22, 0.10);
+      --font-serif:   'Cormorant Garamond', Georgia, serif;
+      --font-sans:    'Raleway', system-ui, sans-serif;
+      --nav-h:        84px;
+      --pad-section:  clamp(72px, 10vw, 128px);
+      --pad-x:        clamp(20px, 5vw, 72px);
+      --ease-out:     cubic-bezier(0.22, 1, 0.36, 1);
+      /* Pfeilspitze fuer die Hauptknoepfe, als Maske eingesetzt */
+      --pfeil: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 9'%3E%3Cpath d='M0 4.5h12.6M9.2 1 12.7 4.5 9.2 8' fill='none' stroke='%23000' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    }
+
+    /* ═══════════════════════════════════════════
+       RESET & BASE
+    ═══════════════════════════════════════════ */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; scroll-padding-top: calc(var(--nav-h) + 12px); }
+
+    body {
+      font-family: var(--font-sans);
+      color: var(--ink);
+      background-color: var(--marble);
+      overflow-x: hidden;
+      line-height: 1.65;
+    }
+
+    img { display: block; max-width: 100%; height: auto; }
+    a   { color: inherit; text-decoration: none; }
+
+    :focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 3px;
+    }
+
+    .skip-link {
+      position: absolute;
+      top: -60px; left: 16px;
+      z-index: 500;
+      background: var(--ink);
+      color: #fff;
+      padding: 10px 20px;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      transition: top 0.25s ease;
+    }
+    .skip-link:focus { top: 12px; }
+
+    /* ═══════════════════════════════════════════
+       MARMOR-HINTERGRUND (statisch, performant)
+    ═══════════════════════════════════════════ */
+    .marble-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 90% 60% at 20% 0%,   rgba(243, 234, 214, 0.5) 0%, transparent 60%),
+        radial-gradient(ellipse 70% 50% at 100% 100%, rgba(243, 234, 214, 0.35) 0%, transparent 65%),
+        var(--marble);
+    }
+    .marble-bg svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+    /* Dezenter Schimmer der Goldadern – läuft auch auf Mobile */
+    .marble-bg path { animation: veinGlow 8s ease-in-out infinite; }
+    .marble-bg path:nth-of-type(2) { animation-delay: 2.2s; }
+    .marble-bg path:nth-of-type(3) { animation-delay: 4.1s; }
+    .marble-bg path:nth-of-type(4) { animation-delay: 5.6s; }
+    @keyframes veinGlow {
+      0%, 100% { opacity: 0.3; }
+      50%      { opacity: 0.75; }
+    }
+
+    /* ═══════════════════════════════════════════
+       NAVIGATION
+    ═══════════════════════════════════════════ */
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 200;
+      height: var(--nav-h);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--pad-x);
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--border-gold);
+      transition: box-shadow 0.4s ease;
+    }
+    .nav--scrolled { box-shadow: 0 2px 24px rgba(27, 25, 22, 0.07); }
+
+    .nav__brand { display: flex; align-items: center; }
+    .nav__logo-img {
+      height: 62px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    /* Neun Punkte inklusive Trauringe: Abstand mitwachsen lassen und
+       einen festen Sicherheitsabstand zum Logo halten, sonst klebt der
+       erste Link am Signet. */
+    .nav__links {
+      display: flex;
+      align-items: center;
+      gap: clamp(14px, 1.6vw, 26px);
+      margin-left: clamp(18px, 2.2vw, 38px);
+      list-style: none;
+    }
+    .nav__links a {
+      font-size: clamp(0.62rem, 0.78vw, 0.7rem);
+      font-weight: 500;
+      white-space: nowrap;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+      position: relative;
+      transition: color 0.3s;
+      padding: 6px 0;
+    }
+    .nav__links a::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 0; height: 1px;
+      background: var(--gold);
+      transition: width 0.35s var(--ease-out);
+    }
+    .nav__links a:hover        { color: var(--gold); }
+    .nav__links a:hover::after { width: 100%; }
+
+    .nav__cta {
+      font-weight: 600;
+      color: var(--gold);
+      border: 1px solid var(--border-gold);
+      padding: 10px 24px !important;
+      transition: all 0.35s ease;
+    }
+    .nav__cta:hover {
+      background: var(--gold);
+      color: #fff !important;
+      border-color: var(--gold);
+    }
+    .nav__cta::after { display: none; }
+
+    .nav__burger {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      gap: 6px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      width: 44px; height: 44px;
+      padding: 10px;
+    }
+    .nav__burger span {
+      display: block;
+      width: 24px; height: 1.5px;
+      background: var(--ink);
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+    .nav__burger.open span:nth-child(1) { transform: translateY(7.5px) rotate(45deg); }
+    .nav__burger.open span:nth-child(2) { opacity: 0; }
+    .nav__burger.open span:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); }
+
+    /* ═══════════════════════════════════════════
+       HERO — Scroll-Animation (Ring)
+       #hero ist 230vh hoch → Scroll-Strecke.
+       .hero__sticky bleibt im Viewport stehen,
+       während der Ring Frame für Frame rotiert.
+    ═══════════════════════════════════════════ */
+    #hero {
+      height: 230vh;
+      position: relative;
+    }
+
+    .hero__sticky {
+      position: sticky;
+      top: 0;
+      height: 100svh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: calc(var(--nav-h) + 16px) var(--pad-x) 0;
+    }
+
+    .hero__ring-stage {
+      position: relative;
+      margin-top: clamp(8px, 2vh, 24px);
+    }
+    /* Der weiße Video-Hintergrund wird beim Zeichnen per Pixel-Keying
+       entfernt (siehe JS) – das Canvas enthält nur den freigestellten Ring */
+    #ringCanvas {
+      display: block;
+      width: clamp(260px, 44vh, 460px);
+      height: auto;
+      aspect-ratio: 1 / 1;
+      filter: drop-shadow(0 22px 38px rgba(160, 120, 56, 0.28));
+      opacity: 1;
+    }
+    .hero__ring-glow {
+      position: absolute;
+      inset: 8%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(201, 160, 85, 0.14) 0%, transparent 65%);
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .hero__eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 26px;
+      opacity: 0;
+      animation: riseIn 1.2s var(--ease-out) 0.1s forwards;
+    }
+    .hero__eyebrow::before {
+      content: '';
+      width: 40px; height: 1px;
+      background: var(--gold);
+    }
+
+    .hero__title {
+      font-family: var(--font-serif);
+      font-size: clamp(2.7rem, 5.5vw, 4.6rem);
+      font-weight: 300;
+      font-style: italic;
+      line-height: 1.1;
+      margin-bottom: 26px;
+      opacity: 0;
+      animation: riseIn 1.3s var(--ease-out) 0.25s forwards;
+    }
+    .hero__title strong {
+      font-weight: 500;
+      font-style: normal;
+      color: var(--gold);
+    }
+
+    .hero__text {
+      font-family: var(--font-serif);
+      font-size: clamp(1.02rem, 1.6vw, 1.22rem);
+      font-weight: 300;
+      line-height: 1.75;
+      color: var(--ink-soft);
+      max-width: 520px;
+      margin: 0 auto 30px;
+      opacity: 0;
+      animation: riseIn 1.3s var(--ease-out) 0.4s forwards;
+    }
+
+    .hero__actions {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+      opacity: 0;
+      animation: riseIn 1.3s var(--ease-out) 0.55s forwards;
+    }
+
+    /* Öffnungsstatus-Badge */
+    .hero__badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      margin-top: 26px;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border-gold);
+      box-shadow: var(--shadow-soft);
+      padding: 12px 20px;
+      opacity: 0;
+      animation: fadeIn 1.2s ease 1.1s forwards;
+    }
+    .hero__badge-dot {
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      background: #4C9A64;
+      flex-shrink: 0;
+      animation: pulse 2.4s ease-in-out infinite;
+    }
+    .hero__badge-dot.closed { background: #B0533B; animation: none; }
+    .hero__badge-text { line-height: 1.4; }
+    .hero__badge-text strong {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+    .hero__badge-text span {
+      font-size: 0.72rem;
+      color: var(--ink-muted);
+    }
+
+    .hero__scroll {
+      position: absolute;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      opacity: 0;
+      animation: fadeIn 1s ease 1.5s forwards;
+    }
+    .hero__scroll span {
+      font-size: 0.62rem;
+      font-weight: 500;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+    }
+    .hero__scroll-line {
+      width: 1px; height: 36px;
+      background: linear-gradient(to bottom, var(--gold), transparent);
+      animation: pulse 2.2s ease-in-out infinite;
+    }
+
+    /* Buttons — Pillenform, wie der Knopf im Trauring-Popup.
+       Der Pfeil bleibt den goldenen Hauptknoepfen vorbehalten; hinge er
+       an jedem Knopf, waere er kein Hinweis mehr, sondern Dekor. */
+    .btn-solid,
+    .btn-ghost,
+    .btn-gold-inv,
+    .btn-line-light {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      font-family: var(--font-sans);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      padding: 15px 34px;
+      border-radius: 999px;
+      transition: background 0.35s ease, color 0.35s ease,
+                  border-color 0.35s ease, box-shadow 0.4s ease,
+                  transform 0.4s var(--ease-out);
+      text-align: center;
+    }
+    .btn-solid, .btn-gold-inv {
+      background: var(--gold);
+      color: #fff;
+      box-shadow: 0 6px 22px rgba(160, 120, 56, 0.26);
+    }
+    .btn-solid:hover, .btn-gold-inv:hover {
+      background: var(--gold-dark);
+      box-shadow: 0 10px 28px rgba(160, 120, 56, 0.34);
+      transform: translateY(-2px);
+    }
+    .btn-ghost {
+      font-weight: 500;
+      color: var(--ink);
+      border: 1px solid var(--border-light);
+    }
+    .btn-ghost:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+      transform: translateY(-2px);
+    }
+
+    /* Der Pfeil ist eine Maske, kein Zeichen: so erbt er die Schrift-
+       farbe des Knopfes und stimmt auf hellem wie auf dunklem Grund. */
+    .btn-solid::after,
+    .btn-gold-inv::after {
+      content: '';
+      flex: none;
+      width: 15px;
+      height: 9px;
+      background: currentColor;
+      -webkit-mask: var(--pfeil) no-repeat center / contain;
+      mask: var(--pfeil) no-repeat center / contain;
+      transition: transform 0.35s var(--ease-out);
+    }
+    .btn-solid:hover::after,
+    .btn-gold-inv:hover::after { transform: translateX(5px); }
+    /* Fuer Knoepfe, bei denen ein Weiter-Pfeil in die Irre fuehrt —
+       Kopieren, Sichern, Zuruecksetzen. */
+    .btn--schlicht::after { display: none; }
+
+    /* ═══════════════════════════════════════════
+       SECTION BASE
+    ═══════════════════════════════════════════ */
+    section { padding: var(--pad-section) 0; }
+
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 0 var(--pad-x);
+    }
+
+    .eyebrow {
+      display: block;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.36em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 18px;
+    }
+
+    .section-title {
+      font-family: var(--font-serif);
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      font-weight: 400;
+      font-style: italic;
+      line-height: 1.16;
+      margin-bottom: 26px;
+    }
+
+    .gold-bar { width: 44px; height: 1px; background: var(--gold); }
+
+    /* ═══════════════════════════════════════════
+       ÜBER UNS
+    ═══════════════════════════════════════════ */
+    #about {
+      position: relative;
+      background: rgba(245, 242, 237, 0.5);
+    }
+    #about::before, #about::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border-gold) 50%, transparent);
+    }
+    #about::before { top: 0; }
+    #about::after  { bottom: 0; }
+
+    /* Ohne Ladenfoto: einspaltiger, zentrierter Textblock. */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      max-width: 760px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .about-body .gold-bar { margin-left: auto; margin-right: auto; }
+
+    .about-body p {
+      font-family: var(--font-serif);
+      font-size: clamp(1.02rem, 1.5vw, 1.18rem);
+      font-weight: 300;
+      line-height: 1.9;
+      color: var(--ink-soft);
+      margin-bottom: 18px;
+    }
+    .about-body p.lead {
+      font-size: clamp(1.18rem, 2vw, 1.4rem);
+      font-style: italic;
+      color: var(--ink);
+      margin-bottom: 24px;
+    }
+
+    .about-tags {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 34px;
+      list-style: none;
+    }
+    .tag {
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+      border: 1px solid var(--border-light);
+      padding: 8px 18px;
+      background: rgba(255, 254, 252, 0.75);
+      transition: border-color 0.3s ease, color 0.3s ease;
+    }
+    .tag:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* ═══════════════════════════════════════════
+       KOLLEKTIONEN (Galerie)
+    ═══════════════════════════════════════════ */
+    .collections-header {
+      text-align: center;
+      margin-bottom: 64px;
+    }
+    .collections-header .gold-bar { margin: 0 auto; }
+
+    /* Drei Karten, die mittlere gross: Verlobungsringe stehen im
+       Mittelpunkt, Schmuck und Trauringe flankieren sie. */
+    .collections-grid {
+      display: grid;
+      grid-template-columns: 0.82fr 1.34fr 0.82fr;
+      gap: clamp(16px, 2.4vw, 30px);
+      align-items: center;
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+    .collection-card a { display: block; color: inherit; }
+    .collection-card--gross img { aspect-ratio: 4 / 5.8; }
+    .collection-card--gross figcaption strong { font-size: 1.5rem; }
+
+    .collection-card {
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-soft);
+      border-radius: 240px 240px 8px 8px;  /* Bogen-Form */
+      transition: transform 0.6s var(--ease-out), box-shadow 0.6s ease;
+    }
+    .collection-card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-card);
+    }
+    .collection-card img {
+      width: 100%;
+      aspect-ratio: 4 / 5.4;
+      object-fit: cover;
+      transition: transform 1.1s var(--ease-out);
+    }
+    .collections-grid .collection-card:hover img { transform: scale(1.06); }
+    .collection-card figcaption {
+      position: absolute;
+      inset: auto 0 0 0;
+      padding: 56px 26px 24px;
+      background: linear-gradient(to top, rgba(20, 17, 13, 0.72), transparent);
+      color: #fff;
+    }
+    .collection-card figcaption strong {
+      display: block;
+      font-family: var(--font-serif);
+      font-size: 1.35rem;
+      font-weight: 400;
+      font-style: italic;
+      margin-bottom: 4px;
+    }
+    .collection-card figcaption span {
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold-light);
+    }
+
+    /* ═══════════════════════════════════════════
+       LEISTUNGEN
+    ═══════════════════════════════════════════ */
+    #services {
+      position: relative;
+      background: rgba(245, 242, 237, 0.5);
+    }
+    #services::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border-gold) 50%, transparent);
+    }
+
+    .services-header { text-align: center; margin-bottom: 64px; }
+    .services-header .gold-bar { margin: 0 auto; }
+
+    /* Flex statt Grid: bei 5 Karten fuellt die letzte Reihe die Breite aus,
+       statt eine leere Zelle in der Hairline-Optik stehen zu lassen. */
+    .services-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1px;
+      background: var(--border-light);
+      border: 1px solid var(--border-light);
+    }
+
+    .service-card {
+      flex: 1 1 calc(33.333% - 1px);
+      min-width: 0;
+      background: rgba(253, 252, 249, 0.95);
+      padding: clamp(36px, 5vw, 52px) clamp(28px, 4vw, 42px);
+      position: relative;
+      overflow: hidden;
+      transition: background 0.4s ease;
+    }
+    .service-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--gold-dark), var(--gold-light));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.45s var(--ease-out);
+    }
+    .service-card:hover { background: #fffdf9; }
+    .service-card:hover::after { transform: scaleX(1); }
+
+    .service-icon {
+      width: 40px; height: 40px;
+      margin-bottom: 24px;
+    }
+    .service-icon svg {
+      width: 100%; height: 100%;
+      fill: none;
+      stroke: var(--gold);
+      stroke-width: 1.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .service-title {
+      font-family: var(--font-serif);
+      font-size: 1.28rem;
+      font-weight: 500;
+      font-style: italic;
+      margin-bottom: 12px;
+    }
+
+    .service-text {
+      font-size: 0.86rem;
+      line-height: 1.8;
+      color: var(--ink-soft);
+    }
+
+    /* ═══════════════════════════════════════════
+       EINBLICKE (echte Fotos)
+    ═══════════════════════════════════════════ */
+    .gallery-header {
+      text-align: center;
+      margin-bottom: 64px;
+    }
+    .gallery-header .gold-bar { margin: 0 auto; }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(18px, 3vw, 32px);
+      align-items: stretch;
+    }
+    .gallery-card {
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-soft);
+      border-radius: 22px;
+      transition: transform 0.6s var(--ease-out), box-shadow 0.6s ease;
+    }
+    .gallery-card:hover {
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-card);
+    }
+    .gallery-card:first-child { border-radius: 999px 999px 22px 22px; }  /* Bogen */
+    .gallery-card img {
+      width: 100%;
+      height: 100%;
+      aspect-ratio: 3 / 4;
+      object-fit: cover;
+      transition: transform 1.1s var(--ease-out);
+    }
+    .gallery-card--wide { grid-column: 1 / -1; }
+    .gallery-card--wide img {
+      height: auto;
+      aspect-ratio: 16 / 8;
+      object-position: center 30%;
+    }
+    .gallery-grid .gallery-card:hover img { transform: scale(1.05); }
+    .gallery-card figcaption {
+      position: absolute;
+      inset: auto 0 0 0;
+      padding: 48px 22px 18px;
+      background: linear-gradient(to top, rgba(20, 17, 13, 0.66), transparent);
+      color: #fff;
+      font-size: 0.76rem;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    /* ═══════════════════════════════════════════
+       GOOGLE-BEWERTUNGEN
+    ═══════════════════════════════════════════ */
+    #reviews {
+      position: relative;
+      background: rgba(245, 242, 237, 0.5);
+    }
+    #reviews::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border-gold) 50%, transparent);
+    }
+
+    .reviews-header {
+      text-align: center;
+      margin-bottom: 56px;
+    }
+    .reviews-header .gold-bar { margin: 0 auto; }
+
+    .reviews-summary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+    .reviews-score {
+      font-family: var(--font-serif);
+      font-size: 2.6rem;
+      font-weight: 500;
+      line-height: 1;
+    }
+    .reviews-stars {
+      color: var(--gold);
+      font-size: 1.3rem;
+      letter-spacing: 0.12em;
+    }
+    .reviews-count {
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      color: var(--ink-muted);
+    }
+
+    .reviews-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: clamp(16px, 2.5vw, 28px);
+    }
+    .review-card {
+      background: rgba(255, 254, 251, 0.95);
+      border: 1px solid var(--border-light);
+      border-radius: 14px;
+      padding: 30px 28px 24px;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      transition: border-color 0.35s ease, box-shadow 0.35s ease, transform 0.45s var(--ease-out);
+    }
+    .review-card:hover {
+      border-color: var(--border-gold);
+      box-shadow: var(--shadow-card);
+      transform: translateY(-5px);
+    }
+    .review-stars {
+      color: var(--gold);
+      font-size: 0.95rem;
+      letter-spacing: 0.16em;
+      margin-bottom: 14px;
+    }
+    .review-card p {
+      font-family: var(--font-serif);
+      font-size: 1.02rem;
+      font-weight: 300;
+      font-style: italic;
+      line-height: 1.75;
+      color: var(--ink-soft);
+      flex: 1;
+      margin-bottom: 20px;
+    }
+    .review-card footer {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      border-top: 1px solid var(--border-light);
+      padding-top: 14px;
+    }
+    .review-card cite {
+      font-style: normal;
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+    }
+    .review-card footer span {
+      font-size: 0.68rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+    }
+
+    .reviews-cta {
+      text-align: center;
+      margin-top: 48px;
+    }
+
+    /* ═══════════════════════════════════════════
+       ÖFFNUNGSZEITEN & KONTAKT
+    ═══════════════════════════════════════════ */
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(48px, 7vw, 96px);
+    }
+
+    .hours-list {
+      margin-top: 36px;
+      border-top: 1px solid var(--border-light);
+      list-style: none;
+    }
+    .hour-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 4px;
+      border-bottom: 1px solid var(--border-light);
+      font-size: 0.9rem;
+      transition: background 0.3s ease;
+    }
+    .hour-row.today {
+      background: rgba(201, 160, 85, 0.07);
+      border-bottom-color: var(--border-gold);
+    }
+    .hour-row.today .hour-day::after {
+      content: 'Heute';
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--gold);
+      border: 1px solid var(--border-gold);
+      padding: 3px 8px;
+      margin-left: 10px;
+      vertical-align: middle;
+    }
+    .hour-day  { font-weight: 500; letter-spacing: 0.04em; }
+    .hour-time { color: var(--ink-soft); }
+    .hour-closed { color: var(--ink-muted); font-style: italic; }
+
+    .contact-items { margin-top: 36px; }
+    .c-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    .c-item__icon {
+      width: 46px; height: 46px;
+      border: 1px solid var(--border-gold);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      background: rgba(255, 254, 252, 0.8);
+    }
+    .c-item__icon svg {
+      width: 17px; height: 17px;
+      fill: none;
+      stroke: var(--gold);
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .c-item__label {
+      display: block;
+      font-size: 0.66rem;
+      font-weight: 600;
+      letter-spacing: 0.26em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      margin-bottom: 4px;
+    }
+    .c-item__value {
+      font-family: var(--font-serif);
+      font-size: 1.1rem;
+      line-height: 1.5;
+      transition: color 0.3s;
+    }
+    a.c-item__value:hover { color: var(--gold); }
+
+    /* ═══════════════════════════════════════════
+       KARTE
+    ═══════════════════════════════════════════ */
+    #location { padding-bottom: 0; }
+    .location-intro {
+      text-align: center;
+      padding-bottom: var(--pad-section);
+    }
+    .location-intro .gold-bar { margin: 0 auto; }
+    .location-intro p {
+      font-family: var(--font-serif);
+      font-size: clamp(1.02rem, 1.5vw, 1.16rem);
+      font-weight: 300;
+      line-height: 1.85;
+      color: var(--ink-soft);
+      max-width: 500px;
+      margin: 24px auto 0;
+    }
+
+    .map-frame {
+      position: relative;
+      height: clamp(340px, 44vw, 520px);
+      overflow: hidden;
+    }
+    .map-frame iframe {
+      width: 100%; height: 100%;
+      border: none;
+      filter: grayscale(15%) sepia(8%) brightness(1.03);
+      display: block;
+    }
+    .map-badge {
+      position: absolute;
+      top: 36px; left: 36px;
+      background: rgba(249, 247, 243, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 22px 28px;
+      border: 1px solid var(--border-gold);
+      box-shadow: var(--shadow-card);
+    }
+    .map-badge__name {
+      font-family: var(--font-serif);
+      font-size: 1.12rem;
+      font-style: italic;
+      margin-bottom: 6px;
+    }
+    .map-badge__addr {
+      font-size: 0.8rem;
+      color: var(--ink-soft);
+      line-height: 1.6;
+    }
+
+    /* ═══════════════════════════════════════════
+       CTA DUNKEL
+    ═══════════════════════════════════════════ */
+    #visit {
+      text-align: center;
+      background: #1A1714;
+      padding: clamp(72px, 10vw, 120px) var(--pad-x);
+      position: relative;
+      overflow: hidden;
+    }
+    #visit::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(201, 160, 85, 0.08) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 40% at 50% 120%, rgba(201, 160, 85, 0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    #visit > * { position: relative; }
+
+    .visit-title {
+      font-family: var(--font-serif);
+      font-size: clamp(2.2rem, 5vw, 4rem);
+      font-weight: 300;
+      font-style: italic;
+      line-height: 1.12;
+      color: #fff;
+      margin-bottom: 20px;
+    }
+    .visit-title em { font-weight: 400; color: var(--gold-light); }
+    .visit-sub {
+      font-family: var(--font-serif);
+      font-size: clamp(1rem, 1.5vw, 1.14rem);
+      font-weight: 300;
+      color: rgba(255, 255, 255, 0.55);
+      max-width: 480px;
+      margin: 0 auto 48px;
+      line-height: 1.85;
+    }
+    .visit-actions {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .btn-gold-inv { background: var(--gold); color: #fff; padding: 16px 44px; }
+    .btn-gold-inv:hover { background: var(--gold-dark); }
+    .btn-line-light {
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      padding: 16px 44px;
+    }
+    .btn-line-light:hover { border-color: var(--gold); color: var(--gold-light); }
+
+    /* ═══════════════════════════════════════════
+       FOOTER
+    ═══════════════════════════════════════════ */
+    .site-footer {
+      background: #110F0D;
+      color: rgba(255, 255, 255, 0.55);
+      padding: 64px 0 36px;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: clamp(32px, 5vw, 56px);
+      margin-bottom: 48px;
+    }
+    .footer-brand-name {
+      font-family: var(--font-serif);
+      font-size: 1.35rem;
+      font-style: italic;
+      color: rgba(255, 255, 255, 0.85);
+      margin-bottom: 8px;
+    }
+    .footer-brand-tag {
+      font-size: 0.68rem;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 18px;
+    }
+    .footer-brand-desc {
+      font-size: 0.82rem;
+      line-height: 1.8;
+      max-width: 280px;
+    }
+    .footer-col-head {
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 20px;
+    }
+    .footer-col ul { list-style: none; }
+    .footer-col ul li { margin-bottom: 12px; }
+    .footer-col ul li a {
+      font-size: 0.82rem;
+      color: rgba(255, 255, 255, 0.55);
+      transition: color 0.3s;
+    }
+    .footer-col ul li a:hover { color: var(--gold-light); }
+
+    .footer-bottom {
+      border-top: 1px solid rgba(255, 255, 255, 0.07);
+      padding-top: 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.74rem;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .flowstate-credit {
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      color: rgba(255, 255, 255, 0.35);
+    }
+    .flowstate-credit a {
+      color: rgba(255, 255, 255, 0.55);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-weight: 600;
+      transition: color 0.3s ease;
+    }
+    .flowstate-credit a:hover { color: var(--gold-light); }
+
+    /* ═══════════════════════════════════════════
+       SCROLL REVEAL — drei Choreografien:
+       .reveal       sanftes Aufsteigen (Text, Karten)
+       .reveal-img   Bild-Wipe von unten + Zoom-Settle
+       .reveal-lines Zeilen-Maske für Überschriften
+    ═══════════════════════════════════════════ */
+    .reveal {
+      opacity: 0;
+      transform: translateY(34px);
+      transition:
+        opacity 0.9s var(--ease-out),
+        transform 0.9s var(--ease-out);
+    }
+    .reveal.in { opacity: 1; transform: translateY(0); }
+    .d1 { transition-delay: 0.08s; }
+    .d2 { transition-delay: 0.16s; }
+    .d3 { transition-delay: 0.24s; }
+    .d4 { transition-delay: 0.32s; }
+    .d5 { transition-delay: 0.40s; }
+
+    /* Bild-Wipe: Bild wird von unten aufgedeckt und setzt sich
+       aus einer leichten Vergrößerung weich ab */
+    .reveal-img img {
+      clip-path: inset(100% 0 0 0);
+      transform: scale(1.14);
+      transition:
+        clip-path 1.15s var(--ease-out),
+        transform 1.6s var(--ease-out);
+    }
+    .reveal-img.in img {
+      clip-path: inset(0 0 0 0);
+      transform: none;
+    }
+    .reveal-img.d1 img { transition-delay: 0.14s; }
+    .reveal-img.d2 img { transition-delay: 0.28s; }
+    .reveal-img figcaption {
+      opacity: 0;
+      transform: translateY(14px);
+      transition: opacity 0.7s ease 0.55s, transform 0.7s var(--ease-out) 0.55s;
+    }
+    .reveal-img.in figcaption { opacity: 1; transform: translateY(0); }
+
+    /* Zeilen-Maske: Überschriften-Zeilen gleiten aus einer
+       unsichtbaren Maske nach oben */
+    .reveal-lines .tl__line { display: block; overflow: hidden; }
+    .reveal-lines .tl__line > span {
+      display: block;
+      transform: translateY(118%);
+      transition: transform 0.9s var(--ease-out);
+    }
+    .reveal-lines .tl__line:nth-child(2) > span { transition-delay: 0.14s; }
+    .reveal-lines.in .tl__line > span { transform: translateY(0); }
+
+    /* ═══════════════════════════════════════════
+       MARQUEE-BAND (Editorial-Laufband)
+    ═══════════════════════════════════════════ */
+    .marquee {
+      overflow: hidden;
+      padding: clamp(26px, 4vw, 46px) 0;
+      border-top: 1px solid var(--border-gold);
+      border-bottom: 1px solid var(--border-gold);
+      background: rgba(255, 254, 251, 0.6);
+    }
+    .marquee__track {
+      display: flex;
+      align-items: center;
+      gap: clamp(28px, 4vw, 56px);
+      width: max-content;
+      animation: marquee 36s linear infinite;
+    }
+    .marquee__track span {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-weight: 300;
+      font-size: clamp(1.5rem, 3.2vw, 2.4rem);
+      color: rgba(27, 25, 22, 0.22);
+      white-space: nowrap;
+    }
+    .marquee__track .diamond {
+      font-style: normal;
+      font-size: clamp(0.7rem, 1.2vw, 0.95rem);
+      color: var(--gold);
+      opacity: 0.75;
+    }
+    @keyframes marquee {
+      to { transform: translateX(-50%); }
+    }
+
+    /* ═══════════════════════════════════════════
+       CURSOR-GLOW (nur Desktop mit Maus)
+    ═══════════════════════════════════════════ */
+    #cursorGlow {
+      position: fixed;
+      left: 0; top: 0;
+      width: 560px; height: 560px;
+      margin: -280px 0 0 -280px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(201, 160, 85, 0.11) 0%, transparent 62%);
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+
+    @keyframes riseIn {
+      from { opacity: 0; transform: translateY(26px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn { to { opacity: 1; } }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.4; }
+      50%      { opacity: 1; }
+    }
+
+    /* ═══════════════════════════════════════════
+       REDUCED MOTION
+    ═══════════════════════════════════════════ */
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .reveal { opacity: 1; transform: none; }
+      .reveal-img img { clip-path: none; transform: none; }
+      .reveal-img figcaption { opacity: 1; transform: none; }
+      .reveal-lines .tl__line > span { transform: none; }
+      .marquee__track { animation: none; }
+      #cursorGlow { display: none; }
+      .hero__eyebrow, .hero__title, .hero__text,
+      .hero__actions, #kastenCanvas,
+      .hero__badge, .hero__scroll { opacity: 1; }
+    }
+
+    /* ═══════════════════════════════════════════
+       TABLET  ≤ 960px
+    ═══════════════════════════════════════════ */
+    @media (max-width: 1150px) {
+      .nav__links {
+        display: none;
+        position: fixed;
+        top: var(--nav-h); left: 0; right: 0;
+        margin-left: 0;          /* Desktop-Abstand zum Logo zuruecknehmen */
+        background: rgba(249, 247, 243, 0.98);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 28px var(--pad-x);
+        gap: 22px;
+        border-bottom: 1px solid var(--border-gold);
+        box-shadow: 0 8px 32px rgba(27, 25, 22, 0.08);
+        z-index: 199;
+      }
+      .nav__links.open { display: flex; }
+      .nav__burger     { display: flex; }
+
+      #kastenCanvas { width: clamp(260px, 40vh, 420px); }
+
+      .contact-grid { grid-template-columns: 1fr; gap: 48px; }
+      .collections-grid { grid-template-columns: 1fr 1fr; max-width: 780px; }
+      .collection-card--gross { grid-column: span 2; }
+      .collection-card--gross img { aspect-ratio: 16 / 10; }
+      .services-grid .service-card { flex-basis: calc(50% - 1px); }
+      .gallery-card--wide img { aspect-ratio: 16 / 10; }
+      .reviews-grid { grid-template-columns: 1fr 1fr; }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    /* ═══════════════════════════════════════════
+       MOBIL  ≤ 600px
+    ═══════════════════════════════════════════ */
+    @media (max-width: 600px) {
+      :root {
+        --nav-h:       70px;
+        --pad-x:       18px;
+        --pad-section: 60px;
+      }
+
+      .nav__logo-img { height: 64px; }
+
+      #hero { height: 210vh; }
+      .hero__sticky { padding-top: calc(var(--nav-h) + 12px); }
+      .hero__title { font-size: clamp(2rem, 8.5vw, 2.7rem); }
+      .hero__text { font-size: 0.98rem; margin-bottom: 22px; }
+      .hero__actions {
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+        max-width: 280px;
+        margin: 0 auto;
+        gap: 10px;
+      }
+      .hero__actions a { padding: 13px 24px; }
+      #kastenCanvas { width: clamp(230px, 36vh, 340px); }
+      .hero__badge { margin-top: 18px; padding: 10px 16px; }
+      .hero__scroll { display: none; }
+
+      /* Untereinander werden die Bogen sonst sehr hoch — drei Karten
+         a 520 px sind ein halber Bildschirm zu viel Scrollweg. */
+      .collections-grid { grid-template-columns: 1fr; gap: 16px; }
+      .collection-card--gross { grid-column: auto; }
+      .collection-card img { aspect-ratio: 4 / 4.5; }
+      .collection-card--gross img { aspect-ratio: 4 / 5; }
+      .collection-card--gross figcaption strong { font-size: 1.35rem; }
+      .collections-header { margin-bottom: 40px; }
+
+      .services-grid {
+        background: transparent;
+        gap: 12px;
+        border: none;
+      }
+      .services-grid .service-card { flex-basis: 100%; }
+      .service-card { border: 1px solid var(--border-light); padding: 28px 22px; }
+      .services-header { margin-bottom: 40px; }
+
+      .gallery-grid { grid-template-columns: 1fr; gap: 16px; }
+      .gallery-card--wide img { aspect-ratio: 4 / 3; }
+      .gallery-header { margin-bottom: 40px; }
+      .reviews-grid { grid-template-columns: 1fr; gap: 14px; }
+      .reviews-summary { gap: 12px; }
+      .reviews-score { font-size: 2.1rem; }
+
+      .hour-row { font-size: 0.84rem; padding: 13px 4px; }
+
+      .map-frame { height: 280px; }
+      .map-badge {
+        top: 12px; left: 12px;
+        padding: 12px 16px;
+        max-width: calc(100vw - 60px);
+      }
+      .map-badge__name { font-size: 0.98rem; }
+      .map-badge__addr { font-size: 0.74rem; }
+
+      .visit-actions {
+        flex-direction: column;
+        align-items: stretch;
+        max-width: 300px;
+        margin: 0 auto;
+      }
+
+      .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+      .footer-bottom {
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+    /* ═══════════════════════════════════════════
+       FEINSCHLIFF
+       Die Handschrift, die das Trauring-Popup hatte, auf die ganze
+       Seite gezogen: goldene Haarlinien an den Vorzeilen, ein kursiver
+       Goldakzent in den Titeln, ein einmaliger Lichtstreifen ueber die
+       Bildkarten und mattiertes Glas dort, wo Text auf Bild liegt.
+    ═══════════════════════════════════════════ */
+
+    /* Vorzeile mit Haarlinien links und rechts — beidseitig, damit sie
+       im mittigen wie im linksbuendigen Block sitzt. */
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      letter-spacing: 0.34em;
+    }
+    .eyebrow::before,
+    .eyebrow::after {
+      content: '';
+      width: 24px;
+      height: 1px;
+      background: currentColor;
+      opacity: 0.5;
+      flex: none;
+    }
+
+    /* Kursiver Goldakzent im Titel: derselbe Griff wie im Popup, wo
+       der hervorgehobene Teil kursiv und in Gold stand. */
+    .section-title em,
+    .sub-hero__title em,
+    .hero__title em,
+    .intro__title em { font-style: italic; color: var(--gold-dark); }
+    /* Auf dem dunklen Band muss der Akzent heller werden, sonst
+       verschwindet er. */
+    .visit-title em { font-style: italic; color: var(--gold-light); }
+
+    /* Einmaliger Lichtstreifen, sobald die Karte im Bild steht —
+       im Popup lief er ueber das mattierte Glas. */
+    @keyframes jdSchimmer { to { transform: translateX(140%); } }
+    .collection-card {
+      /* Der Streifen braucht eine eigene Ebene ueber dem Bild, aber
+         unter der Bildunterschrift. */
+      isolation: isolate;
+    }
+    .collection-card .jd-glanz {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background: linear-gradient(105deg,
+        rgba(255,255,255,0) 38%,
+        rgba(255,255,255,0.5) 50%,
+        rgba(255,255,255,0) 62%);
+      transform: translateX(-140%);
+    }
+    .collection-card.in .jd-glanz {
+      animation: jdSchimmer 1.5s var(--ease-out) 0.35s 1;
+    }
+    .collection-card figcaption { z-index: 2; }
+
+    /* Dieselbe Geste beim Zeigen auf eine Reparaturkarte. */
+    .service-card--foto .jd-glanz {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      background: linear-gradient(105deg,
+        rgba(255,255,255,0) 38%,
+        rgba(255,255,255,0.62) 50%,
+        rgba(255,255,255,0) 62%);
+      transform: translateX(-140%);
+    }
+    .service-card--foto:hover .jd-glanz,
+    .service-card--foto:focus-within .jd-glanz {
+      animation: jdSchimmer 1.1s var(--ease-out) 1;
+    }
+
+    /* Mattiertes Glas, wo Schrift auf Bewegtbild liegt: das Abzeichen
+       im Hero stand bisher als undurchsichtige Flaeche auf dem Video. */
+    .hero__badge {
+      background: rgba(255, 253, 250, 0.62);
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      border-radius: 999px;
+      box-shadow: 0 10px 30px rgba(24, 21, 17, 0.12);
+    }
+    @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+      .hero__badge {
+        background: rgba(255, 253, 250, 0.42);
+        -webkit-backdrop-filter: blur(12px) saturate(1.25);
+        backdrop-filter: blur(12px) saturate(1.25);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .collection-card .jd-glanz,
+      .service-card--foto .jd-glanz { display: none; }
+      .btn-solid:hover, .btn-ghost:hover, .btn-gold-inv:hover { transform: none; }
+      .btn-solid:hover::after, .btn-gold-inv:hover::after { transform: none; }
+    }
+
+    /* ═══════════════════════════════════════════
+       LADESCREEN
+    ═══════════════════════════════════════════ */
+    body.is-loading { overflow: hidden; }
+
+    .loader {
+      position: fixed;
+      inset: 0;
+      z-index: 900;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--marble-warm);
+      transition: opacity 0.75s ease, visibility 0.75s ease;
+    }
+    .loader::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 45%, rgba(201,160,85,0.10) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .loader.is-done { opacity: 0; visibility: hidden; }
+
+    .loader__logo {
+      width: clamp(118px, 17vw, 168px);
+      height: auto;
+      display: block;
+      animation: loaderBreath 2.6s ease-in-out infinite;
+    }
+    @keyframes loaderBreath {
+      0%, 100% { opacity: 0.68; transform: scale(0.982); }
+      50%      { opacity: 1;    transform: scale(1); }
+    }
+
+    .loader__word {
+      margin-top: 22px;
+      font-size: 0.58rem;
+      font-weight: 500;
+      letter-spacing: 0.42em;
+      text-transform: uppercase;
+      color: var(--gold-dark);
+    }
+    .loader__bar {
+      margin-top: 26px;
+      width: min(190px, 44vw);
+      height: 1px;
+      background: var(--border-gold);
+      overflow: hidden;
+    }
+    .loader__bar span {
+      display: block;
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--gold-dark), var(--gold-light));
+      transition: width 0.4s ease;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .loader__logo { animation: none; opacity: 1; }
+    }
+
+    /* ═══════════════════════════════════════════
+       HERO — zwei Ladenvideos im Wechsel
+    ═══════════════════════════════════════════ */
+    /* padding: 0 hebt die Basisregel `section { padding: var(--pad-section) 0 }`
+       auf — sonst schiebt sie das Video unter der Navbar nach unten. */
+    #hero { height: 100svh; position: relative; padding: 0; }
+
+    .hero__stage {
+      position: relative;
+      height: 100%;
+      overflow: hidden;
+      background: #F4F1EB;
+    }
+
+    /* Beide Clips sind 2196x940 (2.34:1). Auf breiten Schirmen bekommt das
+       Video genau dieses Seitenverhaeltnis und sitzt mittig — so bleibt die
+       komplette Ladenfront samt Schriftzug im Bild, oben und unten laeuft es
+       in die Seitenfarbe aus. Schmale Schirme fuellen stattdessen die ganze
+       Flaeche, weil ein duennes Band dort verloren wirkt.
+       Die Clips liegen uebereinander; der einblendende bekommt per JS das
+       hoehere z-index und deckt den laufenden waehrend der Blende ab —
+       so entsteht eine echte Ueberblendung statt eines Durchblicks auf den
+       Seitenhintergrund. */
+    .hero__video {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      z-index: 1;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 2196 / 940;
+      transform: translateY(-50%);
+      display: block;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+    .hero__video.is-on { opacity: 1; }
+    @media (max-width: 900px) {
+      .hero__video {
+        top: 0;
+        transform: none;
+        height: 100%;
+        aspect-ratio: auto;
+      }
+    }
+
+    /* Dunkelt die Clips ab. Zwei Lagen: ein gleichmaessiger Schleier ueber
+       das ganze Bild und ein weicher Schatten in der Mitte, damit das weisse
+       Logo auch vor der hell beleuchteten Auslage steht. */
+    .hero__shade {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      pointer-events: none;
+      background:
+        radial-gradient(52% 48% at 50% 47%,
+          rgba(18,14,11,0.42) 0%,
+          rgba(18,14,11,0.24) 58%,
+          rgba(18,14,11,0)   100%),
+        linear-gradient(180deg,
+          rgba(18,14,11,0.30) 0%,
+          rgba(18,14,11,0.36) 100%);
+    }
+
+    /* das freigestellte Logo steht mittig vor dem Video */
+    .hero__mark {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      z-index: 5;
+      width: clamp(190px, 22vw, 340px);
+      height: auto;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      filter: drop-shadow(0 6px 22px rgba(0,0,0,0.5));
+      opacity: 0;
+      animation: fadeIn 1.6s ease 0.35s forwards;
+    }
+
+    /* haelt die Navbar oben lesbar und blendet unten in die Seite ueber */
+    .hero__veil {
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      pointer-events: none;
+      background: linear-gradient(180deg,
+        rgba(255,255,255,0.42) 0%,
+        rgba(255,255,255,0)    20%,
+        rgba(255,255,255,0)    58%,
+        rgba(248,245,239,0.55) 82%,
+        rgba(248,245,239,1)    100%);
+    }
+
+    .hero__cue {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 6;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      transition: opacity 0.4s ease;
+    }
+    .hero__cue span {
+      font-size: 0.6rem;
+      font-weight: 500;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+    }
+    .hero__cue i {
+      display: block;
+      width: 1px; height: 34px;
+      background: linear-gradient(to bottom, var(--gold), transparent);
+      animation: pulse 2.2s ease-in-out infinite;
+    }
+
+    /* ═══════════════════════════════════════════
+       INTRO — Text unter dem Video
+    ═══════════════════════════════════════════ */
+    #intro {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: clamp(56px, 8vw, 104px) var(--pad-x) clamp(48px, 6vw, 84px);
+    }
+    .intro__inner { max-width: 720px; margin: 0 auto; }
+
+    .intro__eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 26px;
+    }
+    .intro__eyebrow::before {
+      content: '';
+      width: 40px; height: 1px;
+      background: var(--gold);
+    }
+    .intro__title {
+      font-family: var(--font-serif);
+      font-size: clamp(2.5rem, 5.2vw, 4.4rem);
+      font-weight: 300;
+      font-style: italic;
+      line-height: 1.1;
+      margin-bottom: 26px;
+    }
+    .intro__title strong {
+      font-weight: 500;
+      font-style: normal;
+      color: var(--gold);
+    }
+    .intro__text {
+      font-family: var(--font-serif);
+      font-size: clamp(1.02rem, 1.6vw, 1.22rem);
+      font-weight: 300;
+      line-height: 1.75;
+      color: var(--ink-soft);
+      max-width: 520px;
+      margin: 0 auto 30px;
+    }
+    .intro__actions {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    /* ═══════════════════════════════════════════
+       RING — eigene Scroll-Sektion
+    ═══════════════════════════════════════════ */
+    #ring { height: 190vh; position: relative; padding: 0; }
+    .ring__sticky {
+      position: sticky;
+      top: 0;
+      height: 100svh;
+      /* Der Schimmer greift bewusst ueber den Kasten hinaus und ragte
+         auf schmalen Schirmen aus der Seite — das gab eine Querlauf-
+         Leiste. Hier abschneiden und nicht an der Sektion: ein
+         overflow an der Sektion wuerde dieses Element selbst aus der
+         Klebeposition nehmen. */
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: calc(var(--nav-h) + 20px) var(--pad-x) 0;
+    }
+    .ring__stage { position: relative; }
+    #kastenCanvas {
+      display: block;
+      width: clamp(280px, 44vh, 560px);
+      height: auto;
+      aspect-ratio: 900 / 969;
+      filter: drop-shadow(0 26px 44px rgba(120, 92, 48, 0.22));
+      transform-origin: 50% 62%;   /* der Kasten steht unten auf */
+    }
+    /* Der Schimmer wandert beim Scrollen gegen die Leserichtung.
+       Grosszuegig ueber den Kasten hinaus, sonst sieht man die
+       Bewegung an den Raendern abreissen. */
+    .kasten__glanz {
+      position: absolute;
+      inset: -22% -18%;
+      z-index: -1;
+      pointer-events: none;
+      background: radial-gradient(ellipse 62% 52% at 50% 52%,
+        rgba(201, 160, 85, 0.20) 0%,
+        rgba(201, 160, 85, 0.09) 42%,
+        transparent 72%);
+      will-change: transform;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .kasten__glanz { transform: none !important; }
+    }
+    .ring__caption {
+      margin-top: clamp(20px, 3vh, 34px);
+      font-size: 0.6rem;
+      font-weight: 500;
+      letter-spacing: 0.36em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+    }
+
+    @media (max-width: 900px) {
+      #ring { height: 170vh; }
+      .hero__cue { display: none; }
+      .hero__mark { width: clamp(180px, 52vw, 260px); }
+      .intro__title { font-size: clamp(2rem, 8.5vw, 2.7rem); }
+      .intro__text { font-size: 0.98rem; margin-bottom: 22px; }
+      .intro__actions { flex-direction: column; align-items: stretch; }
+      .intro__actions a { text-align: center; }
+    }
+
+  
+    :root {
+      --kreuz: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 11 11'%3E%3Cpath d='M5.5 0v11M0 5.5h11' stroke='%23000' stroke-width='1.3'/%3E%3C/svg%3E");
+    }
+    /* ═══════════════════════════════════════════
+       SHOP — eigene Ebene ueber dem Seiten-CSS
+       Dichter gesetzt als der Rest der Website: mehr Haarlinien,
+       mehr Bogen, mehr Staffelung. Die Bausteine der Seite bleiben
+       aber dieselben, damit Shop und Website eine Handschrift haben.
+    ═══════════════════════════════════════════ */
+
+    .sh-hinweis {
+      position: relative;
+      z-index: 30;
+      margin-top: var(--nav-h);
+      padding: 9px var(--pad-x);
+      text-align: center;
+      background: var(--ink);
+      color: rgba(255, 255, 255, 0.82);
+      font-size: 0.6rem;
+      font-weight: 500;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+    }
+    .sh-hinweis b { color: var(--gold-light); font-weight: 600; }
+
+    /* ── Auftakt ─────────────────────────────────────────── */
+    .sh-auftakt {
+      position: relative;
+      padding: clamp(40px, 6vw, 84px) 0 clamp(56px, 7vw, 104px);
+    }
+    .sh-auftakt__raster {
+      display: grid;
+      grid-template-columns: 0.92fr 1.08fr;
+      gap: clamp(30px, 5vw, 78px);
+      align-items: center;
+    }
+
+    /* Der Film sitzt in einem Bogen — dieselbe Form wie die
+       Kollektionskarten, nur groesser und mit Goldkante. */
+    .sh-film {
+      position: relative;
+      margin: 0;
+      border-radius: 260px 260px 12px 12px;
+      overflow: hidden;
+      border: 1px solid var(--border-gold);
+      box-shadow: 0 34px 80px rgba(27, 25, 22, 0.16);
+      background: var(--marble-warm);
+    }
+    .sh-film video {
+      display: block;
+      width: 100%;
+      aspect-ratio: 3 / 4;
+      object-fit: cover;
+    }
+    /* Haelt die Bogenkante ruhig und traegt unten die Bildunterschrift. */
+    .sh-film__schleier {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(180deg,
+        rgba(27, 25, 22, 0.16) 0%,
+        rgba(27, 25, 22, 0) 26%,
+        rgba(27, 25, 22, 0) 58%,
+        rgba(27, 25, 22, 0.42) 100%);
+    }
+    .sh-film__cap {
+      position: absolute;
+      left: 0; right: 0; bottom: 18px;
+      text-align: center;
+      font-size: 0.54rem;
+      font-weight: 600;
+      letter-spacing: 0.34em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.9);
+      pointer-events: none;
+    }
+
+    .sh-auftakt__text h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(2.3rem, 4.6vw, 3.7rem);
+      font-weight: 300;
+      line-height: 1.1;
+      margin-bottom: 22px;
+    }
+    .sh-auftakt__text h1 em { font-style: italic; color: var(--gold-dark); }
+    .sh-auftakt__lead {
+      font-family: var(--font-serif);
+      font-size: clamp(1.02rem, 1.5vw, 1.2rem);
+      font-weight: 300;
+      line-height: 1.9;
+      color: var(--ink-soft);
+      max-width: 46ch;
+      margin-bottom: 28px;
+    }
+
+    /* Drei Zusagen, durch Haarlinien getrennt. */
+    .sh-zusagen {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0;
+      margin-top: 34px;
+      border-top: 1px solid var(--border-gold);
+    }
+    .sh-zusagen li {
+      flex: 1 1 33%;
+      min-width: 128px;
+      list-style: none;
+      padding: 16px 18px 0 0;
+    }
+    .sh-zusagen li + li {
+      border-left: 1px solid var(--border-gold);
+      padding-left: 18px;
+    }
+    .sh-zusagen strong {
+      display: block;
+      font-family: var(--font-serif);
+      font-size: 1.04rem;
+      font-style: italic;
+      font-weight: 500;
+      margin-bottom: 3px;
+    }
+    .sh-zusagen span {
+      font-size: 0.68rem;
+      line-height: 1.6;
+      color: var(--ink-muted);
+    }
+
+    /* ── Kategorieleiste ─────────────────────────────────── */
+    .sh-kat {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: clamp(10px, 1.6vw, 20px);
+    }
+    .sh-kat a {
+      position: relative;
+      display: block;
+      border-radius: 160px 160px 8px 8px;
+      overflow: hidden;
+      background: var(--marble-warm);
+      border: 1px solid var(--border-gold);
+      transition: transform 0.55s var(--ease-out), box-shadow 0.55s ease;
+    }
+    .sh-kat a:hover { transform: translateY(-6px); box-shadow: var(--shadow-card); }
+    .sh-kat img {
+      width: 100%;
+      aspect-ratio: 3 / 4;
+      object-fit: contain;
+      padding: clamp(16px, 2.4vw, 30px) clamp(8px, 1.4vw, 18px) clamp(40px, 5vw, 58px);
+      transition: transform 0.7s var(--ease-out);
+    }
+    .sh-kat a:hover img { transform: scale(1.07) translateY(-4px); }
+    .sh-kat b {
+      position: absolute;
+      left: 0; right: 0; bottom: 14px;
+      text-align: center;
+      font-size: 0.58rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold-dark);
+    }
+
+    /* ── Produktraster ───────────────────────────────────── */
+    .sh-leiste {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+      padding-bottom: 14px;
+      margin-bottom: clamp(22px, 3vw, 38px);
+      border-bottom: 1px solid var(--border-gold);
+    }
+    .sh-leiste h2 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.6vw, 2.1rem);
+      font-weight: 400;
+      font-style: italic;
+    }
+    .sh-leiste p { font-size: 0.7rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-muted); }
+
+    .sh-raster {
+      display: grid;
+      /* minmax(0,...) statt 1fr: sonst laesst sich eine Spalte nicht
+         unter die Mindestbreite ihres Inhalts druecken, und auf dem
+         Handy schiebt die Preiszeile das Raster aus der Seite. */
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: clamp(14px, 2vw, 26px);
+    }
+
+    .sh-karte {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      padding: clamp(18px, 2.2vw, 26px) clamp(14px, 1.8vw, 20px) clamp(18px, 2.2vw, 24px);
+      border: 1px solid transparent;
+      border-radius: 4px;
+      transition: border-color 0.5s ease, background 0.5s ease, transform 0.5s var(--ease-out);
+    }
+    .sh-karte:hover {
+      transform: translateY(-4px);
+      border-color: var(--border-gold);
+      background: rgba(255, 255, 255, 0.6);
+    }
+
+    /* Das Bett hinter dem freigestellten Stueck: ein weicher Lichtkegel,
+       der beim Zeigen aufgeht. Ohne ihn schweben die Ringe im Nichts. */
+    .sh-karte__bett {
+      position: relative;
+      display: grid;
+      place-items: center;
+      aspect-ratio: 1 / 1;
+      /* Ohne das waechst das Quadrat an einem hohen Bild vorbei: die
+         automatische Mindesthoehe eines Rasterkastens richtet sich nach
+         seinem Inhalt und schlaegt das Seitenverhaeltnis. Die zehn Ringe
+         sind unterschiedlich freigestellt, dadurch stand in jeder Karte
+         der Name auf einer anderen Hoehe. */
+      min-height: 0;
+      /* Und nicht schrumpfen lassen: als Flex-Kind gaebe es sonst Hoehe
+         an den Text ab, sobald eine Karte in der Reihe mehr Zeilen hat. */
+      flex: none;
+      margin-bottom: 16px;
+    }
+    .sh-karte__bett::before {
+      content: '';
+      position: absolute;
+      inset: 8%;
+      border-radius: 50%;
+      background: radial-gradient(circle,
+        rgba(201, 160, 85, 0.16) 0%,
+        rgba(201, 160, 85, 0.05) 45%,
+        transparent 72%);
+      opacity: 0;
+      transform: scale(0.85);
+      transition: opacity 0.6s ease, transform 0.7s var(--ease-out);
+    }
+    .sh-karte:hover .sh-karte__bett::before { opacity: 1; transform: scale(1); }
+    /* Breite UND Hoehe ausdruecklich, nicht ueber gegenueberliegende
+       Kanten: die Grundregel der Seite setzt img auf height:auto, und
+       bei einem absolut gesetzten Bild wird damit die untere Kante
+       ignoriert. Das Bild behielt so seine volle Eigenhoehe, lief aus
+       dem Quadrat heraus und legte sich ueber die Namen. */
+    .sh-karte__bett img {
+      position: absolute;
+      top: 9%;
+      left: 9%;
+      width: 82%;
+      height: 82%;
+      object-fit: contain;
+      filter: drop-shadow(0 12px 18px rgba(27, 25, 22, 0.14));
+      transition: transform 0.7s var(--ease-out);
+    }
+    .sh-karte:hover .sh-karte__bett img { transform: translateY(-6px) scale(1.05); }
+
+    .sh-karte__name {
+      font-family: var(--font-serif);
+      font-size: 1.16rem;
+      font-style: italic;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    .sh-karte__spec {
+      display: block;
+      font-size: 0.55rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold-dark);
+      margin-bottom: 10px;
+    }
+    .sh-karte__text {
+      font-size: 0.74rem;
+      line-height: 1.7;
+      color: var(--ink-muted);
+      margin-bottom: 14px;
+    }
+    .sh-karte__fuss {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px 12px;
+      margin-top: auto;
+      padding-top: 12px;
+      border-top: 1px solid var(--border-light);
+    }
+    .sh-preis {
+      font-family: var(--font-serif);
+      font-size: 1.02rem;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .sh-preis small {
+      display: block;
+      font-family: var(--font-sans);
+      font-size: 0.52rem;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+    }
+    /* Die Goldpunkte zeigen, in welchen Toenen es das Stueck gibt. */
+    .sh-tone { display: flex; gap: 6px; }
+    .sh-tone i {
+      width: 13px; height: 13px;
+      border-radius: 50%;
+      border: 1px solid rgba(27, 25, 22, 0.14);
+    }
+    .sh-tone .gelb  { background: linear-gradient(140deg, #E8C87E, #C9A055); }
+    .sh-tone .weiss { background: linear-gradient(140deg, #F2F2F0, #C9C9C6); }
+    .sh-tone .rose  { background: linear-gradient(140deg, #EFC7B4, #D09B84); }
+
+    /* Der ganze Karteninhalt ist ein Link — der Rahmen bleibt aber die
+       Karte, damit der Hover die ganze Flaeche fasst. */
+    .sh-karte__link { position: static; color: inherit; }
+    .sh-karte__link::after { content: ''; position: absolute; inset: 0; }
+
+    /* ── Editorial-Band ──────────────────────────────────── */
+    .sh-band {
+      position: relative;
+      margin: clamp(56px, 8vw, 104px) 0;
+      height: min(62vh, 520px);
+      overflow: hidden;
+    }
+    .sh-band img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .sh-band__text {
+      position: absolute;
+      inset: auto 0 0 0;
+      padding: clamp(28px, 5vw, 54px) var(--pad-x);
+      text-align: center;
+      background: linear-gradient(180deg, transparent, rgba(24, 21, 17, 0.62));
+      color: #fff;
+    }
+    .sh-band__text strong {
+      display: block;
+      font-family: var(--font-serif);
+      font-size: clamp(1.4rem, 3vw, 2.2rem);
+      font-weight: 300;
+      font-style: italic;
+      margin-bottom: 8px;
+    }
+    .sh-band__text span { font-size: 0.68rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--gold-light); }
+
+    /* ── Produktseite ────────────────────────────────────── */
+    .sh-detail {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: clamp(30px, 5vw, 76px);
+      align-items: start;
+      padding-top: clamp(24px, 4vw, 48px);
+    }
+    .sh-detail__bild {
+      position: sticky;
+      top: calc(var(--nav-h) + 20px);
+      margin: 0;
+      display: grid;
+      place-items: center;
+      aspect-ratio: 1 / 1;
+      border-radius: 240px 240px 10px 10px;
+      border: 1px solid var(--border-gold);
+      background:
+        radial-gradient(circle at 50% 44%, #FFFFFF 0%, #F8F5EF 58%, #F1EBE1 100%);
+      overflow: hidden;
+    }
+    .sh-detail__bild img {
+      max-width: 66%;
+      max-height: 66%;
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 20px 30px rgba(27, 25, 22, 0.18));
+    }
+
+    .sh-detail__kopf h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(2rem, 3.6vw, 3rem);
+      font-weight: 300;
+      font-style: italic;
+      line-height: 1.1;
+      margin: 6px 0 10px;
+    }
+    .sh-detail__preis {
+      font-family: var(--font-serif);
+      font-size: 1.5rem;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    .sh-detail__preis small {
+      display: block;
+      font-family: var(--font-sans);
+      font-size: 0.56rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      margin-top: 4px;
+    }
+    .sh-detail p.sh-detail__text {
+      font-family: var(--font-serif);
+      font-size: 1.04rem;
+      font-weight: 300;
+      line-height: 1.9;
+      color: var(--ink-soft);
+      margin: 20px 0 26px;
+    }
+
+    .sh-wahl { margin-bottom: 22px; }
+    .sh-wahl__titel {
+      display: block;
+      font-size: 0.55rem;
+      font-weight: 600;
+      letter-spacing: 0.26em;
+      text-transform: uppercase;
+      color: var(--gold-dark);
+      margin-bottom: 10px;
+    }
+    .sh-wahl__reihe { display: flex; flex-wrap: wrap; gap: 8px; }
+    .sh-chip {
+      font-family: var(--font-sans);
+      font-size: 0.68rem;
+      font-weight: 500;
+      padding: 9px 16px;
+      border-radius: 999px;
+      border: 1px solid var(--border-light);
+      background: transparent;
+      color: var(--ink-soft);
+      cursor: pointer;
+      transition: border-color 0.3s ease, color 0.3s ease, background 0.3s ease;
+    }
+    .sh-chip:hover { border-color: var(--gold); color: var(--gold-dark); }
+    .sh-chip.is-on {
+      border-color: var(--gold);
+      background: rgba(201, 160, 85, 0.1);
+      color: var(--ink);
+    }
+
+    .sh-aktionen { display: flex; flex-wrap: wrap; gap: 12px; margin: 26px 0 8px; }
+    .sh-notiz {
+      font-size: 0.7rem;
+      line-height: 1.7;
+      color: var(--ink-muted);
+      margin-top: 12px;
+    }
+
+    .sh-falt { margin-top: 30px; border-top: 1px solid var(--border-gold); }
+    .sh-falt details { border-bottom: 1px solid var(--border-light); }
+    .sh-falt summary {
+      cursor: pointer;
+      list-style: none;
+      padding: 15px 0;
+      font-size: 0.66rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .sh-falt summary::-webkit-details-marker { display: none; }
+    .sh-falt summary::after {
+      content: '';
+      width: 11px; height: 11px;
+      flex: none;
+      background: currentColor;
+      -webkit-mask: var(--kreuz) no-repeat center / contain;
+      mask: var(--kreuz) no-repeat center / contain;
+      transition: transform 0.35s var(--ease-out);
+    }
+    .sh-falt details[open] summary::after { transform: rotate(45deg); }
+    .sh-falt p {
+      font-family: var(--font-serif);
+      font-size: 0.95rem;
+      font-weight: 300;
+      line-height: 1.85;
+      color: var(--ink-soft);
+      padding-bottom: 18px;
+      max-width: 54ch;
+    }
+
+    /* ── Tablet ──────────────────────────────────────────── */
+    @media (max-width: 1100px) {
+      .sh-raster { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .sh-kat { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    @media (max-width: 900px) {
+      .sh-auftakt__raster { grid-template-columns: 1fr; }
+      .sh-film { max-width: 420px; margin: 0 auto; }
+      .sh-detail { grid-template-columns: 1fr; }
+      .sh-detail__bild { position: static; max-width: 460px; margin: 0 auto; }
+    }
+
+    /* ── Mobil ───────────────────────────────────────────── */
+    @media (max-width: 620px) {
+      .sh-raster { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .sh-kat { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .sh-karte { padding: 12px 10px 16px; }
+      .sh-karte__text { display: none; }
+      .sh-karte__name { font-size: 1.02rem; }
+      .sh-zusagen li { flex-basis: 100%; padding-right: 0; }
+      .sh-zusagen li + li { border-left: 0; border-top: 1px solid var(--border-gold); padding-left: 0; }
+      .sh-band { height: min(48vh, 360px); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .sh-karte, .sh-karte__bett img, .sh-kat a, .sh-kat img { transition: none; }
+      .sh-karte:hover, .sh-kat a:hover { transform: none; }
+      .sh-karte:hover .sh-karte__bett img, .sh-kat a:hover img { transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Zum Inhalt springen</a>
+  <div class="marble-bg" aria-hidden="true">
+    <svg viewBox="0 0 1440 960" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="gv1" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%"   stop-color="#C9A055" stop-opacity="0"/>
+          <stop offset="45%"  stop-color="#EDD280" stop-opacity="0.5"/>
+          <stop offset="100%" stop-color="#A07838" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="gv2" x1="0%" y1="20%" x2="100%" y2="80%">
+          <stop offset="0%"   stop-color="#D4AA50" stop-opacity="0"/>
+          <stop offset="55%"  stop-color="#D4A843" stop-opacity="0.4"/>
+          <stop offset="100%" stop-color="#C9A055" stop-opacity="0"/>
+        </linearGradient>
+        <filter id="goldGlow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="2.2" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
+      <path d="M 60,960 Q 140,680 210,500 Q 280,320 320,160 Q 350,40 420,-20"
+            fill="none" stroke="url(#gv1)" stroke-width="2.6" stroke-linecap="round"
+            filter="url(#goldGlow)" opacity="0.55"/>
+      <path d="M 90,960 Q 170,690 240,510 Q 308,330 348,170 Q 376,50 445,-20"
+            fill="none" stroke="url(#gv1)" stroke-width="1.2" stroke-linecap="round" opacity="0.4"/>
+      <path d="M 960,0 Q 1010,120 1020,260 Q 1030,400 980,520 Q 930,650 920,800 Q 910,900 930,960"
+            fill="none" stroke="url(#gv2)" stroke-width="2.2" stroke-linecap="round"
+            filter="url(#goldGlow)" opacity="0.5"/>
+      <path d="M 1000,600 Q 1040,700 1060,800 Q 1070,880 1040,960"
+            fill="none" stroke="url(#gv2)" stroke-width="0.9" stroke-linecap="round" opacity="0.35"/>
+    </svg>
+  </div>
+
+  <div class="loader" id="loader" role="status" aria-label="Seite wird geladen">
+    <img src="assets/logo-cut.webp" alt="" class="loader__logo" width="566" height="593">
+    <div class="loader__word">Juwelier Damla</div>
+    <div class="loader__bar"><span id="loaderBar"></span></div>
+  </div>
+  <nav class="nav" id="mainNav" aria-label="Hauptnavigation">
+    <a href="index.html#hero" class="nav__brand" aria-label="Juwelier Damla – Startseite">
+      <img src="assets/logo-cut.webp" alt="Juwelier Damla Logo" class="nav__logo-img" width="240" height="92">
+    </a>
+
+    <ul class="nav__links" id="navLinks">
+      <li><a href="index.html#about">Über uns</a></li>
+      <li><a href="index.html#collections">Kollektionen</a></li>
+      <li><a href="trauringe.html">Trauringe</a></li>
+      <li><a href="trauring-konfigurator.html">Konfigurator</a></li>
+      <li><a href="verlobungsringe.html">Verlobungsringe</a></li>
+      <li><a href="reparaturen.html">Reparaturen</a></li>
+      <li><a href="index.html#services">Leistungen</a></li>
+      <li><a href="index.html#reviews">Bewertungen</a></li>
+      <li><a href="index.html#contact">Öffnungszeiten</a></li>
+      <li><a href="tel:+496115807830" class="nav__cta">Anrufen</a></li>
+    </ul>
+
+    <button class="nav__burger" id="navBurger" aria-label="Menü öffnen" aria-expanded="false" aria-controls="navLinks">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <main id="main">
+  <div class="sh-hinweis"><b>Entwurf</b> &nbsp;·&nbsp; Beispiel einer Produktseite &nbsp;·&nbsp; Preise sind Platzhalter</div>
+
+  <section aria-labelledby="pTitel">
+    <div class="wrap">
+      <p class="sub-crumb"><a href="index.html">Startseite</a> &nbsp;·&nbsp; <a href="shop.html">Shop</a> &nbsp;·&nbsp; <span>Wellritz</span></p>
+
+      <div class="sh-detail">
+
+        <figure class="sh-detail__bild">
+          <img id="pBild" src="assets/trauringe/modell-01.webp"
+               alt="Trauring Wellritz: Gelbgold mit gebürstetem Weißgoldband in der Mitte"
+               width="403" height="736" fetchpriority="high">
+        </figure>
+
+        <div class="sh-detail__kopf">
+          <span class="eyebrow">Trauring · Modell 01</span>
+          <h1 id="pTitel">Wellritz</h1>
+          <p class="sh-detail__preis">ab 890 €<small>pro Ring · 585er Gold · Platzhalterpreis</small></p>
+
+          <p class="sh-detail__text">
+            Ein gebürstetes Weißgoldband läuft zwischen zwei polierten Gelbgoldkanten.
+            Der Kontrast zwischen matt und glänzend bleibt auch nach Jahren sichtbar –
+            und lässt sich jederzeit bei uns wieder auffrischen.
+          </p>
+
+          <div class="sh-wahl">
+            <span class="sh-wahl__titel">Legierung</span>
+            <div class="sh-wahl__reihe" id="pLegierung">
+              <button type="button" class="sh-chip is-on">585 Gelb/Weiß</button>
+              <button type="button" class="sh-chip">585 Rot/Weiß</button>
+              <button type="button" class="sh-chip">750 Gelb/Weiß</button>
+            </div>
+          </div>
+
+          <div class="sh-wahl">
+            <span class="sh-wahl__titel">Breite</span>
+            <div class="sh-wahl__reihe" id="pBreite">
+              <button type="button" class="sh-chip">5,0 mm</button>
+              <button type="button" class="sh-chip is-on">6,0 mm</button>
+              <button type="button" class="sh-chip">7,0 mm</button>
+            </div>
+          </div>
+
+          <div class="sh-wahl">
+            <span class="sh-wahl__titel">Ringgröße</span>
+            <div class="sh-wahl__reihe" id="pGroesse">
+              <button type="button" class="sh-chip">50</button>
+              <button type="button" class="sh-chip">52</button>
+              <button type="button" class="sh-chip is-on">54</button>
+              <button type="button" class="sh-chip">56</button>
+              <button type="button" class="sh-chip">58</button>
+              <button type="button" class="sh-chip">60</button>
+              <button type="button" class="sh-chip">Weiß ich nicht</button>
+            </div>
+          </div>
+
+          <div class="sh-aktionen">
+            <a class="btn-solid" id="pAnfrage" href="#">Unverbindlich anfragen</a>
+            <a class="btn-ghost btn--schlicht" href="tel:+496115807830">0611 5807830</a>
+          </div>
+          <p class="sh-notiz">
+            Der Entwurf hat noch keine Kasse. Die Anfrage öffnet WhatsApp mit Ihrer
+            Zusammenstellung – so, wie es später auch der Warenkorb tun würde.
+          </p>
+
+          <div class="sh-falt">
+            <details open>
+              <summary>Maße &amp; Material</summary>
+              <p>6,0 mm breit, 1,8 mm stark, bombierte Innenseite. 585er Gold, Weißgold rhodiniert. Gewicht je nach Größe etwa 7–9 g.</p>
+            </details>
+            <details>
+              <summary>Gravur</summary>
+              <p>Innengravur bis 24 Zeichen ist im Preis enthalten – Datum, Namen, ein kurzes Wort. Wir gravieren auch später noch, an einem Ring, den Sie längst tragen.</p>
+            </details>
+            <details>
+              <summary>Größe &amp; Änderungen</summary>
+              <p>Wir messen kostenlos und in einer Minute. Die Weite lässt sich später ändern, enger wie weiter – bei diesem Modell in beide Richtungen um zwei Größen.</p>
+            </details>
+            <details>
+              <summary>Lieferzeit</summary>
+              <p>Zwei bis drei Wochen, weil jeder Ring einzeln gefertigt wird. Eilig? Sprechen Sie uns an, manches geht schneller.</p>
+            </details>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="sub-alt" aria-labelledby="dazuTitel">
+    <div class="wrap">
+      <div class="sh-leiste">
+        <h2 id="dazuTitel">Dazu passend</h2>
+        <p>Aus derselben Werkstatt</p>
+      </div>
+      <div class="sh-raster">
+        <article class="sh-karte reveal">
+          <div class="sh-karte__bett">
+            <img src="assets/trauringe/modell-02.webp" alt="Flacher Trauring in Gelbgold mit eingelassenem Weißgoldfeld" width="398" height="739" loading="lazy" decoding="async">
+          </div>
+          <h3 class="sh-karte__name"><a class="sh-karte__link" href="shop-produkt.html">Carré</a></h3>
+          <span class="sh-karte__spec">6 mm · Bicolor</span>
+          <p class="sh-karte__text">Flache Schiene mit eingelassenem, poliertem Weißgoldfeld.</p>
+          <div class="sh-karte__fuss">
+            <span class="sh-preis">ab 920&nbsp;€<small>pro Ring</small></span>
+            <span class="sh-tone" aria-label="Erhältlich in gelb, weiss"><i class="gelb"></i><i class="weiss"></i></span>
+          </div>
+        </article>
+
+        <article class="sh-karte reveal">
+          <div class="sh-karte__bett">
+            <img src="assets/trauringe/modell-07.webp" alt="Flacher, kantiger Trauring mit breitem gebürstetem Weißgoldfeld" width="432" height="755" loading="lazy" decoding="async">
+          </div>
+          <h3 class="sh-karte__name"><a class="sh-karte__link" href="shop-produkt.html">Tafel</a></h3>
+          <span class="sh-karte__spec">6,5 mm · Bicolor</span>
+          <p class="sh-karte__text">Flach und kantig, mit breitem gebürstetem Weißgoldfeld.</p>
+          <div class="sh-karte__fuss">
+            <span class="sh-preis">ab 980&nbsp;€<small>pro Ring</small></span>
+            <span class="sh-tone" aria-label="Erhältlich in gelb, weiss"><i class="gelb"></i><i class="weiss"></i></span>
+          </div>
+        </article>
+
+        <article class="sh-karte reveal">
+          <div class="sh-karte__bett">
+            <img src="assets/trauringe/modell-05.webp" alt="Schlichter, polierter Trauring in Gelbgold" width="516" height="747" loading="lazy" decoding="async">
+          </div>
+          <h3 class="sh-karte__name"><a class="sh-karte__link" href="shop-produkt.html">Klar</a></h3>
+          <span class="sh-karte__spec">6 mm · Gelbgold</span>
+          <p class="sh-karte__text">Ganz ohne Zutat: hochglanzpoliert und sanft gewölbt.</p>
+          <div class="sh-karte__fuss">
+            <span class="sh-preis">ab 690&nbsp;€<small>pro Ring</small></span>
+            <span class="sh-tone" aria-label="Erhältlich in gelb, weiss, rose"><i class="gelb"></i><i class="weiss"></i><i class="rose"></i></span>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer-grid">
+
+        <div>
+          <div class="footer-brand-name">Juwelier Damla</div>
+          <div class="footer-brand-tag">Stilvoll · Persönlich · Wiesbaden</div>
+          <p class="footer-brand-desc">
+            Ihr Juwelier in der Wellritzstraße – für Momente, die bleiben. Persönliche Beratung, ausgewählte Qualität, echte Leidenschaft für Schmuck.
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <div class="footer-col-head">Navigation</div>
+          <ul>
+            <li><a href="index.html#about">Über uns</a></li>
+            <li><a href="index.html#collections">Kollektionen</a></li>
+            <li><a href="trauringe.html">Trauringe</a></li>
+            <li><a href="trauring-konfigurator.html">Konfigurator</a></li>
+            <li><a href="verlobungsringe.html">Verlobungsringe</a></li>
+            <li><a href="reparaturen.html">Reparaturen</a></li>
+            <li><a href="index.html#services">Leistungen</a></li>
+            <li><a href="index.html#reviews">Bewertungen</a></li>
+            <li><a href="index.html#contact">Öffnungszeiten</a></li>
+            <li><a href="index.html#location">Standort</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <div class="footer-col-head">Kontakt</div>
+          <ul>
+            <li><a href="tel:+496115807830">+49 611 5807830</a></li>
+            <li>
+              <a href="https://maps.google.com/?q=Wellritzstraße+3,+65183+Wiesbaden"
+                 target="_blank" rel="noopener noreferrer">
+                Wellritzstraße 3<br>65183 Wiesbaden
+              </a>
+            </li>
+            <li><a href="https://juwelier-damla.de" target="_blank" rel="noopener noreferrer">juwelier-damla.de</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <div class="footer-col-head">Rechtliches</div>
+          <ul>
+            <li><a href="impressum.html">Impressum</a></li>
+            <li><a href="datenschutz.html">Datenschutz</a></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="footer-bottom">
+        <span>© <span id="year">2026</span> Juwelier Damla · Wellritzstraße 3 · 65183 Wiesbaden</span>
+        <span class="flowstate-credit">Created by <a href="index.html#" rel="noopener">Flowstate</a></span>
+      </div>
+    </div>
+  </footer>
+  <script>
+
+    // ── Ladescreen ────────────────────────────────────
+    // Blendet ab, sobald die Hero-Videos das erste Bild haben.
+    (function () {
+      const el  = document.getElementById('loader');
+      const bar = document.getElementById('loaderBar');
+      if (!el) return;
+      document.body.classList.add('is-loading');
+
+      // Nur der erste Clip wird abgewartet. Frueher waren es beide — dann
+      // haengt der Ladescreen an 1,1 MB Video, obwohl die Seite laengst
+      // steht und die Poster den Hero ohnehin korrekt zeigen.
+      // (Beide Clips behalten preload="auto": mit "metadata" verliert der
+      // zweite nach dem Abspielen seine Puffer und zeigt bei jedem
+      // Durchlauf kurz sein Poster.)
+      const WARM = 1;              // so viele Clips vor dem Start
+      let seen = 0, finished = false;
+
+      function finish() {
+        if (finished) return;
+        finished = true;
+        if (bar) bar.style.width = '100%';
+        setTimeout(function () {
+          el.classList.add('is-done');
+          document.body.classList.remove('is-loading');
+        }, 280);
+      }
+      // wird vom Hero-Loader aufgerufen
+      window.__heroWarm = function () {
+        seen++;
+        if (bar) bar.style.width = Math.min(100, seen / WARM * 100).toFixed(0) + '%';
+        if (seen >= WARM) finish();
+      };
+      window.addEventListener('load', function () { setTimeout(finish, 500); });
+      // Der Ladescreen ist Schmuck; das Markup steht mit dem Inline-CSS
+      // sofort. Laenger als gut zwei Sekunden darf er niemanden aufhalten.
+      setTimeout(finish, 2500);           // Notausstieg, falls Bilder haengen
+    })();
+
+    // ── Hero: zwei Ladenvideos im Wechsel ─────────────
+    // Ladenfront und Ladenraum laufen abwechselnd, je 4.0 s
+    // (leicht beschleunigt, damit ein Durchlauf ~8 s dauert).
+    (function () {
+      const sec  = document.getElementById('hero');
+      const cue  = document.getElementById('heroCue');
+      const vids = sec ? [].slice.call(sec.querySelectorAll('.hero__video')) : [];
+      if (!sec || !vids.length) return;
+
+      const SLOT = 4000;   // Standzeit je Clip
+      const FADE = 800;      // muss zur CSS-Transition passen
+
+      // Fortschritt fuer den Ladescreen: jeder Clip meldet sich einmal.
+      vids.forEach(function (v) {
+        let told = false;
+        function ready() {
+          if (told) return;
+          told = true;
+          if (window.__heroWarm) window.__heroWarm();
+        }
+        if (v.readyState >= 2) ready();
+        else {
+          v.addEventListener('loadeddata', ready, { once: true });
+          v.addEventListener('error', ready, { once: true });
+        }
+      });
+
+      // Wer weniger Bewegung moechte, bekommt nur das Standbild.
+      const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (still) { vids[0].classList.add('is-on'); return; }
+
+      let idx = 0, timer = 0, guard = 0, nextAt = 0, running = false;
+
+      function play(v) {
+        // Clip in SLOT ms durchspielen — die Quellen sind gut 5 s lang.
+        const d = v.duration;
+        if (d && isFinite(d)) v.playbackRate = Math.min(2, Math.max(1, d / (SLOT / 1000)));
+        v.muted = true;                 // iOS startet nur stumme Videos selbst
+        const pr = v.play();
+        if (pr && pr.catch) pr.catch(function () {});   // Autoplay abgelehnt
+      }
+
+      function show(i, prev) {
+        idx = i;
+        const next = vids[i];
+        if (prev && prev !== next) {
+          // Der neue Clip legt sich waehrend der Blende ueber den alten. Der
+          // alte wird dabei sofort angehalten — er steht durch die angepasste
+          // Geschwindigkeit ohnehin schon auf seinem letzten Bild, und iOS
+          // bricht die Wiedergabe gern ab, wenn zwei Videos gleichzeitig
+          // laufen. Sichtbar bleibt er bis zum Ende der Blende.
+          prev.pause();
+          prev.style.zIndex = '1';
+          next.style.zIndex = '2';
+          clearTimeout(prev.__fade);
+          prev.__fade = setTimeout(function () {
+            if (vids[idx] !== prev) prev.classList.remove('is-on');
+          }, FADE);
+        }
+        try { next.currentTime = 0; } catch (e) {}
+        next.classList.add('is-on');
+        play(next);
+        clearTimeout(timer);
+        nextAt = Date.now() + SLOT;
+        timer = setTimeout(function () { show((i + 1) % vids.length, next); }, SLOT);
+      }
+
+      // Sicherheitsnetz, damit die Schleife wirklich nie endet: iOS haelt
+      // Videos bei Energiesparmodus oder Speicherdruck von sich aus an, und
+      // gedrosselte Timer koennen einen Wechsel verschlafen. Der Waechter
+      // schiebt beides wieder an.
+      function watch() {
+        if (!running) return;
+        const v = vids[idx];
+        if (Date.now() > nextAt + 900) { show((idx + 1) % vids.length, v); return; }
+        if (v.paused && !v.ended) play(v);
+      }
+
+      function start() {
+        if (running) return;
+        running = true;
+        show(idx, null);
+        clearInterval(guard);
+        guard = setInterval(watch, 1000);
+      }
+      function stop() {
+        if (!running) return;
+        running = false;
+        clearTimeout(timer);
+        clearInterval(guard);
+        vids.forEach(function (v) { v.pause(); });
+      }
+
+      // Nur laufen lassen, solange der Hero sichtbar und der Tab aktiv ist.
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(function (es) {
+          es.forEach(function (e) {
+            if (e.isIntersecting && !document.hidden) start(); else stop();
+          });
+        }, { threshold: 0.05 }).observe(sec);
+      } else {
+        start();
+      }
+      document.addEventListener('visibilitychange', function () {
+        if (document.hidden) stop();
+        else if (sec.getBoundingClientRect().bottom > 0) start();
+      });
+      start();
+
+      // Scroll-Hinweis verblasst, sobald es losgeht.
+      if (cue) {
+        let ticking = false;
+        const fade = function () {
+          ticking = false;
+          const p = Math.min(1, window.scrollY / (window.innerHeight * 0.35));
+          cue.style.opacity = (1 - p).toFixed(2);
+        };
+        window.addEventListener('scroll', function () {
+          if (!ticking) { ticking = true; requestAnimationFrame(fade); }
+        }, { passive: true });
+        fade();
+      }
+    })();
+    // ── Navbar Scroll-Zustand ─────────────────────────
+    const nav = document.getElementById('mainNav');
+    const onScroll = () => {
+      nav.classList.toggle('nav--scrolled', window.scrollY > 32);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    // ── Mobile Navigation ─────────────────────────────
+    const burger = document.getElementById('navBurger');
+    const links  = document.getElementById('navLinks');
+    const closeMenu = () => {
+      links.classList.remove('open');
+      burger.classList.remove('open');
+      burger.setAttribute('aria-expanded', 'false');
+    };
+    burger.addEventListener('click', () => {
+      const open = links.classList.toggle('open');
+      burger.classList.toggle('open', open);
+      burger.setAttribute('aria-expanded', String(open));
+    });
+    links.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMenu));
+    document.addEventListener('click', e => {
+      if (!nav.contains(e.target) && links.classList.contains('open')) closeMenu();
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeMenu();
+    });
+
+    // ── Scroll-Reveal (drei Choreografien) ────────────
+    const revealEls = document.querySelectorAll('.reveal, .reveal-img, .reveal-lines');
+    if ('IntersectionObserver' in window) {
+      const revealObs = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in');
+            revealObs.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -56px 0px' });
+      revealEls.forEach(el => revealObs.observe(el));
+    } else {
+      revealEls.forEach(el => el.classList.add('in'));
+    }
+
+    // ── Zähl-Animation für Bewertungs-Statistik ───────
+    (function () {
+      const els = document.querySelectorAll('[data-count]');
+      if (!els.length || !('IntersectionObserver' in window)) return;
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+          if (!e.isIntersecting) return;
+          obs.unobserve(e.target);
+          const el = e.target;
+          const target = parseFloat(el.dataset.count);
+          const dec = parseInt(el.dataset.decimals || '0', 10);
+          const fmt = v => (dec ? v.toFixed(dec).replace('.', ',') : Math.round(v).toString());
+          if (reduced) { el.textContent = fmt(target); return; }
+          const dur = 1400, t0 = performance.now();
+          function tick(now) {
+            const p = Math.min(1, (now - t0) / dur);
+            const eased = 1 - Math.pow(1 - p, 3);   // ease-out cubic
+            el.textContent = fmt(target * eased);
+            if (p < 1) requestAnimationFrame(tick);
+            else el.textContent = fmt(target);
+          }
+          requestAnimationFrame(tick);
+        });
+      }, { threshold: 0.6 });
+      els.forEach(el => obs.observe(el));
+    })();
+
+    // ── Cursor-Glow (nur Geräte mit Maus) ─────────────
+    (function () {
+      const glow = document.getElementById('cursorGlow');
+      if (!glow || !window.matchMedia('(pointer: fine)').matches) return;
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      let tx = 0, ty = 0, x = 0, y = 0, active = false;
+      window.addEventListener('mousemove', e => {
+        tx = e.clientX; ty = e.clientY;
+        if (!active) { active = true; glow.style.opacity = '1'; follow(); }
+      }, { passive: true });
+      document.documentElement.addEventListener('mouseleave', () => {
+        glow.style.opacity = '0';
+      });
+      function follow() {
+        x += (tx - x) * 0.12;
+        y += (ty - y) * 0.12;
+        glow.style.transform = 'translate3d(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px,0)';
+        requestAnimationFrame(follow);
+      }
+    })();
+
+    // ── Schmuckkästchen: Scroll-Animation (Frame-Scrubbing) ──
+    // 50 Frames aus einem Greenscreen-Video, beim Freistellen schon
+    // mit Alphakanal versehen. Deshalb hier kein Keying mehr pro Bild
+    // wie beim alten Ring — das Canvas zeichnet nur noch.
+    (function () {
+      const canvas  = document.getElementById('kastenCanvas');
+      const sektion = document.getElementById('ring');
+      const schimmer = document.getElementById('kastenGlanz');
+      if (!canvas || !sektion) return;
+      const ctx = canvas.getContext('2d');
+      const FRAMES = 50;
+      const SRC = i => 'assets/kasten/kasten-' + String(i + 1).padStart(3, '0') + '.webp';
+      const imgs = new Array(FRAMES);
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      let current = -1;
+      const ready = i => imgs[i] && imgs[i].complete && imgs[i].naturalWidth;
+
+      function draw(i) {
+        if (!ready(i)) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(imgs[i], 0, 0, canvas.width, canvas.height);
+        current = i;
+      }
+      function load(i, cb) {
+        if (imgs[i]) return;
+        const im = new Image();
+        im.decoding = 'async';
+        if (cb) im.onload = cb;
+        im.src = SRC(i);
+        imgs[i] = im;
+      }
+
+      if (reduced) {                       // offener Kasten genügt
+        load(FRAMES - 1, () => draw(FRAMES - 1));
+        return;
+      }
+
+      load(0, () => draw(0));
+      // Die restlichen Bilder sind zusammen gut zwei Megabyte. Erst
+      // laden, wenn die Seite steht — sonst nehmen sie dem Hero-Video
+      // die Leitung weg.
+      const rest = () => { for (let i = 1; i < FRAMES; i++) load(i); };
+      if (document.readyState === 'complete') rest();
+      else window.addEventListener('load', rest, { once: true });
+
+      let ticking = false;
+      function update() {
+        ticking = false;
+        const runway = sektion.offsetHeight - window.innerHeight;
+        if (runway <= 0) return;
+        const p = Math.min(1, Math.max(0, -sektion.getBoundingClientRect().top / runway));
+        const idx = Math.min(FRAMES - 1, Math.round(p * (FRAMES - 1)));
+        if (idx !== current) {
+          let j = idx;
+          while (j >= 0 && !ready(j)) j--;        // nächstes geladenes Frame
+          if (j >= 0 && j !== current) draw(j);
+        }
+        canvas.style.transform = 'scale(' + (0.95 + p * 0.08).toFixed(4) + ')';
+        // Gegenbewegung: der Schimmer wandert nach unten, während die
+        // Seite nach oben läuft. Bewusst klein gehalten — er soll Tiefe
+        // geben und nicht selbst auffallen.
+        if (schimmer) {
+          schimmer.style.transform = 'translateY(' + ((p - 0.5) * 96).toFixed(1) + 'px)';
+        }
+      }
+      window.addEventListener('scroll', () => {
+        if (!ticking) { ticking = true; requestAnimationFrame(update); }
+      }, { passive: true });
+      window.addEventListener('resize', update);
+      update();
+    })();
+
+    // ── Öffnungsstatus (Hero-Badge + "Heute"-Zeile) ───
+    // Mo–Fr 09:30–19:00 · Sa 09:30–17:00 · So geschlossen
+    (function () {
+      const now = new Date();
+      const day = now.getDay();               // 0 = Sonntag
+      const mins = now.getHours() * 60 + now.getMinutes();
+
+      document.querySelectorAll('#hoursList .hour-row').forEach(row => {
+        const days = (row.dataset.days || '').split(',');
+        if (days.includes(String(day))) row.classList.add('today');
+      });
+
+      const badge = document.getElementById('openBadge');
+      if (!badge) return;
+      const open =
+        (day >= 1 && day <= 5 && mins >= 570 && mins < 1140) ||  // 09:30–19:00
+        (day === 6 && mins >= 570 && mins < 1020);               // 09:30–17:00
+
+      document.getElementById('openState').textContent =
+        open ? 'Jetzt geöffnet' : 'Derzeit geschlossen';
+      if (!open) document.getElementById('openDot').classList.add('closed');
+      badge.hidden = false;
+    })();
+
+    // ── Copyright-Jahr ────────────────────────────────
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+
+  <script>
+  (function () {
+    // Auswahlknoepfe: innerhalb einer Reihe ist immer genau einer an.
+    document.querySelectorAll('.sh-wahl__reihe').forEach(function (reihe) {
+      reihe.addEventListener('click', function (e) {
+        var knopf = e.target.closest('.sh-chip');
+        if (!knopf || !reihe.contains(knopf)) return;
+        reihe.querySelectorAll('.sh-chip').forEach(function (k) { k.classList.remove('is-on'); });
+        knopf.classList.add('is-on');
+        anfrageBauen();
+      });
+    });
+
+    // Der Entwurf hat keine Kasse — die Anfrage traegt die Auswahl
+    // genauso zusammen, wie es der Warenkorb spaeter taete.
+    var knopf = document.getElementById('pAnfrage');
+    function wert(id) {
+      var an = document.querySelector('#' + id + ' .sh-chip.is-on');
+      return an ? an.textContent.trim() : '—';
+    }
+    function anfrageBauen() {
+      if (!knopf) return;
+      var t = document.getElementById('pTitel');
+      var text = 'Guten Tag, ich interessiere mich fuer den Trauring '
+        + (t ? t.textContent.trim() : '') + '.\n'
+        + 'Legierung: ' + wert('pLegierung') + '\n'
+        + 'Breite: ' + wert('pBreite') + '\n'
+        + 'Ringgroesse: ' + wert('pGroesse');
+      knopf.href = 'https://wa.me/496115807830?text=' + encodeURIComponent(text);
+    }
+    anfrageBauen();
+  })();
+  </script>
+</body>
+</html>
