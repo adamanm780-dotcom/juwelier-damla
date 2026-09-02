@@ -1742,760 +1742,422 @@
       --kreuz: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 11 11'%3E%3Cpath d='M5.5 0v11M0 5.5h11' stroke='%23000' stroke-width='1.3'/%3E%3C/svg%3E");
     }
     /* ═══════════════════════════════════════════
-       SHOP — eigene Ebene ueber dem Seiten-CSS
-       Dichter gesetzt als der Rest der Website: mehr Haarlinien,
-       mehr Bogen, mehr Staffelung. Die Bausteine der Seite bleiben
-       aber dieselben, damit Shop und Website eine Handschrift haben.
+       SHOP
+       Zurueckhaltend gesetzt: eine Schrift fuer die Titel, eine fuer
+       alles andere, Gold nur an Knopf und Preis. Was hier wirkt, ist
+       nicht Dekor, sondern Bewegung — der Ring in 3D, die Aufnahme,
+       die man durchblaettert.
     ═══════════════════════════════════════════ */
 
     .sh-hinweis {
       position: relative;
       z-index: 30;
       margin-top: var(--nav-h);
-      padding: 9px var(--pad-x);
+      padding: 8px var(--pad-x);
       text-align: center;
       background: var(--ink);
-      color: rgba(255, 255, 255, 0.82);
+      color: rgba(255, 255, 255, 0.78);
       font-size: 0.6rem;
       font-weight: 500;
-      letter-spacing: 0.24em;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
     }
     .sh-hinweis b { color: var(--gold-light); font-weight: 600; }
 
+    /* Titel: Cormorant aufrecht, keine Kursive, kein Goldakzent. */
+    .sh-auftakt h1, .sh-kopf h2, .sh-laden__name, .sh-detail__kopf h1 {
+      font-family: var(--font-serif);
+      font-weight: 400;
+      font-style: normal;
+      line-height: 1.06;
+      letter-spacing: -0.005em;
+      color: var(--ink);
+    }
+
     /* ── Auftakt ─────────────────────────────────────────── */
-    .sh-auftakt {
-      position: relative;
-      padding: clamp(40px, 6vw, 84px) 0 clamp(56px, 7vw, 104px);
+    .sh-auftakt { position: relative; height: 240vh; padding: 0; }
+    .sh-auftakt__kleber {
+      position: sticky;
+      top: var(--nav-h);
+      height: calc(100vh - var(--nav-h));
+      height: calc(100svh - var(--nav-h));
+      display: flex;
+      align-items: center;
+      overflow: hidden;
     }
     .sh-auftakt__raster {
       display: grid;
-      grid-template-columns: 0.92fr 1.08fr;
-      gap: clamp(30px, 5vw, 78px);
+      grid-template-columns: 0.9fr 1.1fr;
       align-items: center;
-    }
-
-    /* Der Film sitzt in einem Bogen — dieselbe Form wie die
-       Kollektionskarten, nur groesser und mit Goldkante. */
-    .sh-film {
-      position: relative;
-      margin: 0;
-      border-radius: 260px 260px 12px 12px;
-      overflow: hidden;
-      border: 1px solid var(--border-gold);
-      box-shadow: 0 34px 80px rgba(27, 25, 22, 0.16);
-      background: var(--marble-warm);
-    }
-    .sh-film video {
-      display: block;
+      gap: clamp(20px, 4vw, 60px);
       width: 100%;
-      aspect-ratio: 3 / 4;
-      object-fit: cover;
     }
-    /* Haelt die Bogenkante ruhig und traegt unten die Bildunterschrift. */
-    .sh-film__schleier {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      background: linear-gradient(180deg,
-        rgba(27, 25, 22, 0.16) 0%,
-        rgba(27, 25, 22, 0) 26%,
-        rgba(27, 25, 22, 0) 58%,
-        rgba(27, 25, 22, 0.42) 100%);
-    }
-    .sh-film__cap {
-      position: absolute;
-      left: 0; right: 0; bottom: 18px;
-      text-align: center;
-      font-size: 0.54rem;
-      font-weight: 600;
-      letter-spacing: 0.34em;
-      text-transform: uppercase;
-      color: rgba(255, 255, 255, 0.9);
-      pointer-events: none;
-    }
-
-    .sh-auftakt__text h1 {
-      font-family: var(--font-serif);
-      font-size: clamp(2.3rem, 4.6vw, 3.7rem);
-      font-weight: 300;
-      line-height: 1.1;
-      margin-bottom: 22px;
-    }
-    .sh-auftakt__text h1 em { font-style: italic; color: var(--gold-dark); }
+    .sh-auftakt h1 { font-size: clamp(2.4rem, 5.2vw, 4.4rem); margin-bottom: 22px; }
     .sh-auftakt__lead {
-      font-family: var(--font-serif);
-      font-size: clamp(1.02rem, 1.5vw, 1.2rem);
-      font-weight: 300;
-      line-height: 1.9;
+      font-size: clamp(0.94rem, 1.2vw, 1.06rem);
+      line-height: 1.75;
       color: var(--ink-soft);
-      max-width: 46ch;
-      margin-bottom: 28px;
+      max-width: 42ch;
+      margin-bottom: 26px;
     }
-
-    /* Drei Zusagen, durch Haarlinien getrennt. */
-    .sh-zusagen {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0;
-      margin-top: 34px;
-      border-top: 1px solid var(--border-gold);
-    }
-    .sh-zusagen li {
-      flex: 1 1 33%;
-      min-width: 128px;
+    /* Die drei Legierungen: die aktive steht dunkel, die anderen zurueck. */
+    .sh-auftakt__stufen {
       list-style: none;
-      padding: 16px 18px 0 0;
-    }
-    .sh-zusagen li + li {
-      border-left: 1px solid var(--border-gold);
-      padding-left: 18px;
-    }
-    .sh-zusagen strong {
-      display: block;
-      font-family: var(--font-serif);
-      font-size: 1.04rem;
-      font-style: italic;
-      font-weight: 500;
-      margin-bottom: 3px;
-    }
-    .sh-zusagen span {
-      font-size: 0.68rem;
-      line-height: 1.6;
+      display: flex;
+      gap: 22px;
+      margin-bottom: 30px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
       color: var(--ink-muted);
     }
-
-    /* ── Kategorieleiste ─────────────────────────────────── */
-    .sh-kat {
-      display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: clamp(10px, 1.6vw, 20px);
-    }
-    .sh-kat a {
+    .sh-auftakt__stufen li {
       position: relative;
-      display: block;
-      border-radius: 160px 160px 8px 8px;
-      overflow: hidden;
-      background: var(--marble-warm);
-      border: 1px solid var(--border-gold);
-      transition: transform 0.55s var(--ease-out), box-shadow 0.55s ease;
+      padding-bottom: 8px;
+      transition: color 0.4s ease;
     }
-    .sh-kat a:hover { transform: translateY(-6px); box-shadow: var(--shadow-card); }
-    .sh-kat img {
-      width: 100%;
-      aspect-ratio: 3 / 4;
-      object-fit: contain;
-      padding: clamp(16px, 2.4vw, 30px) clamp(8px, 1.4vw, 18px) clamp(40px, 5vw, 58px);
-      transition: transform 0.7s var(--ease-out);
-    }
-    .sh-kat a:hover img { transform: scale(1.07) translateY(-4px); }
-    .sh-kat b {
-      position: absolute;
-      left: 0; right: 0; bottom: 14px;
-      text-align: center;
-      font-size: 0.58rem;
-      font-weight: 600;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--gold-dark);
-    }
-
-    /* ── Produktraster ───────────────────────────────────── */
-    .sh-leiste {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 20px;
-      flex-wrap: wrap;
-      padding-bottom: 14px;
-      margin-bottom: clamp(22px, 3vw, 38px);
-      border-bottom: 1px solid var(--border-gold);
-    }
-    .sh-leiste h2 {
-      font-family: var(--font-serif);
-      font-size: clamp(1.5rem, 2.6vw, 2.1rem);
-      font-weight: 400;
-      font-style: italic;
-    }
-    .sh-leiste p { font-size: 0.7rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-muted); }
-
-    .sh-raster {
-      display: grid;
-      /* minmax(0,...) statt 1fr: sonst laesst sich eine Spalte nicht
-         unter die Mindestbreite ihres Inhalts druecken, und auf dem
-         Handy schiebt die Preiszeile das Raster aus der Seite. */
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: clamp(14px, 2vw, 26px);
-    }
-
-    .sh-karte {
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      padding: clamp(18px, 2.2vw, 26px) clamp(14px, 1.8vw, 20px) clamp(18px, 2.2vw, 24px);
-      border: 1px solid transparent;
-      border-radius: 4px;
-      transition: border-color 0.5s ease, background 0.5s ease, transform 0.5s var(--ease-out);
-    }
-    .sh-karte:hover {
-      transform: translateY(-4px);
-      border-color: var(--border-gold);
-      background: rgba(255, 255, 255, 0.6);
-    }
-
-    /* Das Bett hinter dem freigestellten Stueck: ein weicher Lichtkegel,
-       der beim Zeigen aufgeht. Ohne ihn schweben die Ringe im Nichts. */
-    .sh-karte__bett {
-      position: relative;
-      display: grid;
-      place-items: center;
-      aspect-ratio: 1 / 1;
-      /* Ohne das waechst das Quadrat an einem hohen Bild vorbei: die
-         automatische Mindesthoehe eines Rasterkastens richtet sich nach
-         seinem Inhalt und schlaegt das Seitenverhaeltnis. Die zehn Ringe
-         sind unterschiedlich freigestellt, dadurch stand in jeder Karte
-         der Name auf einer anderen Hoehe. */
-      min-height: 0;
-      /* Und nicht schrumpfen lassen: als Flex-Kind gaebe es sonst Hoehe
-         an den Text ab, sobald eine Karte in der Reihe mehr Zeilen hat. */
-      flex: none;
-      margin-bottom: 16px;
-    }
-    .sh-karte__bett::before {
+    .sh-auftakt__stufen li::after {
       content: '';
       position: absolute;
-      inset: 8%;
-      border-radius: 50%;
-      background: radial-gradient(circle,
-        rgba(201, 160, 85, 0.16) 0%,
-        rgba(201, 160, 85, 0.05) 45%,
-        transparent 72%);
-      opacity: 0;
-      transform: scale(0.85);
-      transition: opacity 0.6s ease, transform 0.7s var(--ease-out);
+      left: 0; right: 0; bottom: 0;
+      height: 1px;
+      background: var(--ink);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.5s var(--ease-out);
     }
-    .sh-karte:hover .sh-karte__bett::before { opacity: 1; transform: scale(1); }
-    /* Breite UND Hoehe ausdruecklich, nicht ueber gegenueberliegende
-       Kanten: die Grundregel der Seite setzt img auf height:auto, und
-       bei einem absolut gesetzten Bild wird damit die untere Kante
-       ignoriert. Das Bild behielt so seine volle Eigenhoehe, lief aus
-       dem Quadrat heraus und legte sich ueber die Namen. */
-    .sh-karte__bett img {
-      position: absolute;
-      top: 9%;
-      left: 9%;
-      width: 82%;
-      height: 82%;
-      object-fit: contain;
-      filter: drop-shadow(0 12px 18px rgba(27, 25, 22, 0.14));
-      transition: transform 0.7s var(--ease-out);
-    }
-    .sh-karte:hover .sh-karte__bett img { transform: translateY(-6px) scale(1.05); }
+    .sh-auftakt__stufen li.is-aktiv { color: var(--ink); }
+    .sh-auftakt__stufen li.is-aktiv::after { transform: scaleX(1); }
+    .sh-auftakt__aktionen { display: flex; flex-wrap: wrap; gap: 12px; }
 
-    .sh-karte__name {
-      font-family: var(--font-serif);
-      font-size: 1.16rem;
-      font-style: italic;
-      font-weight: 500;
-      margin-bottom: 4px;
+    .sh-auftakt__ring {
+      position: relative;
+      aspect-ratio: 1 / 1;
+      max-height: calc(100svh - var(--nav-h) - 60px);
+      margin: 0 auto;
+      width: 100%;
     }
-    .sh-karte__spec {
-      display: block;
-      font-size: 0.55rem;
-      font-weight: 600;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--gold-dark);
-      margin-bottom: 10px;
+    .sh-auftakt__ring canvas { display: block; }
+    /* Bis das erste Bild gerechnet ist — und ohne WebGL dauerhaft —
+       steht die Abbildung an derselben Stelle. */
+    .sh-auftakt__ersatz {
+      position: absolute;
+      inset: 12%;
+      width: 76%;
+      height: 76%;
+      object-fit: contain;
+      transition: opacity 0.6s ease;
     }
-    .sh-karte__text {
-      font-size: 0.74rem;
-      line-height: 1.7;
-      color: var(--ink-muted);
+    .sh-auftakt__ring.is-bereit .sh-auftakt__ersatz { opacity: 0; }
+
+    /* ── Abschnitte ──────────────────────────────────────── */
+    .sh-block { padding: clamp(56px, 8vw, 110px) 0; }
+    .sh-kopf {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+      gap: clamp(16px, 3vw, 48px);
+      align-items: end;
+      padding-bottom: 22px;
+      margin-bottom: clamp(26px, 3.5vw, 44px);
+      border-bottom: 1px solid var(--ink);
+    }
+    .sh-kopf h2 { font-size: clamp(2rem, 3.8vw, 3.2rem); }
+    .sh-kopf p { font-size: 0.86rem; line-height: 1.75; color: var(--ink-soft); max-width: 56ch; }
+
+    /* ── Raster ──────────────────────────────────────────── */
+    .sh-raster {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: clamp(18px, 2.4vw, 34px) clamp(14px, 2vw, 28px);
+    }
+    .sh-raster--zwei { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 720px; }
+
+    .sh-karte { position: relative; display: flex; flex-direction: column; }
+    .sh-karte__link { color: inherit; }
+    .sh-karte__link::after { content: ''; position: absolute; inset: 0; }
+
+    /* Flacher Grund, kein Schweben: die Karte ist ein Katalogblatt. */
+    .sh-bett {
+      position: relative;
+      aspect-ratio: 1 / 1;
+      min-height: 0;
+      flex: none;
+      background: #F4F1EB;
       margin-bottom: 14px;
+      overflow: hidden;
+      z-index: 1;   /* ueber dem Karten-Link, damit das 3D-Fenster Zeiger bekommt */
     }
-    .sh-karte__fuss {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 10px 12px;
-      margin-top: auto;
-      padding-top: 12px;
-      border-top: 1px solid var(--border-light);
+    .sh-bett > img {
+      position: absolute;
+      top: 10%; left: 10%;
+      width: 80%; height: 80%;
+      object-fit: contain;
+      transition: opacity 0.35s ease;
     }
-    .sh-preis {
-      font-family: var(--font-serif);
-      font-size: 1.02rem;
-      font-weight: 500;
-      white-space: nowrap;
+    .sh-bett.is-live > img { opacity: 0; }
+
+    /* Das gemeinsame 3D-Fenster wird in die Karte gehaengt. */
+    .sh-live {
+      position: absolute;
+      inset: 0;
+      cursor: grab;
+      opacity: 0;
+      transition: opacity 0.35s ease;
     }
-    .sh-preis small {
-      display: block;
-      font-family: var(--font-sans);
-      font-size: 0.52rem;
+    .sh-live:active { cursor: grabbing; }
+    .sh-bett.is-live .sh-live { opacity: 1; }
+    .sh-live canvas { display: block; }
+    .sh-live__hinweis {
+      position: absolute;
+      left: 12px; bottom: 10px;
+      font-size: 0.56rem;
       font-weight: 600;
       letter-spacing: 0.16em;
       text-transform: uppercase;
       color: var(--ink-muted);
+      pointer-events: none;
     }
-    /* Die Goldpunkte zeigen, in welchen Toenen es das Stueck gibt. */
-    .sh-tone { display: flex; gap: 6px; }
-    .sh-tone i {
-      width: 13px; height: 13px;
-      border-radius: 50%;
-      border: 1px solid rgba(27, 25, 22, 0.14);
+
+    .sh-karte__zeile {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
     }
-    .sh-tone .gelb  { background: linear-gradient(140deg, #E8C87E, #C9A055); }
-    .sh-tone .weiss { background: linear-gradient(140deg, #F2F2F0, #C9C9C6); }
-    .sh-tone .rose  { background: linear-gradient(140deg, #EFC7B4, #D09B84); }
+    .sh-karte__name {
+      font-family: var(--font-serif);
+      font-size: 1.28rem;
+      font-weight: 500;
+      font-style: normal;
+    }
+    .sh-preis {
+      font-size: 0.86rem;
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+      color: var(--ink);
+    }
+    .sh-karte__fakten {
+      margin-top: 4px;
+      font-size: 0.72rem;
+      line-height: 1.6;
+      color: var(--ink-muted);
+    }
 
-    /* Der ganze Karteninhalt ist ein Link — der Rahmen bleibt aber die
-       Karte, damit der Hover die ganze Flaeche fasst. */
-    .sh-karte__link { position: static; color: inherit; }
-    .sh-karte__link::after { content: ''; position: absolute; inset: 0; }
-
-    /* ── Editorial-Band ──────────────────────────────────── */
-    .sh-band {
-      position: relative;
-      margin: clamp(56px, 8vw, 104px) 0;
-      height: min(62vh, 520px);
+    /* ── Werkstatt ───────────────────────────────────────── */
+    .sh-werk { position: relative; height: 230vh; padding: 0; background: var(--ink); color: #fff; }
+    .sh-werk__kleber {
+      position: sticky;
+      top: var(--nav-h);
+      height: calc(100vh - var(--nav-h));
+      height: calc(100svh - var(--nav-h));
+      display: flex;
+      align-items: center;
       overflow: hidden;
     }
-    .sh-band img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .sh-band__text {
-      position: absolute;
-      inset: auto 0 0 0;
-      padding: clamp(28px, 5vw, 54px) var(--pad-x);
-      text-align: center;
-      background: linear-gradient(180deg, transparent, rgba(24, 21, 17, 0.62));
-      color: #fff;
+    .sh-werk__raster {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: clamp(24px, 4vw, 64px);
+      align-items: center;
+      width: 100%;
     }
-    .sh-band__text strong {
+    .sh-werk__bild canvas {
       display: block;
-      font-family: var(--font-serif);
-      font-size: clamp(1.4rem, 3vw, 2.2rem);
-      font-weight: 300;
-      font-style: italic;
-      margin-bottom: 8px;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 3;
+      background: #000;
     }
-    .sh-band__text span { font-size: 0.68rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--gold-light); }
+    .sh-werk__ort {
+      font-size: 0.66rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 26px;
+    }
+    /* Die drei Saetze liegen uebereinander; nur der aktive ist sichtbar. */
+    .sh-werk__text { position: relative; min-height: 190px; }
+    .sh-werk__cap {
+      position: absolute;
+      left: 0; right: 0; top: 52px;
+      font-family: var(--font-serif);
+      font-size: clamp(1.3rem, 2.2vw, 1.9rem);
+      font-weight: 300;
+      line-height: 1.35;
+      color: rgba(255, 255, 255, 0.92);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.5s ease, transform 0.6s var(--ease-out);
+    }
+    .sh-werk__cap b { font-weight: 500; }
+    .sh-werk__cap.is-aktiv { opacity: 1; transform: none; }
+    .sh-werk__hinweis {
+      position: absolute;
+      left: 0; bottom: 0;
+      font-size: 0.62rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.38);
+    }
+
+    /* ── Laden ───────────────────────────────────────────── */
+    .sh-laden {
+      position: relative;
+      height: min(72vh, 620px);
+      padding: 0;
+      overflow: hidden;
+      background: #14110D;
+    }
+    .sh-laden__film {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+    /* Eine feste Tafel statt eines Verlaufs: die Fakten stehen auf
+       Papier, der Laden dahinter bleibt, wie er ist. */
+    .sh-laden__tafel {
+      position: absolute;
+      left: var(--pad-x);
+      bottom: clamp(24px, 4vw, 48px);
+      width: min(360px, calc(100% - 2 * var(--pad-x)));
+      padding: 26px 28px 22px;
+      background: var(--marble);
+      color: var(--ink);
+      font-size: 0.86rem;
+      line-height: 1.6;
+    }
+    .sh-laden__tafel p + p { margin-top: 10px; }
+    .sh-laden__name { font-size: 1.5rem; margin-bottom: 6px; }
+    .sh-laden__tafel a { text-decoration: underline; text-underline-offset: 3px; }
+    .sh-laden__klein { font-size: 0.72rem; color: var(--ink-muted); }
 
     /* ── Produktseite ────────────────────────────────────── */
     .sh-detail {
       display: grid;
-      grid-template-columns: 1.05fr 0.95fr;
-      gap: clamp(30px, 5vw, 76px);
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: clamp(28px, 5vw, 72px);
       align-items: start;
-      padding-top: clamp(24px, 4vw, 48px);
+      padding-top: clamp(20px, 3vw, 40px);
     }
     .sh-detail__bild {
       position: sticky;
       top: calc(var(--nav-h) + 20px);
       margin: 0;
-      display: grid;
-      place-items: center;
       aspect-ratio: 1 / 1;
-      border-radius: 240px 240px 10px 10px;
-      border: 1px solid var(--border-gold);
-      background:
-        radial-gradient(circle at 50% 44%, #FFFFFF 0%, #F8F5EF 58%, #F1EBE1 100%);
+      background: #F4F1EB;
       overflow: hidden;
     }
     .sh-detail__bild img {
-      max-width: 66%;
-      max-height: 66%;
-      width: auto;
+      position: absolute;
+      top: 12%; left: 12%;
+      width: 76%; height: 76%;
       object-fit: contain;
-      filter: drop-shadow(0 20px 30px rgba(27, 25, 22, 0.18));
     }
-
-    .sh-detail__kopf h1 {
-      font-family: var(--font-serif);
-      font-size: clamp(2rem, 3.6vw, 3rem);
-      font-weight: 300;
-      font-style: italic;
-      line-height: 1.1;
-      margin: 6px 0 10px;
+    .sh-detail__bild canvas { display: block; cursor: grab; }
+    .sh-detail__bild figcaption {
+      position: absolute;
+      left: 14px; bottom: 12px;
+      font-size: 0.58rem;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      pointer-events: none;
     }
-    .sh-detail__preis {
-      font-family: var(--font-serif);
-      font-size: 1.5rem;
-      font-weight: 500;
-      margin-bottom: 4px;
-    }
-    .sh-detail__preis small {
+    .sh-detail__kopf .sh-detail__nr {
       display: block;
-      font-family: var(--font-sans);
-      font-size: 0.56rem;
+      font-size: 0.66rem;
       font-weight: 600;
       letter-spacing: 0.18em;
       text-transform: uppercase;
       color: var(--ink-muted);
+      margin-bottom: 8px;
+    }
+    .sh-detail__kopf h1 { font-size: clamp(2.2rem, 4vw, 3.4rem); margin-bottom: 10px; }
+    .sh-detail__preis { font-size: 1.2rem; font-weight: 500; font-variant-numeric: tabular-nums; }
+    .sh-detail__preis small {
+      display: block;
+      font-size: 0.66rem;
+      font-weight: 500;
+      color: var(--ink-muted);
       margin-top: 4px;
     }
-    .sh-detail p.sh-detail__text {
-      font-family: var(--font-serif);
-      font-size: 1.04rem;
-      font-weight: 300;
-      line-height: 1.9;
-      color: var(--ink-soft);
-      margin: 20px 0 26px;
-    }
+    .sh-detail__text { font-size: 0.92rem; line-height: 1.8; color: var(--ink-soft); margin: 22px 0 28px; max-width: 52ch; }
 
-    .sh-wahl { margin-bottom: 22px; }
+    .sh-wahl { margin-bottom: 20px; }
     .sh-wahl__titel {
       display: block;
-      font-size: 0.55rem;
+      font-size: 0.62rem;
       font-weight: 600;
-      letter-spacing: 0.26em;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
-      color: var(--gold-dark);
-      margin-bottom: 10px;
+      color: var(--ink-muted);
+      margin-bottom: 8px;
     }
     .sh-wahl__reihe { display: flex; flex-wrap: wrap; gap: 8px; }
     .sh-chip {
       font-family: var(--font-sans);
-      font-size: 0.68rem;
+      font-size: 0.72rem;
       font-weight: 500;
-      padding: 9px 16px;
+      padding: 9px 15px;
       border-radius: 999px;
       border: 1px solid var(--border-light);
       background: transparent;
       color: var(--ink-soft);
       cursor: pointer;
-      transition: border-color 0.3s ease, color 0.3s ease, background 0.3s ease;
+      transition: border-color 0.25s ease, color 0.25s ease, background 0.25s ease;
     }
-    .sh-chip:hover { border-color: var(--gold); color: var(--gold-dark); }
-    .sh-chip.is-on {
-      border-color: var(--gold);
-      background: rgba(201, 160, 85, 0.1);
-      color: var(--ink);
-    }
+    .sh-chip:hover { border-color: var(--ink); color: var(--ink); }
+    .sh-chip.is-on { border-color: var(--ink); background: var(--ink); color: #fff; }
 
     .sh-aktionen { display: flex; flex-wrap: wrap; gap: 12px; margin: 26px 0 8px; }
-    .sh-notiz {
-      font-size: 0.7rem;
-      line-height: 1.7;
-      color: var(--ink-muted);
-      margin-top: 12px;
-    }
+    .sh-notiz { font-size: 0.72rem; line-height: 1.7; color: var(--ink-muted); margin-top: 12px; }
 
-    .sh-falt { margin-top: 30px; border-top: 1px solid var(--border-gold); }
+    .sh-falt { margin-top: 30px; border-top: 1px solid var(--ink); }
     .sh-falt details { border-bottom: 1px solid var(--border-light); }
     .sh-falt summary {
       cursor: pointer;
       list-style: none;
-      padding: 15px 0;
-      font-size: 0.66rem;
+      padding: 14px 0;
+      font-size: 0.7rem;
       font-weight: 600;
-      letter-spacing: 0.2em;
+      letter-spacing: 0.16em;
       text-transform: uppercase;
-      color: var(--ink);
       display: flex;
-      align-items: center;
       justify-content: space-between;
       gap: 12px;
     }
     .sh-falt summary::-webkit-details-marker { display: none; }
-    .sh-falt summary::after {
-      content: '';
-      width: 11px; height: 11px;
-      flex: none;
-      background: currentColor;
-      -webkit-mask: var(--kreuz) no-repeat center / contain;
-      mask: var(--kreuz) no-repeat center / contain;
-      transition: transform 0.35s var(--ease-out);
-    }
-    .sh-falt details[open] summary::after { transform: rotate(45deg); }
-    .sh-falt p {
-      font-family: var(--font-serif);
-      font-size: 0.95rem;
-      font-weight: 300;
-      line-height: 1.85;
-      color: var(--ink-soft);
-      padding-bottom: 18px;
-      max-width: 54ch;
-    }
+    .sh-falt summary::after { content: '+'; font-weight: 400; }
+    .sh-falt details[open] summary::after { content: '–'; }
+    .sh-falt p { font-size: 0.88rem; line-height: 1.8; color: var(--ink-soft); padding-bottom: 16px; max-width: 54ch; }
 
-    /* ── Tablet ──────────────────────────────────────────── */
-    @media (max-width: 1100px) {
-      .sh-raster { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-      .sh-kat { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    }
-    @media (max-width: 900px) {
-      .sh-auftakt__raster { grid-template-columns: 1fr; }
-      .sh-film { max-width: 420px; margin: 0 auto; }
-      .sh-detail { grid-template-columns: 1fr; }
-      .sh-detail__bild { position: static; max-width: 460px; margin: 0 auto; }
-    }
-
-    /* ── Mobil ───────────────────────────────────────────── */
-    @media (max-width: 620px) {
-      .sh-raster { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .sh-kat { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .sh-karte { padding: 12px 10px 16px; }
-      .sh-karte__text { display: none; }
-      .sh-karte__name { font-size: 1.02rem; }
-      .sh-zusagen li { flex-basis: 100%; padding-right: 0; }
-      .sh-zusagen li + li { border-left: 0; border-top: 1px solid var(--border-gold); padding-left: 0; }
-      .sh-band { height: min(48vh, 360px); }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .sh-karte, .sh-karte__bett img, .sh-kat a, .sh-kat img { transition: none; }
-      .sh-karte:hover, .sh-kat a:hover { transform: none; }
-      .sh-karte:hover .sh-karte__bett img, .sh-kat a:hover img { transform: none; }
-    }
-
-    /* ═══════════════════════════════════════════
-       BUEHNE — der Laden als Auftakt
-       Der Film laeuft ueber die volle Breite, die Schrift liegt darin.
-       Das ist der Griff, den die Website nicht hat: dort steht der Hero
-       auf Marmor, hier steht er im Geschaeft.
-    ═══════════════════════════════════════════ */
-    .sh-buehne {
-      position: relative;
-      margin-top: 0;
-      padding: 0;
-      min-height: min(78vh, 660px);
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      overflow: hidden;
-      background: #14110D;
-    }
-    .sh-buehne__film {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      z-index: 0;
-    }
-    /* Von unten dicht, nach oben offen: die Schrift steht unten, die
-       beleuchtete Auslage soll oben sichtbar bleiben. */
-    .sh-buehne__schleier {
-      position: absolute;
-      inset: 0;
-      z-index: 1;
-      pointer-events: none;
-      /* Zwei Verlaeufe: der senkrechte traegt die untere Kante, der
-         schraege verdunkelt die linke Seite, wo die Schrift steht. Ohne
-         den zweiten steht die Zeile ueber der beleuchteten Auslage und
-         verliert dort ihren Kontrast — die Auslage rechts bleibt frei. */
-      background:
-        linear-gradient(100deg,
-          rgba(20, 17, 13, 0.88) 0%,
-          rgba(20, 17, 13, 0.78) 34%,
-          rgba(20, 17, 13, 0.52) 56%,
-          rgba(20, 17, 13, 0.10) 76%,
-          rgba(20, 17, 13, 0) 88%),
-        linear-gradient(180deg,
-          rgba(20, 17, 13, 0.34) 0%,
-          rgba(20, 17, 13, 0.18) 26%,
-          rgba(20, 17, 13, 0.62) 76%,
-          rgba(20, 17, 13, 0.92) 100%);
-    }
-    .sh-buehne__inhalt {
-      position: relative;
-      z-index: 2;
-      max-width: 1180px;
-      width: 100%;
-      margin: 0 auto;
-      padding: clamp(60px, 12vw, 130px) var(--pad-x) clamp(58px, 7vw, 84px);
-      color: #fff;
-    }
-    .sh-buehne__eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 14px;
-      font-size: 0.6rem;
-      font-weight: 600;
-      letter-spacing: 0.34em;
-      text-transform: uppercase;
-      color: var(--gold-light);
-      margin-bottom: 20px;
-    }
-    .sh-buehne__eyebrow::before,
-    .sh-buehne__eyebrow::after {
-      content: '';
-      width: 24px; height: 1px; flex: none;
-      background: currentColor; opacity: 0.55;
-    }
-    .sh-buehne h1 {
-      font-family: var(--font-serif);
-      font-size: clamp(2.1rem, 5vw, 4rem);
-      font-weight: 300;
-      line-height: 1.08;
-      margin-bottom: 18px;
-      /* Zwei Schatten: der weite traegt die Flaeche, der enge die
-         Kanten der Haarstriche — die Serife ist duenn und verschwindet
-         sonst ueber den hellen Stellen der Auslage. */
-      text-shadow: 0 2px 30px rgba(0, 0, 0, 0.45), 0 1px 4px rgba(0, 0, 0, 0.45);
-      max-width: 17ch;
-    }
-    .sh-buehne h1 em { font-style: italic; color: var(--gold-light); }
-    .sh-buehne__inhalt > p {
-      font-family: var(--font-serif);
-      font-size: clamp(1rem, 1.5vw, 1.2rem);
-      font-weight: 300;
-      line-height: 1.85;
-      color: rgba(255, 255, 255, 0.78);
-      max-width: 44ch;
-      margin-bottom: 30px;
-    }
-    .sh-buehne__aktionen { display: flex; flex-wrap: wrap; gap: 14px; }
-    .btn-line-light {
-      color: #fff;
-      border: 1px solid rgba(255, 255, 255, 0.42);
-    }
-    .btn-line-light:hover { border-color: var(--gold-light); color: var(--gold-light); }
-
-    /* Laufband am unteren Rand der Buehne */
-    .sh-buehne__marke {
-      position: relative;
-      z-index: 2;
-      display: flex;
-      align-items: center;
-      gap: 26px;
-      padding: 12px 0;
-      border-top: 1px solid rgba(255, 255, 255, 0.16);
-      white-space: nowrap;
-      overflow: hidden;
-      font-size: 0.58rem;
-      font-weight: 600;
-      letter-spacing: 0.28em;
-      text-transform: uppercase;
-      color: rgba(255, 255, 255, 0.6);
-      -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
-      mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
-    }
-    .sh-buehne__marke i { color: var(--gold); font-style: normal; font-size: 0.5rem; }
-    .sh-buehne__marke span, .sh-buehne__marke i {
-      animation: shLauf 34s linear infinite;
-    }
-    @keyframes shLauf { to { transform: translateX(-50%); } }
-    @media (prefers-reduced-motion: reduce) {
-      .sh-buehne__marke span, .sh-buehne__marke i { animation: none; }
-    }
-
-    /* ── Abschnittsmarke mit grosser Ziffer ──────────────── */
-    .sh-marke {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: clamp(18px, 3vw, 40px);
-      align-items: start;
-      padding-bottom: 20px;
-      margin-bottom: clamp(26px, 3.4vw, 44px);
-      border-bottom: 1px solid var(--border-gold);
-    }
-    .sh-marke__zahl {
-      font-family: var(--font-serif);
-      font-size: clamp(2.6rem, 6vw, 4.6rem);
-      font-weight: 300;
-      font-style: italic;
-      line-height: 0.86;
-      color: var(--border-gold);
-    }
-    .sh-marke h2 {
-      font-family: var(--font-serif);
-      font-size: clamp(1.7rem, 3.2vw, 2.6rem);
-      font-weight: 400;
-      font-style: italic;
-      margin-bottom: 8px;
-    }
-    .sh-marke p {
-      font-size: 0.82rem;
-      line-height: 1.8;
-      color: var(--ink-muted);
-      max-width: 62ch;
-    }
-
-    /* ── Werkstattstreifen ───────────────────────────────── */
-    .sh-werk {
-      background: rgba(245, 242, 237, 0.55);
-      border-top: 1px solid var(--border-gold);
-      border-bottom: 1px solid var(--border-gold);
-    }
-    .sh-werk__raster {
-      display: grid;
-      grid-template-columns: 1.05fr 0.95fr;
-      gap: clamp(28px, 5vw, 70px);
-      align-items: center;
-    }
-    .sh-werk__film {
-      margin: 0;
-      border: 1px solid var(--border-gold);
-      box-shadow: 0 28px 66px rgba(27, 25, 22, 0.14);
-      background: var(--marble-warm);
-    }
-    .sh-werk__film video {
-      display: block;
-      width: 100%;
-      aspect-ratio: 4 / 3;
-      object-fit: cover;
-    }
-    .sh-werk__film figcaption {
-      padding: 10px 14px;
-      font-size: 0.52rem;
-      font-weight: 600;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: var(--gold-dark);
-      border-top: 1px solid var(--border-gold);
-    }
-    .sh-werk__text h2 {
-      font-family: var(--font-serif);
-      font-size: clamp(1.8rem, 3.4vw, 2.8rem);
-      font-weight: 300;
-      line-height: 1.12;
-      margin-bottom: 26px;
-    }
-    .sh-werk__text h2 em { font-style: italic; color: var(--gold-dark); }
-
-    .sh-schritte { list-style: none; }
-    .sh-schritte li {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      column-gap: 16px;
-      padding: 14px 0;
-      border-top: 1px solid var(--border-light);
-    }
-    .sh-schritte li:last-child { border-bottom: 1px solid var(--border-light); }
-    .sh-schritte b {
-      grid-row: span 2;
-      font-family: var(--font-serif);
-      font-size: 1.1rem;
-      font-style: italic;
-      font-weight: 400;
-      color: var(--gold-dark);
-      padding-top: 2px;
-    }
-    .sh-schritte strong {
-      font-family: var(--font-serif);
-      font-size: 1.08rem;
-      font-style: italic;
-      font-weight: 500;
-    }
-    .sh-schritte span { font-size: 0.76rem; line-height: 1.7; color: var(--ink-muted); }
-
-    /* Zwei Stuecke nebeneinander statt vier — sonst stehen die beiden
-       Armbaender verloren in einer Vierer-Reihe. */
-    .sh-raster--zwei {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      max-width: 640px;
-    }
-
-    @media (max-width: 900px) {
+    /* ── Breakpoints ─────────────────────────────────────── */
+    @media (max-width: 1000px) {
+      .sh-auftakt__raster { grid-template-columns: 1fr; gap: 10px; }
+      .sh-auftakt__ring { max-width: 340px; order: -1; }
+      .sh-auftakt h1 { font-size: clamp(2rem, 7vw, 3rem); }
       .sh-werk__raster { grid-template-columns: 1fr; }
-      .sh-buehne { min-height: min(70vh, 560px); }
+      .sh-werk__text { min-height: 150px; }
+      .sh-detail { grid-template-columns: 1fr; }
+      .sh-detail__bild { position: static; max-width: 480px; }
     }
-    @media (max-width: 620px) {
-      .sh-marke { grid-template-columns: 1fr; gap: 6px; }
-      .sh-marke__zahl { font-size: 2.2rem; }
-      .sh-raster--zwei { max-width: none; }
-      .sh-buehne__marke { gap: 18px; font-size: 0.52rem; }
+    @media (max-width: 720px) {
+      .sh-raster { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .sh-kopf { grid-template-columns: 1fr; gap: 8px; }
+      .sh-karte__name { font-size: 1.1rem; }
+      .sh-auftakt { height: 200vh; }
+      .sh-werk { height: 200vh; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .sh-auftakt, .sh-werk { height: auto; }
+      .sh-auftakt__kleber, .sh-werk__kleber { position: static; height: auto; padding: 40px 0; }
+      .sh-werk__cap { position: static; opacity: 1; transform: none; margin-bottom: 14px; }
+      .sh-werk__text { min-height: 0; }
+      .sh-werk__hinweis { display: none; }
     }
   </style>
 </head>
@@ -2564,212 +2226,182 @@
   </nav>
 
   <main id="main">
-  <div class="sh-hinweis"><b>Entwurf</b> &nbsp;·&nbsp; Gestaltungsvorschlag für einen Onlineshop &nbsp;·&nbsp; Preise sind Platzhalter</div>
+  <div class="sh-hinweis"><b>Entwurf</b> · Gestaltungsvorschlag · Preise sind Platzhalter · Ringe sind Abbildungen, keine Fotos</div>
 
   <!-- ═══════════════════════════════════
-       AUFTAKT — der Laden selbst
+       AUFTAKT — ein Ring in 3D, dreht sich mit dem Scrollen
   ═══════════════════════════════════ -->
-  <section class="sh-buehne" aria-labelledby="shopTitel">
-    <video class="sh-buehne__film" autoplay muted loop playsinline preload="metadata"
-           poster="assets/shop/laden-poster.webp"
-           aria-label="Das Geschäft von Juwelier Damla am Abend, die Auslage ist beleuchtet">
-      <source src="assets/shop/laden.mp4" type="video/mp4">
-    </video>
-    <div class="sh-buehne__schleier" aria-hidden="true"></div>
+  <section class="sh-auftakt" id="shAuftakt" aria-labelledby="shopTitel">
+    <div class="sh-auftakt__kleber">
+      <div class="wrap sh-auftakt__raster">
 
-    <div class="sh-buehne__inhalt">
-      <span class="sh-buehne__eyebrow">Wellritzstraße 3 · Wiesbaden</span>
-      <h1 id="shopTitel">Was in der Auslage liegt,<br><em>können Sie hier ansehen</em></h1>
-      <p>
-        Jedes Stück entsteht bei uns im Haus. Online aussuchen,
-        im Geschäft an den Finger legen.
-      </p>
-      <div class="sh-buehne__aktionen">
-        <a href="#trauringe" class="btn-solid">Trauringe ansehen</a>
-        <a href="#werkstatt" class="btn-line-light btn--schlicht">Wie wir arbeiten</a>
+        <div class="sh-auftakt__text">
+          <h1 id="shopTitel">Trauringe.<br>Gefertigt in Wiesbaden.</h1>
+          <p class="sh-auftakt__lead">
+            Zehn Modelle aus unserer Werkstatt, in 585 oder 750 Gold,
+            2,5 bis 8 Millimeter breit. Online aussuchen, bei uns anprobieren.
+          </p>
+          <ol class="sh-auftakt__stufen" aria-label="Legierungen">
+            <li data-legierung="gelbgold">Gelbgold</li>
+            <li data-legierung="weissgold">Weißgold</li>
+            <li data-legierung="rotgold">Rotgold</li>
+          </ol>
+          <div class="sh-auftakt__aktionen">
+            <a href="#trauringe" class="btn-solid btn--schlicht">Zu den Modellen</a>
+            <a href="trauring-konfigurator.html" class="btn-ghost btn--schlicht">Selbst zusammenstellen</a>
+          </div>
+        </div>
+
+        <div class="sh-auftakt__ring" id="heroRing"
+             data-spec='{"legierung":"gelbgold","profil":"bombiert","breite":4.5,"staerke":1.7,"oberflaeche":"poliert"}'
+             role="img" aria-label="Ein polierter Trauring, dreidimensional dargestellt">
+          <img class="sh-auftakt__ersatz" src="assets/trauringe/modell-05.webp" alt="" width="516" height="747" aria-hidden="true">
+        </div>
+
       </div>
-    </div>
-
-    <div class="sh-buehne__marke" aria-hidden="true">
-      <span>Trauringe</span><i>◆</i><span>Verlobungsringe</span><i>◆</i><span>Armbänder</span><i>◆</i>
-      <span>Gravur inklusive</span><i>◆</i><span>Eigene Werkstatt</span><i>◆</i>
-      <span>Trauringe</span><i>◆</i><span>Verlobungsringe</span><i>◆</i><span>Armbänder</span><i>◆</i>
-      <span>Gravur inklusive</span><i>◆</i><span>Eigene Werkstatt</span><i>◆</i>
     </div>
   </section>
 
   <!-- ═══════════════════════════════════
        TRAURINGE
   ═══════════════════════════════════ -->
-  <section id="trauringe" aria-labelledby="trTitel">
+  <section id="trauringe" class="sh-block" aria-labelledby="trTitel">
     <div class="wrap">
-      <div class="sh-marke">
-        <span class="sh-marke__zahl" aria-hidden="true">01</span>
-        <div class="sh-marke__text">
-          <h2 id="trTitel">Trauringe</h2>
-          <p>Zehn Modelle, jedes in Gelb-, Weiß- oder Rotgold und in Ihrer Breite.
-             Die Größe messen wir kostenlos und ändern sie später jederzeit.</p>
-        </div>
-      </div>
-
+      <header class="sh-kopf">
+        <h2 id="trTitel">Trauringe</h2>
+        <p>Zehn Modelle. Jedes in Gelb-, Weiß- oder Rotgold, in Ihrer Breite und Größe.
+           Mit der Maus über ein Modell: es erscheint als Geometrie, die sich drehen lässt.</p>
+      </header>
       <div class="sh-raster">
-        <article class="sh-karte reveal">
-          <div class="sh-karte__bett">
+        <article class="sh-karte" data-spec='{"legierung":"gelbgold","profil":"flach","breite":6,"staerke":1.8,"oberflaeche":"poliert","band":{"legierung":"weissgold","spanne":0.34,"oberflaeche":"laengsmatt"}}'>
+          <div class="sh-bett">
             <img src="assets/trauringe/modell-01.webp" alt="Trauring in Gelbgold mit gebürstetem Weißgoldband in der Mitte" width="433" height="760" loading="lazy" decoding="async">
           </div>
-          <h3 class="sh-karte__name"><a class="sh-karte__link" href="shop-produkt.html">Wellritz</a></h3>
-          <span class="sh-karte__spec">6 mm · Bicolor</span>
-          <p class="sh-karte__text">Gebürstetes Weißgoldband zwischen polierten Gelbgoldkanten.</p>
-          <div class="sh-karte__fuss">
-            <span class="sh-preis">ab 890&nbsp;€<small>pro Ring</small></span>
-            <span class="sh-tone" aria-label="Erhältlich in gelb, weiss"><i class="gelb"></i><i class="weiss"></i></span>
+          <div class="sh-karte__zeile">
+            <h3 class="sh-karte__name"><a class="sh-karte__link" href="shop-produkt.html">Wellritz</a></h3>
+            <span class="sh-preis">ab 890&nbsp;€</span>
           </div>
+          <p class="sh-karte__fakten">6 mm · Bicolor · Gelb / Weiß<br>pro Ring</p>
         </article>
 
-        <article class="sh-karte reveal">
-          <div class="sh-karte__bett">
+        <article class="sh-karte" data-spec='{"legierung":"gelbgold","profil":"flach","breite":6,"staerke":1.8,"oberflaeche":"poliert","band":{"legierung":"weissgold","spanne":0.22}}'>
+          <div class="sh-bett">
             <img src="assets/trauringe/modell-02.webp" alt="Flacher Trauring in Gelbgold mit eingelassenem Weißgoldfeld" width="398" height="739" loading="lazy" decoding="async">
           </div>
-          <h3 class="sh-karte__name"><a class="sh-karte__link" href="shop-produkt.html">Carré</a></h3>
-          <span class="sh-karte__spec">6 mm · Bicolor</span>
-          <p class="sh-karte__text">Flache Schiene mit eingelassenem, poliertem Weißgoldfeld.</p>
-          <div class="sh-karte__fuss">
-            <span class="sh-preis">ab 920&nbsp;€<small>pro Ring</small></span>
-            <span class="sh-tone" aria-label="Erhältlich in gelb, weiss"><i class="gelb"></i><i class="weiss"></i></span>
+          <div class="sh-karte__zeile">
+            <h3 class="sh-karte__name"><a class="sh-karte__link" href="shop-produkt.html">Carré</a></h3>
+            <span class="sh-preis">ab 920&nbsp;€</span>
           </div>
+          <p class="sh-karte__fakten">6 mm · Bicolor · Gelb / Weiß<br>pro Ring</p>
         </article>
 
-        <article class="sh-karte reveal">
-          <div class="sh-karte__bett">
+        <article class="sh-karte" data-spec='{"legierung":"gelbgold","profil":"bombiert","breite":5,"staerke":1.7,"oberflaeche":"seidenmatt","steine":{"anteil":0.5,"lage":"rand"}}'>
+          <div class="sh-bett">
             <img src="assets/trauringe/modell-03.webp" alt="Mattierter Trauring in Gelbgold mit Brillantreihe an einer Kante" width="356" height="760" loading="lazy" decoding="async">
           </div>
-          <h3 class="sh-karte__name"><a class="sh-karte__link" href="shop-produkt.html">Saum</a></h3>
-          <span class="sh-karte__spec">5 mm · Brillanten</span>
-          <p class="sh-karte__text">Mattierte Schiene, eine Brillantreihe läuft an einer Kante entlang.</p>
-          <div class="sh-karte__fuss">
-            <span class="sh-preis">ab 1.090&nbsp;€<small>pro Ring</small></span>
-            <span class="sh-tone" aria-label="Erhältlich in gelb, weiss, rose"><i class="gelb"></i><i class="weiss"></i><i class="rose"></i></span>
+          <div class="sh-karte__zeile">
+            <h3 class="sh-karte__name"><a class="sh-karte__link" href="shop-produkt.html">Saum</a></h3>
+            <span class="sh-preis">ab 1.090&nbsp;€</span>
           </div>
+          <p class="sh-karte__fakten">5 mm · Brillanten · Gelb / Weiß / Rosé<br>pro Ring</p>
         </article>
 
-        <article class="sh-karte reveal">
-          <div class="sh-karte__bett">
+        <article class="sh-karte" data-spec='{"legierung":"weissgold","profil":"bombiert","breite":5,"staerke":1.7,"oberflaeche":"seidenmatt","band":{"legierung":"gelbgold","spanne":0.06,"mitte":0.35}}'>
+          <div class="sh-bett">
             <img src="assets/trauringe/modell-04.webp" alt="Trauring in Weißgold, seidenmatt, mit feiner Gelbgoldlinie" width="476" height="696" loading="lazy" decoding="async">
           </div>
-          <h3 class="sh-karte__name"><a class="sh-karte__link" href="shop-produkt.html">Linie</a></h3>
-          <span class="sh-karte__spec">5 mm · Weißgold</span>
-          <p class="sh-karte__text">Seidenmatte Fläche, eine feine Gelbgoldlinie und eine Rille daneben.</p>
-          <div class="sh-karte__fuss">
-            <span class="sh-preis">ab 780&nbsp;€<small>pro Ring</small></span>
-            <span class="sh-tone" aria-label="Erhältlich in weiss, gelb"><i class="weiss"></i><i class="gelb"></i></span>
+          <div class="sh-karte__zeile">
+            <h3 class="sh-karte__name"><a class="sh-karte__link" href="shop-produkt.html">Linie</a></h3>
+            <span class="sh-preis">ab 780&nbsp;€</span>
           </div>
+          <p class="sh-karte__fakten">5 mm · Weißgold · Weiß / Gelb<br>pro Ring</p>
         </article>
 
-        <article class="sh-karte reveal">
-          <div class="sh-karte__bett">
+        <article class="sh-karte" data-spec='{"legierung":"gelbgold","profil":"bombiert","breite":6,"staerke":1.9,"oberflaeche":"poliert"}'>
+          <div class="sh-bett">
             <img src="assets/trauringe/modell-05.webp" alt="Schlichter, polierter Trauring in Gelbgold" width="516" height="747" loading="lazy" decoding="async">
           </div>
-          <h3 class="sh-karte__name"><a class="sh-karte__link" href="shop-produkt.html">Klar</a></h3>
-          <span class="sh-karte__spec">6 mm · Gelbgold</span>
-          <p class="sh-karte__text">Ganz ohne Zutat: hochglanzpoliert und sanft gewölbt.</p>
-          <div class="sh-karte__fuss">
-            <span class="sh-preis">ab 690&nbsp;€<small>pro Ring</small></span>
-            <span class="sh-tone" aria-label="Erhältlich in gelb, weiss, rose"><i class="gelb"></i><i class="weiss"></i><i class="rose"></i></span>
+          <div class="sh-karte__zeile">
+            <h3 class="sh-karte__name"><a class="sh-karte__link" href="shop-produkt.html">Klar</a></h3>
+            <span class="sh-preis">ab 690&nbsp;€</span>
           </div>
+          <p class="sh-karte__fakten">6 mm · Gelbgold · Gelb / Weiß / Rosé<br>pro Ring</p>
         </article>
 
-        <article class="sh-karte reveal">
-          <div class="sh-karte__bett">
+        <article class="sh-karte" data-spec='{"legierung":"gelbgold","profil":"flach","breite":5.5,"staerke":1.9,"oberflaeche":"seidenmatt","band":{"legierung":"weissgold","spanne":0.3},"steine":{"anteil":1,"lage":"mitte"}}'>
+          <div class="sh-bett">
             <img src="assets/trauringe/modell-06.webp" alt="Trauring in Gelbgold mit Brillantreihe in einem Weißgoldkanal" width="442" height="741" loading="lazy" decoding="async">
           </div>
-          <h3 class="sh-karte__name"><a class="sh-karte__link" href="shop-produkt.html">Kanal</a></h3>
-          <span class="sh-karte__spec">5,5 mm · Brillanten</span>
-          <p class="sh-karte__text">Brillantreihe in einem Weißgoldkanal, beidseitig mattiertes Gold.</p>
-          <div class="sh-karte__fuss">
-            <span class="sh-preis">ab 1.240&nbsp;€<small>pro Ring</small></span>
-            <span class="sh-tone" aria-label="Erhältlich in gelb, weiss"><i class="gelb"></i><i class="weiss"></i></span>
+          <div class="sh-karte__zeile">
+            <h3 class="sh-karte__name"><a class="sh-karte__link" href="shop-produkt.html">Kanal</a></h3>
+            <span class="sh-preis">ab 1.240&nbsp;€</span>
           </div>
+          <p class="sh-karte__fakten">5,5 mm · Brillanten · Gelb / Weiß<br>pro Ring</p>
         </article>
 
-        <article class="sh-karte reveal">
-          <div class="sh-karte__bett">
+        <article class="sh-karte" data-spec='{"legierung":"gelbgold","profil":"kantig","breite":6.5,"staerke":1.9,"oberflaeche":"poliert","band":{"legierung":"weissgold","spanne":0.5,"oberflaeche":"laengsmatt"}}'>
+          <div class="sh-bett">
             <img src="assets/trauringe/modell-07.webp" alt="Flacher, kantiger Trauring mit breitem gebürstetem Weißgoldfeld" width="432" height="755" loading="lazy" decoding="async">
           </div>
-          <h3 class="sh-karte__name"><a class="sh-karte__link" href="shop-produkt.html">Tafel</a></h3>
-          <span class="sh-karte__spec">6,5 mm · Bicolor</span>
-          <p class="sh-karte__text">Flach und kantig, mit breitem gebürstetem Weißgoldfeld.</p>
-          <div class="sh-karte__fuss">
-            <span class="sh-preis">ab 980&nbsp;€<small>pro Ring</small></span>
-            <span class="sh-tone" aria-label="Erhältlich in gelb, weiss"><i class="gelb"></i><i class="weiss"></i></span>
+          <div class="sh-karte__zeile">
+            <h3 class="sh-karte__name"><a class="sh-karte__link" href="shop-produkt.html">Tafel</a></h3>
+            <span class="sh-preis">ab 980&nbsp;€</span>
           </div>
+          <p class="sh-karte__fakten">6,5 mm · Bicolor · Gelb / Weiß<br>pro Ring</p>
         </article>
 
-        <article class="sh-karte reveal">
-          <div class="sh-karte__bett">
+        <article class="sh-karte" data-spec='{"legierung":"gelbgold","profil":"bombiert","breite":4.5,"staerke":1.8,"oberflaeche":"poliert","steine":{"anteil":1,"lage":"mitte"}}'>
+          <div class="sh-bett">
             <img src="assets/trauringe/modell-08.webp" alt="Polierter Trauring in Gelbgold mit dichter Pavé-Brillantreihe" width="470" height="757" loading="lazy" decoding="async">
           </div>
-          <h3 class="sh-karte__name"><a class="sh-karte__link" href="shop-produkt.html">Pavé</a></h3>
-          <span class="sh-karte__spec">4,5 mm · Brillanten</span>
-          <p class="sh-karte__text">Dichte Brillantreihe über die ganze Mitte der Schiene.</p>
-          <div class="sh-karte__fuss">
-            <span class="sh-preis">ab 1.390&nbsp;€<small>pro Ring</small></span>
-            <span class="sh-tone" aria-label="Erhältlich in gelb, weiss, rose"><i class="gelb"></i><i class="weiss"></i><i class="rose"></i></span>
+          <div class="sh-karte__zeile">
+            <h3 class="sh-karte__name"><a class="sh-karte__link" href="shop-produkt.html">Pavé</a></h3>
+            <span class="sh-preis">ab 1.390&nbsp;€</span>
           </div>
+          <p class="sh-karte__fakten">4,5 mm · Brillanten · Gelb / Weiß / Rosé<br>pro Ring</p>
         </article>
 
-        <article class="sh-karte reveal">
-          <div class="sh-karte__bett">
+        <article class="sh-karte" data-spec='{"legierung":"gelbgold","profil":"bombiert","breite":5,"staerke":1.7,"oberflaeche":"seidenmatt","band":{"legierung":"weissgold","spanne":0.06,"mitte":0.3}}'>
+          <div class="sh-bett">
             <img src="assets/trauringe/modell-09.webp" alt="Gewölbter, seidenmatter Trauring in Gelbgold mit feiner Weißgoldlinie" width="424" height="743" loading="lazy" decoding="async">
           </div>
-          <h3 class="sh-karte__name"><a class="sh-karte__link" href="shop-produkt.html">Faden</a></h3>
-          <span class="sh-karte__spec">5 mm · Gelbgold</span>
-          <p class="sh-karte__text">Sanft gewölbt und seidenmatt, mit einer feinen Weißgoldlinie.</p>
-          <div class="sh-karte__fuss">
-            <span class="sh-preis">ab 740&nbsp;€<small>pro Ring</small></span>
-            <span class="sh-tone" aria-label="Erhältlich in gelb, weiss, rose"><i class="gelb"></i><i class="weiss"></i><i class="rose"></i></span>
+          <div class="sh-karte__zeile">
+            <h3 class="sh-karte__name"><a class="sh-karte__link" href="shop-produkt.html">Faden</a></h3>
+            <span class="sh-preis">ab 740&nbsp;€</span>
           </div>
+          <p class="sh-karte__fakten">5 mm · Gelbgold · Gelb / Weiß / Rosé<br>pro Ring</p>
         </article>
 
-        <article class="sh-karte reveal">
-          <div class="sh-karte__bett">
+        <article class="sh-karte" data-spec='{"legierung":"gelbgold","profil":"bombiert","breite":3.5,"staerke":1.6,"oberflaeche":"poliert","steine":{"anteil":0.5,"lage":"rand"}}'>
+          <div class="sh-bett">
             <img src="assets/trauringe/modell-10.webp" alt="Schmaler, polierter Trauring in Gelbgold mit Brillanten an einer Kante" width="403" height="736" loading="lazy" decoding="async">
           </div>
-          <h3 class="sh-karte__name"><a class="sh-karte__link" href="shop-produkt.html">Zart</a></h3>
-          <span class="sh-karte__spec">3,5 mm · Brillanten</span>
-          <p class="sh-karte__text">Schmale polierte Schiene, Brillanten an einer Kante.</p>
-          <div class="sh-karte__fuss">
-            <span class="sh-preis">ab 850&nbsp;€<small>pro Ring</small></span>
-            <span class="sh-tone" aria-label="Erhältlich in gelb, weiss, rose"><i class="gelb"></i><i class="weiss"></i><i class="rose"></i></span>
+          <div class="sh-karte__zeile">
+            <h3 class="sh-karte__name"><a class="sh-karte__link" href="shop-produkt.html">Zart</a></h3>
+            <span class="sh-preis">ab 850&nbsp;€</span>
           </div>
+          <p class="sh-karte__fakten">3,5 mm · Brillanten · Gelb / Weiß / Rosé<br>pro Ring</p>
         </article>
       </div>
     </div>
   </section>
 
   <!-- ═══════════════════════════════════
-       WERKSTATT
+       WERKSTATT — Aufnahme mit dem Scrollen durchgeblaettert
   ═══════════════════════════════════ -->
-  <section id="werkstatt" class="sh-werk" aria-labelledby="wkTitel">
-    <div class="wrap">
-      <div class="sh-werk__raster">
-        <figure class="sh-werk__film reveal-img">
-          <video autoplay muted loop playsinline preload="metadata"
-                 poster="assets/shop/werkstatt-poster.webp"
-                 aria-label="Nahaufnahme aus der Werkstatt: ein Ring wird gefeilt und gefasst">
-            <source src="assets/shop/werkstatt.mp4" type="video/mp4">
-          </video>
-          <figcaption>Aufnahme aus unserer Werkstatt</figcaption>
-        </figure>
-
+  <section id="shWerk" class="sh-werk" aria-label="Aus unserer Werkstatt">
+    <div class="sh-werk__kleber">
+      <div class="wrap sh-werk__raster">
+        <div class="sh-werk__bild">
+          <canvas id="werkCanvas" width="1200" height="900" data-frames="48"
+                  role="img" aria-label="Nahaufnahme aus der Werkstatt: ein Ring wird gefeilt und gefasst"></canvas>
+        </div>
         <div class="sh-werk__text">
-          <span class="eyebrow reveal">Zwischen Auswahl und Finger</span>
-          <h2 class="reveal d1" id="wkTitel">Vier Schritte,<br><em>eine Werkbank</em></h2>
-          <ol class="sh-schritte reveal d2">
-            <li><b>01</b><strong>Löten</strong><span>Die Schiene wird geschlossen, die Naht verschwindet unter der Feile.</span></li>
-            <li><b>02</b><strong>Feilen</strong><span>Profil und Kanten bekommen ihre Form – hier entscheidet sich, wie der Ring sich anfühlt.</span></li>
-            <li><b>03</b><strong>Fassen</strong><span>Jeder Stein wird einzeln gesetzt und die Krappen werden angedrückt.</span></li>
-            <li><b>04</b><strong>Polieren</strong><span>Zum Schluss die Oberfläche – hochglanz, seidenmatt oder gebürstet.</span></li>
-          </ol>
+          <p class="sh-werk__ort">Werkstatt, Wellritzstraße 3</p>
+          <p class="sh-werk__cap" data-von="0" data-bis="0.36"><b>Feilen.</b> Die Kanten bekommen ihre Form. Hier entscheidet sich, wie sich der Ring am Finger anfühlt.</p>
+          <p class="sh-werk__cap" data-von="0.36" data-bis="0.76"><b>Fassen.</b> Jeder Stein wird einzeln gesetzt, die Krappen werden angedrückt.</p>
+          <p class="sh-werk__cap" data-von="0.76" data-bis="1.01"><b>Fertig.</b> Vor der Politur ein letzter Blick unter der Lupe.</p>
+          <p class="sh-werk__hinweis">Scrollen blättert die Aufnahme durch.</p>
         </div>
       </div>
     </div>
@@ -2778,126 +2410,122 @@
   <!-- ═══════════════════════════════════
        VERLOBUNGSRINGE
   ═══════════════════════════════════ -->
-  <section id="verlobung" aria-labelledby="vrTitel">
+  <section id="verlobung" class="sh-block" aria-labelledby="vrTitel">
     <div class="wrap">
-      <div class="sh-marke">
-        <span class="sh-marke__zahl" aria-hidden="true">02</span>
-        <div class="sh-marke__text">
-          <h2 id="vrTitel">Verlobungsringe</h2>
-          <p>Fünf Fassungen. Den Stein suchen wir gemeinsam aus – Größe, Farbe und
-             Reinheit bestimmen den Preis, und den sagen wir Ihnen vorher offen.</p>
-        </div>
-      </div>
-
+      <header class="sh-kopf">
+        <h2 id="vrTitel">Verlobungsringe</h2>
+        <p>Fünf Fassungen. Der Stein kommt dazu – Größe, Farbe und Reinheit
+           besprechen wir vorher, und den Preis auch.</p>
+      </header>
       <div class="sh-raster">
-        <article class="sh-karte reveal">
-          <div class="sh-karte__bett">
+        <article class="sh-karte">
+          <div class="sh-bett">
             <img src="assets/fassung/solitaer-weiss.webp" alt="Verlobungsring mit Solitär in Vierkrappenfassung" width="900" height="900" loading="lazy" decoding="async">
           </div>
-          <h3 class="sh-karte__name"><a class="sh-karte__link" href="shop-produkt.html">Solitär</a></h3>
-          <span class="sh-karte__spec">Vierkrappen · Fassung</span>
-          <p class="sh-karte__text">Der Klassiker: ein Stein, vier Krappen, nichts drumherum.</p>
-          <div class="sh-karte__fuss">
-            <span class="sh-preis">ab 690&nbsp;€<small>Fassung ohne Stein</small></span>
-            <span class="sh-tone" aria-label="Erhältlich in gelb, weiss, rose"><i class="gelb"></i><i class="weiss"></i><i class="rose"></i></span>
+          <div class="sh-karte__zeile">
+            <h3 class="sh-karte__name"><a class="sh-karte__link" href="shop-produkt.html">Solitär</a></h3>
+            <span class="sh-preis">ab 690&nbsp;€</span>
           </div>
+          <p class="sh-karte__fakten">Vierkrappen · Fassung · Gelb / Weiß / Rosé<br>Fassung ohne Stein</p>
         </article>
 
-        <article class="sh-karte reveal">
-          <div class="sh-karte__bett">
+        <article class="sh-karte">
+          <div class="sh-bett">
             <img src="assets/fassung/zarge-weiss.webp" alt="Verlobungsring mit Stein in einer Zargenfassung" width="900" height="900" loading="lazy" decoding="async">
           </div>
-          <h3 class="sh-karte__name"><a class="sh-karte__link" href="shop-produkt.html">Zarge</a></h3>
-          <span class="sh-karte__spec">Randfassung</span>
-          <p class="sh-karte__text">Der Stein sitzt in einem Ring aus Gold – ruhig und robust.</p>
-          <div class="sh-karte__fuss">
-            <span class="sh-preis">ab 740&nbsp;€<small>Fassung ohne Stein</small></span>
-            <span class="sh-tone" aria-label="Erhältlich in gelb, weiss, rose"><i class="gelb"></i><i class="weiss"></i><i class="rose"></i></span>
+          <div class="sh-karte__zeile">
+            <h3 class="sh-karte__name"><a class="sh-karte__link" href="shop-produkt.html">Zarge</a></h3>
+            <span class="sh-preis">ab 740&nbsp;€</span>
           </div>
+          <p class="sh-karte__fakten">Randfassung · Gelb / Weiß / Rosé<br>Fassung ohne Stein</p>
         </article>
 
-        <article class="sh-karte reveal">
-          <div class="sh-karte__bett">
+        <article class="sh-karte">
+          <div class="sh-bett">
             <img src="assets/fassung/twist-weiss.webp" alt="Verlobungsring mit gedrehter Schiene und Solitär" width="900" height="900" loading="lazy" decoding="async">
           </div>
-          <h3 class="sh-karte__name"><a class="sh-karte__link" href="shop-produkt.html">Twist</a></h3>
-          <span class="sh-karte__spec">Gedrehte Schiene</span>
-          <p class="sh-karte__text">Zwei Stränge laufen um den Finger und treffen sich am Stein.</p>
-          <div class="sh-karte__fuss">
-            <span class="sh-preis">ab 820&nbsp;€<small>Fassung ohne Stein</small></span>
-            <span class="sh-tone" aria-label="Erhältlich in gelb, weiss, rose"><i class="gelb"></i><i class="weiss"></i><i class="rose"></i></span>
+          <div class="sh-karte__zeile">
+            <h3 class="sh-karte__name"><a class="sh-karte__link" href="shop-produkt.html">Twist</a></h3>
+            <span class="sh-preis">ab 820&nbsp;€</span>
           </div>
+          <p class="sh-karte__fakten">Gedrehte Schiene · Gelb / Weiß / Rosé<br>Fassung ohne Stein</p>
         </article>
 
-        <article class="sh-karte reveal">
-          <div class="sh-karte__bett">
+        <article class="sh-karte">
+          <div class="sh-bett">
             <img src="assets/fassung/trilogie-weiss.webp" alt="Verlobungsring mit drei Steinen nebeneinander" width="900" height="900" loading="lazy" decoding="async">
           </div>
-          <h3 class="sh-karte__name"><a class="sh-karte__link" href="shop-produkt.html">Trilogie</a></h3>
-          <span class="sh-karte__spec">Drei Steine</span>
-          <p class="sh-karte__text">Ein größerer Stein in der Mitte, zwei kleinere daneben.</p>
-          <div class="sh-karte__fuss">
-            <span class="sh-preis">ab 980&nbsp;€<small>Fassung ohne Stein</small></span>
-            <span class="sh-tone" aria-label="Erhältlich in gelb, weiss, rose"><i class="gelb"></i><i class="weiss"></i><i class="rose"></i></span>
+          <div class="sh-karte__zeile">
+            <h3 class="sh-karte__name"><a class="sh-karte__link" href="shop-produkt.html">Trilogie</a></h3>
+            <span class="sh-preis">ab 980&nbsp;€</span>
           </div>
+          <p class="sh-karte__fakten">Drei Steine · Gelb / Weiß / Rosé<br>Fassung ohne Stein</p>
         </article>
 
-        <article class="sh-karte reveal">
-          <div class="sh-karte__bett">
+        <article class="sh-karte">
+          <div class="sh-bett">
             <img src="assets/fassung/pave-weiss.webp" alt="Verlobungsring mit pavébesetzter Schiene" width="900" height="900" loading="lazy" decoding="async">
           </div>
-          <h3 class="sh-karte__name"><a class="sh-karte__link" href="shop-produkt.html">Pavé</a></h3>
-          <span class="sh-karte__spec">Besetzte Schiene</span>
-          <p class="sh-karte__text">Die Schiene ist bis zur Hälfte mit Brillanten belegt.</p>
-          <div class="sh-karte__fuss">
-            <span class="sh-preis">ab 1.150&nbsp;€<small>Fassung ohne Stein</small></span>
-            <span class="sh-tone" aria-label="Erhältlich in gelb, weiss, rose"><i class="gelb"></i><i class="weiss"></i><i class="rose"></i></span>
+          <div class="sh-karte__zeile">
+            <h3 class="sh-karte__name"><a class="sh-karte__link" href="shop-produkt.html">Pavé</a></h3>
+            <span class="sh-preis">ab 1.150&nbsp;€</span>
           </div>
+          <p class="sh-karte__fakten">Besetzte Schiene · Gelb / Weiß / Rosé<br>Fassung ohne Stein</p>
         </article>
       </div>
     </div>
   </section>
 
   <!-- ═══════════════════════════════════
+       LADEN
+  ═══════════════════════════════════ -->
+  <section class="sh-laden" aria-label="Das Geschäft">
+    <video class="sh-laden__film" autoplay muted loop playsinline preload="metadata"
+           poster="assets/shop/laden-poster.webp"
+           aria-label="Das Geschäft in der Wellritzstraße am Abend">
+      <source src="assets/shop/laden.mp4" type="video/mp4">
+    </video>
+    <div class="sh-laden__tafel">
+      <p class="sh-laden__name">Juwelier Damla</p>
+      <p>Wellritzstraße 3<br>65183 Wiesbaden</p>
+      <p>Mo–Fr 09:30–19:00<br>Sa 09:30–17:00</p>
+      <p><a href="tel:+496115807830">0611 5807830</a></p>
+      <p class="sh-laden__klein">Anprobieren ohne Termin. Größe messen wir kostenlos.</p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
        ARMBÄNDER
   ═══════════════════════════════════ -->
-  <section id="armbaender" class="sub-alt" aria-labelledby="abTitel">
+  <section id="armbaender" class="sh-block" aria-labelledby="abTitel">
     <div class="wrap">
-      <div class="sh-marke">
-        <span class="sh-marke__zahl" aria-hidden="true">03</span>
-        <div class="sh-marke__text">
-          <h2 id="abTitel">Armbänder</h2>
-          <p>Diese Sparte ist im Entwurf noch nicht bestückt. Die beiden Stücke unten
-             sind erzeugte Beispielbilder und zeigen nur, wie die Sparte aussehen
-             könnte – nicht, was im Laden liegt.</p>
-        </div>
-      </div>
-
+      <header class="sh-kopf">
+        <h2 id="abTitel">Armbänder</h2>
+        <p>Diese Sparte ist im Entwurf noch nicht bestückt. Die beiden Stücke sind
+           erzeugte Beispielbilder – sie zeigen, wie die Sparte aussehen könnte,
+           nicht, was im Laden liegt.</p>
+      </header>
       <div class="sh-raster sh-raster--zwei">
-        <article class="sh-karte reveal">
-          <div class="sh-karte__bett">
+        <article class="sh-karte">
+          <div class="sh-bett">
             <img src="assets/armband/gliederkette.webp" alt="Armband aus flacher Panzerkette in Gelbgold mit Karabinerverschluss" width="758" height="760" loading="lazy" decoding="async">
           </div>
-          <h3 class="sh-karte__name"><a class="sh-karte__link" href="shop-produkt.html">Panzer</a></h3>
-          <span class="sh-karte__spec">4 mm · Gelbgold</span>
-          <p class="sh-karte__text">Flache Panzerkette mit Karabiner, klassisch und alltagsfest.</p>
-          <div class="sh-karte__fuss">
-            <span class="sh-preis">ab 590&nbsp;€<small>Beispielbild</small></span>
-            <span class="sh-tone" aria-label="Erhältlich in gelb, weiss, rose"><i class="gelb"></i><i class="weiss"></i><i class="rose"></i></span>
+          <div class="sh-karte__zeile">
+            <h3 class="sh-karte__name"><a class="sh-karte__link" href="shop-produkt.html">Panzer</a></h3>
+            <span class="sh-preis">ab 590&nbsp;€</span>
           </div>
+          <p class="sh-karte__fakten">4 mm · Gelbgold · Gelb / Weiß / Rosé<br>Beispielbild</p>
         </article>
 
-        <article class="sh-karte reveal">
-          <div class="sh-karte__bett">
+        <article class="sh-karte">
+          <div class="sh-bett">
             <img src="assets/armband/tennis.webp" alt="Tennisarmband in Weißgold mit einer durchgehenden Brillantlinie" width="640" height="760" loading="lazy" decoding="async">
           </div>
-          <h3 class="sh-karte__name"><a class="sh-karte__link" href="shop-produkt.html">Tennis</a></h3>
-          <span class="sh-karte__spec">Brillantlinie · Weißgold</span>
-          <p class="sh-karte__text">Eine durchgehende Linie kleiner Brillanten, beweglich gefasst.</p>
-          <div class="sh-karte__fuss">
-            <span class="sh-preis">ab 1.890&nbsp;€<small>Beispielbild</small></span>
-            <span class="sh-tone" aria-label="Erhältlich in weiss, gelb"><i class="weiss"></i><i class="gelb"></i></span>
+          <div class="sh-karte__zeile">
+            <h3 class="sh-karte__name"><a class="sh-karte__link" href="shop-produkt.html">Tennis</a></h3>
+            <span class="sh-preis">ab 1.890&nbsp;€</span>
           </div>
+          <p class="sh-karte__fakten">Brillantlinie · Weißgold · Weiß / Gelb<br>Beispielbild</p>
         </article>
       </div>
     </div>
@@ -3321,38 +2949,14 @@
     document.getElementById('year').textContent = new Date().getFullYear();
   </script>
 
-  <script>
-  (function () {
-    // Auswahlknoepfe: innerhalb einer Reihe ist immer genau einer an.
-    document.querySelectorAll('.sh-wahl__reihe').forEach(function (reihe) {
-      reihe.addEventListener('click', function (e) {
-        var knopf = e.target.closest('.sh-chip');
-        if (!knopf || !reihe.contains(knopf)) return;
-        reihe.querySelectorAll('.sh-chip').forEach(function (k) { k.classList.remove('is-on'); });
-        knopf.classList.add('is-on');
-        anfrageBauen();
-      });
-    });
-
-    // Der Entwurf hat keine Kasse — die Anfrage traegt die Auswahl
-    // genauso zusammen, wie es der Warenkorb spaeter taete.
-    var knopf = document.getElementById('pAnfrage');
-    function wert(id) {
-      var an = document.querySelector('#' + id + ' .sh-chip.is-on');
-      return an ? an.textContent.trim() : '—';
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "./assets/vendor/three.module.js",
+      "three/": "./assets/vendor/"
     }
-    function anfrageBauen() {
-      if (!knopf) return;
-      var t = document.getElementById('pTitel');
-      var text = 'Guten Tag, ich interessiere mich fuer den Trauring '
-        + (t ? t.textContent.trim() : '') + '.\n'
-        + 'Legierung: ' + wert('pLegierung') + '\n'
-        + 'Breite: ' + wert('pBreite') + '\n'
-        + 'Ringgroesse: ' + wert('pGroesse');
-      knopf.href = 'https://wa.me/496115807830?text=' + encodeURIComponent(text);
-    }
-    anfrageBauen();
-  })();
+  }
   </script>
+  <script type="module" src="assets/shop.js"></script>
 </body>
 </html>

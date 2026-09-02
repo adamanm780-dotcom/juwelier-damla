@@ -1,34 +1,36 @@
-  <div class="sh-hinweis"><b>Entwurf</b> &nbsp;·&nbsp; Beispiel einer Produktseite &nbsp;·&nbsp; Preise sind Platzhalter</div>
+  <div class="sh-hinweis"><b>Entwurf</b> · Beispiel einer Produktseite · Preise sind Platzhalter</div>
 
-  <section aria-labelledby="pTitel">
+  <section class="sh-block" aria-labelledby="pTitel">
     <div class="wrap">
       <p class="sub-crumb"><a href="index.html">Startseite</a> &nbsp;·&nbsp; <a href="shop.html">Shop</a> &nbsp;·&nbsp; <span>Wellritz</span></p>
 
       <div class="sh-detail">
 
-        <figure class="sh-detail__bild">
-          <img id="pBild" src="assets/trauringe/modell-01.webp"
+        <figure class="sh-detail__bild" id="pAnsicht"
+                data-spec='{"legierung":"gelbgold","profil":"flach","breite":6,"staerke":1.8,"oberflaeche":"poliert","band":{"legierung":"weissgold","spanne":0.34,"oberflaeche":"laengsmatt"}}'>
+          <img src="assets/trauringe/modell-01.webp"
                alt="Trauring Wellritz: Gelbgold mit gebürstetem Weißgoldband in der Mitte"
-               width="403" height="736" fetchpriority="high">
+               width="433" height="760" fetchpriority="high">
+          <figcaption>Geometrie · ziehen zum Drehen</figcaption>
         </figure>
 
         <div class="sh-detail__kopf">
-          <span class="eyebrow">Trauring · Modell 01</span>
+          <span class="sh-detail__nr">Trauring · Modell 01</span>
           <h1 id="pTitel">Wellritz</h1>
-          <p class="sh-detail__preis">ab 890 €<small>pro Ring · 585er Gold · Platzhalterpreis</small></p>
+          <p class="sh-detail__preis">ab 890 €<small>pro Ring · 585 Gold · Platzhalterpreis</small></p>
 
           <p class="sh-detail__text">
-            Ein gebürstetes Weißgoldband läuft zwischen zwei polierten Gelbgoldkanten.
-            Der Kontrast zwischen matt und glänzend bleibt auch nach Jahren sichtbar –
-            und lässt sich jederzeit bei uns wieder auffrischen.
+            Ein gebürstetes Weißgoldband zwischen zwei polierten Gelbgoldkanten,
+            6 mm breit, 1,8 mm stark. Der Kontrast zwischen matt und glänzend
+            bleibt sichtbar und lässt sich bei uns jederzeit auffrischen.
           </p>
 
           <div class="sh-wahl">
             <span class="sh-wahl__titel">Legierung</span>
             <div class="sh-wahl__reihe" id="pLegierung">
-              <button type="button" class="sh-chip is-on">585 Gelb/Weiß</button>
-              <button type="button" class="sh-chip">585 Rot/Weiß</button>
-              <button type="button" class="sh-chip">750 Gelb/Weiß</button>
+              <button type="button" class="sh-chip is-on" data-legierung="gelbgold">585 Gelb/Weiß</button>
+              <button type="button" class="sh-chip" data-legierung="rotgold">585 Rot/Weiß</button>
+              <button type="button" class="sh-chip" data-legierung="weissgold">585 Weiß/Weiß</button>
             </div>
           </div>
 
@@ -55,30 +57,30 @@
           </div>
 
           <div class="sh-aktionen">
-            <a class="btn-solid" id="pAnfrage" href="#">Unverbindlich anfragen</a>
+            <a class="btn-solid btn--schlicht" id="pAnfrage" href="#">Unverbindlich anfragen</a>
             <a class="btn-ghost btn--schlicht" href="tel:+496115807830">0611 5807830</a>
           </div>
           <p class="sh-notiz">
-            Der Entwurf hat noch keine Kasse. Die Anfrage öffnet WhatsApp mit Ihrer
-            Zusammenstellung – so, wie es später auch der Warenkorb tun würde.
+            Der Entwurf hat keine Kasse. Die Anfrage öffnet WhatsApp mit Ihrer
+            Zusammenstellung – so, wie es später der Warenkorb tun würde.
           </p>
 
           <div class="sh-falt">
             <details open>
               <summary>Maße &amp; Material</summary>
-              <p>6,0 mm breit, 1,8 mm stark, bombierte Innenseite. 585er Gold, Weißgold rhodiniert. Gewicht je nach Größe etwa 7–9 g.</p>
+              <p>6,0 mm breit, 1,8 mm stark, bombierte Innenseite. 585 Gold, Weißgold rhodiniert. Gewicht je nach Größe etwa 7–9 g.</p>
             </details>
             <details>
               <summary>Gravur</summary>
-              <p>Innengravur bis 24 Zeichen ist im Preis enthalten – Datum, Namen, ein kurzes Wort. Wir gravieren auch später noch, an einem Ring, den Sie längst tragen.</p>
+              <p>Innengravur bis 24 Zeichen ist im Preis enthalten. Wir gravieren auch später noch, an einem Ring, den Sie längst tragen.</p>
             </details>
             <details>
               <summary>Größe &amp; Änderungen</summary>
-              <p>Wir messen kostenlos und in einer Minute. Die Weite lässt sich später ändern, enger wie weiter – bei diesem Modell in beide Richtungen um zwei Größen.</p>
+              <p>Wir messen kostenlos. Die Weite lässt sich später ändern, bei diesem Modell um zwei Größen in beide Richtungen.</p>
             </details>
             <details>
               <summary>Lieferzeit</summary>
-              <p>Zwei bis drei Wochen, weil jeder Ring einzeln gefertigt wird. Eilig? Sprechen Sie uns an, manches geht schneller.</p>
+              <p>Zwei bis drei Wochen, weil jeder Ring einzeln gefertigt wird.</p>
             </details>
           </div>
         </div>
@@ -87,12 +89,12 @@
     </div>
   </section>
 
-  <section class="sub-alt" aria-labelledby="dazuTitel">
+  <section class="sh-block" aria-labelledby="dazuTitel">
     <div class="wrap">
-      <div class="sh-leiste">
+      <header class="sh-kopf">
         <h2 id="dazuTitel">Dazu passend</h2>
-        <p>Aus derselben Werkstatt</p>
-      </div>
+        <p>Aus derselben Werkstatt.</p>
+      </header>
       <div class="sh-raster">
 %(dazu)s
       </div>

@@ -52,6 +52,28 @@ STIL = style_block.replace('</style>', KREUZ + SHOP_CSS + '  </style>', 1)
 # Die Preise sind Platzhalter in marktueblicher Groessenordnung, damit
 # der Entwurf sich echt anfuehlt. Sie muessen vor einer Veroeffentlichung
 # durch die Zahlen des Hauses ersetzt werden — die Seite sagt das auch.
+SPEC = {
+    'modell-01': dict(legierung='gelbgold', profil='flach', breite=6, staerke=1.8, oberflaeche='poliert',
+                      band=dict(legierung='weissgold', spanne=0.34, oberflaeche='laengsmatt')),
+    'modell-02': dict(legierung='gelbgold', profil='flach', breite=6, staerke=1.8, oberflaeche='poliert',
+                      band=dict(legierung='weissgold', spanne=0.22)),
+    'modell-03': dict(legierung='gelbgold', profil='bombiert', breite=5, staerke=1.7, oberflaeche='seidenmatt',
+                      steine=dict(anteil=0.5, lage='rand')),
+    'modell-04': dict(legierung='weissgold', profil='bombiert', breite=5, staerke=1.7, oberflaeche='seidenmatt',
+                      band=dict(legierung='gelbgold', spanne=0.06, mitte=0.35)),
+    'modell-05': dict(legierung='gelbgold', profil='bombiert', breite=6, staerke=1.9, oberflaeche='poliert'),
+    'modell-06': dict(legierung='gelbgold', profil='flach', breite=5.5, staerke=1.9, oberflaeche='seidenmatt',
+                      band=dict(legierung='weissgold', spanne=0.3), steine=dict(anteil=1, lage='mitte')),
+    'modell-07': dict(legierung='gelbgold', profil='kantig', breite=6.5, staerke=1.9, oberflaeche='poliert',
+                      band=dict(legierung='weissgold', spanne=0.5, oberflaeche='laengsmatt')),
+    'modell-08': dict(legierung='gelbgold', profil='bombiert', breite=4.5, staerke=1.8, oberflaeche='poliert',
+                      steine=dict(anteil=1, lage='mitte')),
+    'modell-09': dict(legierung='gelbgold', profil='bombiert', breite=5, staerke=1.7, oberflaeche='seidenmatt',
+                      band=dict(legierung='weissgold', spanne=0.06, mitte=0.3)),
+    'modell-10': dict(legierung='gelbgold', profil='bombiert', breite=3.5, staerke=1.6, oberflaeche='poliert',
+                      steine=dict(anteil=0.5, lage='rand')),
+}
+
 TRAURINGE = [
     ('modell-01', 'Wellritz', '6 mm · Bicolor',  890,  'gelb weiss',
      'Gebürstetes Weißgoldband zwischen polierten Gelbgoldkanten.',
@@ -142,21 +164,24 @@ def masse(pfad):
 
 
 def karte(bild, name, spec, euro, tone, text, alt, zusatz=''):
-    punkte = ''.join('<i class="%s"></i>' % t for t in tone.split())
+    import json
     bw, bh = masse(bild)
-    return """        <article class="sh-karte reveal">
-          <div class="sh-karte__bett">
+    schluessel = os.path.splitext(os.path.basename(bild))[0].replace('-weiss', '')
+    plan = SPEC.get(schluessel)
+    toene = {'gelb': 'Gelb', 'weiss': 'Weiß', 'rose': 'Rosé'}
+    fakten = spec + ' · ' + ' / '.join(toene[t] for t in tone.split())
+    # Attribut in einfachen Anfuehrungszeichen, weil das JSON doppelte braucht.
+    daten = (" data-spec='%s'" % json.dumps(plan, separators=(',', ':'))) if plan else ''
+    return """        <article class="sh-karte"%s>
+          <div class="sh-bett">
             <img src="%s" alt="%s" width="%d" height="%d" loading="lazy" decoding="async">
           </div>
-          <h3 class="sh-karte__name"><a class="sh-karte__link" href="shop-produkt.html">%s</a></h3>
-          <span class="sh-karte__spec">%s</span>
-          <p class="sh-karte__text">%s</p>
-          <div class="sh-karte__fuss">
-            <span class="sh-preis">ab %s&nbsp;€<small>%s</small></span>
-            <span class="sh-tone" aria-label="Erhältlich in %s">%s</span>
+          <div class="sh-karte__zeile">
+            <h3 class="sh-karte__name"><a class="sh-karte__link" href="shop-produkt.html">%s</a></h3>
+            <span class="sh-preis">ab %s&nbsp;€</span>
           </div>
-        </article>""" % (bild, alt, bw, bh, name, spec, text, preis(euro),
-                         zusatz or 'pro Ring', tone.replace(' ', ', '), punkte)
+          <p class="sh-karte__fakten">%s<br>%s</p>
+        </article>""" % (daten, bild, alt, bw, bh, name, preis(euro), fakten, zusatz or 'pro Ring')
 
 
 tr_karten = '\n\n'.join(
@@ -186,40 +211,17 @@ kat_kacheln = '\n'.join(
 # ══════════════════════════════════════════════════════════
 #  Kleines Skript: Auswahlknoepfe und die WhatsApp-Anfrage
 # ══════════════════════════════════════════════════════════
+# three.js liegt lokal unter assets/vendor — kein CDN (DSGVO).
 SHOP_JS = """
-  <script>
-  (function () {
-    // Auswahlknoepfe: innerhalb einer Reihe ist immer genau einer an.
-    document.querySelectorAll('.sh-wahl__reihe').forEach(function (reihe) {
-      reihe.addEventListener('click', function (e) {
-        var knopf = e.target.closest('.sh-chip');
-        if (!knopf || !reihe.contains(knopf)) return;
-        reihe.querySelectorAll('.sh-chip').forEach(function (k) { k.classList.remove('is-on'); });
-        knopf.classList.add('is-on');
-        anfrageBauen();
-      });
-    });
-
-    // Der Entwurf hat keine Kasse — die Anfrage traegt die Auswahl
-    // genauso zusammen, wie es der Warenkorb spaeter taete.
-    var knopf = document.getElementById('pAnfrage');
-    function wert(id) {
-      var an = document.querySelector('#' + id + ' .sh-chip.is-on');
-      return an ? an.textContent.trim() : '—';
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "./assets/vendor/three.module.js",
+      "three/": "./assets/vendor/"
     }
-    function anfrageBauen() {
-      if (!knopf) return;
-      var t = document.getElementById('pTitel');
-      var text = 'Guten Tag, ich interessiere mich fuer den Trauring '
-        + (t ? t.textContent.trim() : '') + '.\\n'
-        + 'Legierung: ' + wert('pLegierung') + '\\n'
-        + 'Breite: ' + wert('pBreite') + '\\n'
-        + 'Ringgroesse: ' + wert('pGroesse');
-      knopf.href = 'https://wa.me/496115807830?text=' + encodeURIComponent(text);
-    }
-    anfrageBauen();
-  })();
-  </script>"""
+  }
+  </script>
+  <script type="module" src="assets/shop.js"></script>"""
 
 
 TEMPLATE = """<!DOCTYPE html>
