@@ -2247,6 +2247,256 @@
       .sh-karte:hover, .sh-kat a:hover { transform: none; }
       .sh-karte:hover .sh-karte__bett img, .sh-kat a:hover img { transform: none; }
     }
+
+    /* ═══════════════════════════════════════════
+       BUEHNE — der Laden als Auftakt
+       Der Film laeuft ueber die volle Breite, die Schrift liegt darin.
+       Das ist der Griff, den die Website nicht hat: dort steht der Hero
+       auf Marmor, hier steht er im Geschaeft.
+    ═══════════════════════════════════════════ */
+    .sh-buehne {
+      position: relative;
+      margin-top: 0;
+      padding: 0;
+      min-height: min(78vh, 660px);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      overflow: hidden;
+      background: #14110D;
+    }
+    .sh-buehne__film {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+    }
+    /* Von unten dicht, nach oben offen: die Schrift steht unten, die
+       beleuchtete Auslage soll oben sichtbar bleiben. */
+    .sh-buehne__schleier {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      /* Zwei Verlaeufe: der senkrechte traegt die untere Kante, der
+         schraege verdunkelt die linke Seite, wo die Schrift steht. Ohne
+         den zweiten steht die Zeile ueber der beleuchteten Auslage und
+         verliert dort ihren Kontrast — die Auslage rechts bleibt frei. */
+      background:
+        linear-gradient(100deg,
+          rgba(20, 17, 13, 0.88) 0%,
+          rgba(20, 17, 13, 0.78) 34%,
+          rgba(20, 17, 13, 0.52) 56%,
+          rgba(20, 17, 13, 0.10) 76%,
+          rgba(20, 17, 13, 0) 88%),
+        linear-gradient(180deg,
+          rgba(20, 17, 13, 0.34) 0%,
+          rgba(20, 17, 13, 0.18) 26%,
+          rgba(20, 17, 13, 0.62) 76%,
+          rgba(20, 17, 13, 0.92) 100%);
+    }
+    .sh-buehne__inhalt {
+      position: relative;
+      z-index: 2;
+      max-width: 1180px;
+      width: 100%;
+      margin: 0 auto;
+      padding: clamp(60px, 12vw, 130px) var(--pad-x) clamp(58px, 7vw, 84px);
+      color: #fff;
+    }
+    .sh-buehne__eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.34em;
+      text-transform: uppercase;
+      color: var(--gold-light);
+      margin-bottom: 20px;
+    }
+    .sh-buehne__eyebrow::before,
+    .sh-buehne__eyebrow::after {
+      content: '';
+      width: 24px; height: 1px; flex: none;
+      background: currentColor; opacity: 0.55;
+    }
+    .sh-buehne h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(2.1rem, 5vw, 4rem);
+      font-weight: 300;
+      line-height: 1.08;
+      margin-bottom: 18px;
+      /* Zwei Schatten: der weite traegt die Flaeche, der enge die
+         Kanten der Haarstriche — die Serife ist duenn und verschwindet
+         sonst ueber den hellen Stellen der Auslage. */
+      text-shadow: 0 2px 30px rgba(0, 0, 0, 0.45), 0 1px 4px rgba(0, 0, 0, 0.45);
+      max-width: 17ch;
+    }
+    .sh-buehne h1 em { font-style: italic; color: var(--gold-light); }
+    .sh-buehne__inhalt > p {
+      font-family: var(--font-serif);
+      font-size: clamp(1rem, 1.5vw, 1.2rem);
+      font-weight: 300;
+      line-height: 1.85;
+      color: rgba(255, 255, 255, 0.78);
+      max-width: 44ch;
+      margin-bottom: 30px;
+    }
+    .sh-buehne__aktionen { display: flex; flex-wrap: wrap; gap: 14px; }
+    .btn-line-light {
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.42);
+    }
+    .btn-line-light:hover { border-color: var(--gold-light); color: var(--gold-light); }
+
+    /* Laufband am unteren Rand der Buehne */
+    .sh-buehne__marke {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      gap: 26px;
+      padding: 12px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.16);
+      white-space: nowrap;
+      overflow: hidden;
+      font-size: 0.58rem;
+      font-weight: 600;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.6);
+      -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+      mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+    }
+    .sh-buehne__marke i { color: var(--gold); font-style: normal; font-size: 0.5rem; }
+    .sh-buehne__marke span, .sh-buehne__marke i {
+      animation: shLauf 34s linear infinite;
+    }
+    @keyframes shLauf { to { transform: translateX(-50%); } }
+    @media (prefers-reduced-motion: reduce) {
+      .sh-buehne__marke span, .sh-buehne__marke i { animation: none; }
+    }
+
+    /* ── Abschnittsmarke mit grosser Ziffer ──────────────── */
+    .sh-marke {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: clamp(18px, 3vw, 40px);
+      align-items: start;
+      padding-bottom: 20px;
+      margin-bottom: clamp(26px, 3.4vw, 44px);
+      border-bottom: 1px solid var(--border-gold);
+    }
+    .sh-marke__zahl {
+      font-family: var(--font-serif);
+      font-size: clamp(2.6rem, 6vw, 4.6rem);
+      font-weight: 300;
+      font-style: italic;
+      line-height: 0.86;
+      color: var(--border-gold);
+    }
+    .sh-marke h2 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.7rem, 3.2vw, 2.6rem);
+      font-weight: 400;
+      font-style: italic;
+      margin-bottom: 8px;
+    }
+    .sh-marke p {
+      font-size: 0.82rem;
+      line-height: 1.8;
+      color: var(--ink-muted);
+      max-width: 62ch;
+    }
+
+    /* ── Werkstattstreifen ───────────────────────────────── */
+    .sh-werk {
+      background: rgba(245, 242, 237, 0.55);
+      border-top: 1px solid var(--border-gold);
+      border-bottom: 1px solid var(--border-gold);
+    }
+    .sh-werk__raster {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: clamp(28px, 5vw, 70px);
+      align-items: center;
+    }
+    .sh-werk__film {
+      margin: 0;
+      border: 1px solid var(--border-gold);
+      box-shadow: 0 28px 66px rgba(27, 25, 22, 0.14);
+      background: var(--marble-warm);
+    }
+    .sh-werk__film video {
+      display: block;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+    }
+    .sh-werk__film figcaption {
+      padding: 10px 14px;
+      font-size: 0.52rem;
+      font-weight: 600;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold-dark);
+      border-top: 1px solid var(--border-gold);
+    }
+    .sh-werk__text h2 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.8rem, 3.4vw, 2.8rem);
+      font-weight: 300;
+      line-height: 1.12;
+      margin-bottom: 26px;
+    }
+    .sh-werk__text h2 em { font-style: italic; color: var(--gold-dark); }
+
+    .sh-schritte { list-style: none; }
+    .sh-schritte li {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      column-gap: 16px;
+      padding: 14px 0;
+      border-top: 1px solid var(--border-light);
+    }
+    .sh-schritte li:last-child { border-bottom: 1px solid var(--border-light); }
+    .sh-schritte b {
+      grid-row: span 2;
+      font-family: var(--font-serif);
+      font-size: 1.1rem;
+      font-style: italic;
+      font-weight: 400;
+      color: var(--gold-dark);
+      padding-top: 2px;
+    }
+    .sh-schritte strong {
+      font-family: var(--font-serif);
+      font-size: 1.08rem;
+      font-style: italic;
+      font-weight: 500;
+    }
+    .sh-schritte span { font-size: 0.76rem; line-height: 1.7; color: var(--ink-muted); }
+
+    /* Zwei Stuecke nebeneinander statt vier — sonst stehen die beiden
+       Armbaender verloren in einer Vierer-Reihe. */
+    .sh-raster--zwei {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      max-width: 640px;
+    }
+
+    @media (max-width: 900px) {
+      .sh-werk__raster { grid-template-columns: 1fr; }
+      .sh-buehne { min-height: min(70vh, 560px); }
+    }
+    @media (max-width: 620px) {
+      .sh-marke { grid-template-columns: 1fr; gap: 6px; }
+      .sh-marke__zahl { font-size: 2.2rem; }
+      .sh-raster--zwei { max-width: none; }
+      .sh-buehne__marke { gap: 18px; font-size: 0.52rem; }
+    }
   </style>
 </head>
 <body>
@@ -2317,63 +2567,34 @@
   <div class="sh-hinweis"><b>Entwurf</b> &nbsp;·&nbsp; Gestaltungsvorschlag für einen Onlineshop &nbsp;·&nbsp; Preise sind Platzhalter</div>
 
   <!-- ═══════════════════════════════════
-       AUFTAKT
+       AUFTAKT — der Laden selbst
   ═══════════════════════════════════ -->
-  <section class="sh-auftakt" aria-labelledby="shopTitel">
-    <div class="wrap">
-      <div class="sh-auftakt__raster">
+  <section class="sh-buehne" aria-labelledby="shopTitel">
+    <video class="sh-buehne__film" autoplay muted loop playsinline preload="metadata"
+           poster="assets/shop/laden-poster.webp"
+           aria-label="Das Geschäft von Juwelier Damla am Abend, die Auslage ist beleuchtet">
+      <source src="assets/shop/laden.mp4" type="video/mp4">
+    </video>
+    <div class="sh-buehne__schleier" aria-hidden="true"></div>
 
-        <figure class="sh-film reveal-img">
-          <video autoplay muted loop playsinline preload="metadata"
-                 poster="assets/shop/werkstatt-poster.webp"
-                 aria-label="Nahaufnahme aus der Werkstatt: ein Ring wird gelötet, gefeilt und gefasst">
-            <source src="assets/shop/werkstatt.mp4" type="video/mp4">
-          </video>
-          <div class="sh-film__schleier" aria-hidden="true"></div>
-          <figcaption class="sh-film__cap">In unserer Werkstatt · Wellritzstraße 3</figcaption>
-        </figure>
-
-        <div class="sh-auftakt__text">
-          <span class="eyebrow reveal">Onlineshop</span>
-          <h1 class="reveal d1" id="shopTitel">Handarbeit,<br><em>die man trägt</em></h1>
-          <div class="gold-bar reveal d2" role="presentation"></div>
-          <p class="sh-auftakt__lead reveal d2">
-            Jedes Stück entsteht bei uns im Haus – gelötet, gefeilt, gefasst und poliert.
-            Was Sie hier sehen, können Sie online aussuchen und bei uns in der
-            Wellritzstraße anprobieren, ändern lassen oder gravieren.
-          </p>
-          <div class="sub-actions reveal d3">
-            <a href="#trauringe" class="btn-solid">Trauringe ansehen</a>
-            <a href="#verlobung" class="btn-ghost">Verlobungsringe</a>
-          </div>
-
-          <ul class="sh-zusagen reveal d4">
-            <li><strong>In Wiesbaden gefertigt</strong><span>Änderungen, Gravuren und Reparaturen in der eigenen Werkstatt.</span></li>
-            <li><strong>Erst anprobieren</strong><span>Online aussuchen, im Geschäft an den Finger legen. Ohne Termin.</span></li>
-            <li><strong>Größe inklusive</strong><span>Wir messen kostenlos und passen die Weite später jederzeit an.</span></li>
-          </ul>
-        </div>
-
+    <div class="sh-buehne__inhalt">
+      <span class="sh-buehne__eyebrow">Wellritzstraße 3 · Wiesbaden</span>
+      <h1 id="shopTitel">Was in der Auslage liegt,<br><em>können Sie hier ansehen</em></h1>
+      <p>
+        Jedes Stück entsteht bei uns im Haus. Online aussuchen,
+        im Geschäft an den Finger legen.
+      </p>
+      <div class="sh-buehne__aktionen">
+        <a href="#trauringe" class="btn-solid">Trauringe ansehen</a>
+        <a href="#werkstatt" class="btn-line-light btn--schlicht">Wie wir arbeiten</a>
       </div>
     </div>
-  </section>
 
-  <!-- ═══════════════════════════════════
-       KATEGORIEN
-  ═══════════════════════════════════ -->
-  <section aria-labelledby="katTitel">
-    <div class="wrap">
-      <div class="sh-leiste">
-        <h2 id="katTitel">Wonach suchen Sie?</h2>
-        <p>Fünf Bereiche</p>
-      </div>
-      <nav class="sh-kat reveal" aria-label="Warengruppen">
-        <a href="#trauringe"><img src="assets/trauringe/modell-05.webp" alt="Schlichter polierter Trauring in Gelbgold" width="516" height="747" loading="lazy"><b>Trauringe</b></a>
-        <a href="#verlobung"><img src="assets/fassung/solitaer-weiss.webp" alt="Verlobungsring mit Solitär in Weißgold" width="900" height="900" loading="lazy"><b>Verlobungsringe</b></a>
-        <a href="#trauringe"><img src="assets/trauringe/modell-04.webp" alt="Feiner Ring in Weißgold, stellvertretend für Ketten" width="476" height="696" loading="lazy"><b>Ketten</b></a>
-        <a href="#trauringe"><img src="assets/trauringe/modell-10.webp" alt="Schmaler Ring mit Brillanten, stellvertretend für Ohrringe" width="403" height="736" loading="lazy"><b>Ohrringe</b></a>
-        <a href="#trauringe"><img src="assets/trauringe/modell-09.webp" alt="Gewölbter Ring in Gelbgold, stellvertretend für Armbänder" width="424" height="743" loading="lazy"><b>Armbänder</b></a>
-      </nav>
+    <div class="sh-buehne__marke" aria-hidden="true">
+      <span>Trauringe</span><i>◆</i><span>Verlobungsringe</span><i>◆</i><span>Armbänder</span><i>◆</i>
+      <span>Gravur inklusive</span><i>◆</i><span>Eigene Werkstatt</span><i>◆</i>
+      <span>Trauringe</span><i>◆</i><span>Verlobungsringe</span><i>◆</i><span>Armbänder</span><i>◆</i>
+      <span>Gravur inklusive</span><i>◆</i><span>Eigene Werkstatt</span><i>◆</i>
     </div>
   </section>
 
@@ -2382,10 +2603,15 @@
   ═══════════════════════════════════ -->
   <section id="trauringe" aria-labelledby="trTitel">
     <div class="wrap">
-      <div class="sh-leiste">
-        <h2 id="trTitel">Trauringe</h2>
-        <p>Zehn Modelle · in Gelb-, Weiß- und Rotgold</p>
+      <div class="sh-marke">
+        <span class="sh-marke__zahl" aria-hidden="true">01</span>
+        <div class="sh-marke__text">
+          <h2 id="trTitel">Trauringe</h2>
+          <p>Zehn Modelle, jedes in Gelb-, Weiß- oder Rotgold und in Ihrer Breite.
+             Die Größe messen wir kostenlos und ändern sie später jederzeit.</p>
+        </div>
       </div>
+
       <div class="sh-raster">
         <article class="sh-karte reveal">
           <div class="sh-karte__bett">
@@ -2521,25 +2747,48 @@
   </section>
 
   <!-- ═══════════════════════════════════
-       BAND
+       WERKSTATT
   ═══════════════════════════════════ -->
-  <figure class="sh-band reveal-img">
-    <img src="assets/trauringe/breit-2.webp" alt="Ein polierter Goldtrauring auf champagnerfarbener Seide" width="2000" height="848" loading="lazy">
-    <figcaption class="sh-band__text">
-      <strong>Jeder Ring geht durch dieselben Hände</strong>
-      <span>Löten · Feilen · Fassen · Polieren</span>
-    </figcaption>
-  </figure>
+  <section id="werkstatt" class="sh-werk" aria-labelledby="wkTitel">
+    <div class="wrap">
+      <div class="sh-werk__raster">
+        <figure class="sh-werk__film reveal-img">
+          <video autoplay muted loop playsinline preload="metadata"
+                 poster="assets/shop/werkstatt-poster.webp"
+                 aria-label="Nahaufnahme aus der Werkstatt: ein Ring wird gefeilt und gefasst">
+            <source src="assets/shop/werkstatt.mp4" type="video/mp4">
+          </video>
+          <figcaption>Aufnahme aus unserer Werkstatt</figcaption>
+        </figure>
+
+        <div class="sh-werk__text">
+          <span class="eyebrow reveal">Zwischen Auswahl und Finger</span>
+          <h2 class="reveal d1" id="wkTitel">Vier Schritte,<br><em>eine Werkbank</em></h2>
+          <ol class="sh-schritte reveal d2">
+            <li><b>01</b><strong>Löten</strong><span>Die Schiene wird geschlossen, die Naht verschwindet unter der Feile.</span></li>
+            <li><b>02</b><strong>Feilen</strong><span>Profil und Kanten bekommen ihre Form – hier entscheidet sich, wie der Ring sich anfühlt.</span></li>
+            <li><b>03</b><strong>Fassen</strong><span>Jeder Stein wird einzeln gesetzt und die Krappen werden angedrückt.</span></li>
+            <li><b>04</b><strong>Polieren</strong><span>Zum Schluss die Oberfläche – hochglanz, seidenmatt oder gebürstet.</span></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- ═══════════════════════════════════
        VERLOBUNGSRINGE
   ═══════════════════════════════════ -->
   <section id="verlobung" aria-labelledby="vrTitel">
     <div class="wrap">
-      <div class="sh-leiste">
-        <h2 id="vrTitel">Verlobungsringe</h2>
-        <p>Fünf Fassungen · Stein nach Wunsch</p>
+      <div class="sh-marke">
+        <span class="sh-marke__zahl" aria-hidden="true">02</span>
+        <div class="sh-marke__text">
+          <h2 id="vrTitel">Verlobungsringe</h2>
+          <p>Fünf Fassungen. Den Stein suchen wir gemeinsam aus – Größe, Farbe und
+             Reinheit bestimmen den Preis, und den sagen wir Ihnen vorher offen.</p>
+        </div>
       </div>
+
       <div class="sh-raster">
         <article class="sh-karte reveal">
           <div class="sh-karte__bett">
@@ -2606,11 +2855,51 @@
           </div>
         </article>
       </div>
-      <p class="sub-note reveal">
-        Die Preise gelten für die Fassung. Den Stein suchen wir gemeinsam aus –
-        Größe, Farbe und Reinheit bestimmen am Ende den Preis, und den sagen wir
-        Ihnen vorher offen.
-      </p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       ARMBÄNDER
+  ═══════════════════════════════════ -->
+  <section id="armbaender" class="sub-alt" aria-labelledby="abTitel">
+    <div class="wrap">
+      <div class="sh-marke">
+        <span class="sh-marke__zahl" aria-hidden="true">03</span>
+        <div class="sh-marke__text">
+          <h2 id="abTitel">Armbänder</h2>
+          <p>Diese Sparte ist im Entwurf noch nicht bestückt. Die beiden Stücke unten
+             sind erzeugte Beispielbilder und zeigen nur, wie die Sparte aussehen
+             könnte – nicht, was im Laden liegt.</p>
+        </div>
+      </div>
+
+      <div class="sh-raster sh-raster--zwei">
+        <article class="sh-karte reveal">
+          <div class="sh-karte__bett">
+            <img src="assets/armband/gliederkette.webp" alt="Armband aus flacher Panzerkette in Gelbgold mit Karabinerverschluss" width="758" height="760" loading="lazy" decoding="async">
+          </div>
+          <h3 class="sh-karte__name"><a class="sh-karte__link" href="shop-produkt.html">Panzer</a></h3>
+          <span class="sh-karte__spec">4 mm · Gelbgold</span>
+          <p class="sh-karte__text">Flache Panzerkette mit Karabiner, klassisch und alltagsfest.</p>
+          <div class="sh-karte__fuss">
+            <span class="sh-preis">ab 590&nbsp;€<small>Beispielbild</small></span>
+            <span class="sh-tone" aria-label="Erhältlich in gelb, weiss, rose"><i class="gelb"></i><i class="weiss"></i><i class="rose"></i></span>
+          </div>
+        </article>
+
+        <article class="sh-karte reveal">
+          <div class="sh-karte__bett">
+            <img src="assets/armband/tennis.webp" alt="Tennisarmband in Weißgold mit einer durchgehenden Brillantlinie" width="640" height="760" loading="lazy" decoding="async">
+          </div>
+          <h3 class="sh-karte__name"><a class="sh-karte__link" href="shop-produkt.html">Tennis</a></h3>
+          <span class="sh-karte__spec">Brillantlinie · Weißgold</span>
+          <p class="sh-karte__text">Eine durchgehende Linie kleiner Brillanten, beweglich gefasst.</p>
+          <div class="sh-karte__fuss">
+            <span class="sh-preis">ab 1.890&nbsp;€<small>Beispielbild</small></span>
+            <span class="sh-tone" aria-label="Erhältlich in weiss, gelb"><i class="weiss"></i><i class="gelb"></i></span>
+          </div>
+        </article>
+      </div>
     </div>
   </section>
 

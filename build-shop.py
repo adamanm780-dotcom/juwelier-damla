@@ -103,6 +103,15 @@ FASSUNGEN = [
      'Verlobungsring mit pavébesetzter Schiene'),
 ]
 
+ARMBAENDER = [
+    ('gliederkette', 'Panzer',  '4 mm · Gelbgold', 590, 'gelb weiss rose',
+     'Flache Panzerkette mit Karabiner, klassisch und alltagsfest.',
+     'Armband aus flacher Panzerkette in Gelbgold mit Karabinerverschluss'),
+    ('tennis', 'Tennis', 'Brillantlinie · Weißgold', 1890, 'weiss gelb',
+     'Eine durchgehende Linie kleiner Brillanten, beweglich gefasst.',
+     'Tennisarmband in Weißgold mit einer durchgehenden Brillantlinie'),
+]
+
 KATEGORIEN = [
     ('#trauringe', 'Trauringe',       'assets/trauringe/modell-05.webp',
      'Schlichter polierter Trauring in Gelbgold'),
@@ -163,6 +172,11 @@ fa_karten = '\n\n'.join(
 dazu = '\n\n'.join(
     karte('assets/trauringe/%s.webp' % d[0], d[1], d[2], d[3], d[4], d[5], d[6])
     for d in (TRAURINGE[1], TRAURINGE[6], TRAURINGE[4]))
+
+ab_karten = '\n\n'.join(
+    karte('assets/armband/%s.webp' % d[0], d[1], d[2], d[3], d[4], d[5], d[6],
+          zusatz='Beispielbild')
+    for d in ARMBAENDER)
 
 kat_kacheln = '\n'.join(
     '        <a href="%s"><img src="%s" alt="%s" width="%d" height="%d" loading="lazy"><b>%s</b></a>'
@@ -243,7 +257,7 @@ SEITEN = [
          desc='Entwurf eines Onlineshops für Juwelier Damla: Trauringe und '
               'Verlobungsringe aus eigener Werkstatt, Wellritzstraße 3 in Wiesbaden.',
          body=io.open(os.path.join(DIR, 'shop.body.html'), encoding='utf-8').read()
-              % dict(kategorien=kat_kacheln, trauringe=tr_karten, fassungen=fa_karten)),
+              % dict(trauringe=tr_karten, fassungen=fa_karten, armband=ab_karten)),
 
     dict(slug='shop-produkt.html',
          title='Trauring Wellritz (Entwurf) – Juwelier Damla Wiesbaden',

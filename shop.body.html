@@ -1,59 +1,34 @@
   <div class="sh-hinweis"><b>Entwurf</b> &nbsp;·&nbsp; Gestaltungsvorschlag für einen Onlineshop &nbsp;·&nbsp; Preise sind Platzhalter</div>
 
   <!-- ═══════════════════════════════════
-       AUFTAKT
+       AUFTAKT — der Laden selbst
   ═══════════════════════════════════ -->
-  <section class="sh-auftakt" aria-labelledby="shopTitel">
-    <div class="wrap">
-      <div class="sh-auftakt__raster">
+  <section class="sh-buehne" aria-labelledby="shopTitel">
+    <video class="sh-buehne__film" autoplay muted loop playsinline preload="metadata"
+           poster="assets/shop/laden-poster.webp"
+           aria-label="Das Geschäft von Juwelier Damla am Abend, die Auslage ist beleuchtet">
+      <source src="assets/shop/laden.mp4" type="video/mp4">
+    </video>
+    <div class="sh-buehne__schleier" aria-hidden="true"></div>
 
-        <figure class="sh-film reveal-img">
-          <video autoplay muted loop playsinline preload="metadata"
-                 poster="assets/shop/werkstatt-poster.webp"
-                 aria-label="Nahaufnahme aus der Werkstatt: ein Ring wird gelötet, gefeilt und gefasst">
-            <source src="assets/shop/werkstatt.mp4" type="video/mp4">
-          </video>
-          <div class="sh-film__schleier" aria-hidden="true"></div>
-          <figcaption class="sh-film__cap">In unserer Werkstatt · Wellritzstraße 3</figcaption>
-        </figure>
-
-        <div class="sh-auftakt__text">
-          <span class="eyebrow reveal">Onlineshop</span>
-          <h1 class="reveal d1" id="shopTitel">Handarbeit,<br><em>die man trägt</em></h1>
-          <div class="gold-bar reveal d2" role="presentation"></div>
-          <p class="sh-auftakt__lead reveal d2">
-            Jedes Stück entsteht bei uns im Haus – gelötet, gefeilt, gefasst und poliert.
-            Was Sie hier sehen, können Sie online aussuchen und bei uns in der
-            Wellritzstraße anprobieren, ändern lassen oder gravieren.
-          </p>
-          <div class="sub-actions reveal d3">
-            <a href="#trauringe" class="btn-solid">Trauringe ansehen</a>
-            <a href="#verlobung" class="btn-ghost">Verlobungsringe</a>
-          </div>
-
-          <ul class="sh-zusagen reveal d4">
-            <li><strong>In Wiesbaden gefertigt</strong><span>Änderungen, Gravuren und Reparaturen in der eigenen Werkstatt.</span></li>
-            <li><strong>Erst anprobieren</strong><span>Online aussuchen, im Geschäft an den Finger legen. Ohne Termin.</span></li>
-            <li><strong>Größe inklusive</strong><span>Wir messen kostenlos und passen die Weite später jederzeit an.</span></li>
-          </ul>
-        </div>
-
+    <div class="sh-buehne__inhalt">
+      <span class="sh-buehne__eyebrow">Wellritzstraße 3 · Wiesbaden</span>
+      <h1 id="shopTitel">Was in der Auslage liegt,<br><em>können Sie hier ansehen</em></h1>
+      <p>
+        Jedes Stück entsteht bei uns im Haus. Online aussuchen,
+        im Geschäft an den Finger legen.
+      </p>
+      <div class="sh-buehne__aktionen">
+        <a href="#trauringe" class="btn-solid">Trauringe ansehen</a>
+        <a href="#werkstatt" class="btn-line-light btn--schlicht">Wie wir arbeiten</a>
       </div>
     </div>
-  </section>
 
-  <!-- ═══════════════════════════════════
-       KATEGORIEN
-  ═══════════════════════════════════ -->
-  <section aria-labelledby="katTitel">
-    <div class="wrap">
-      <div class="sh-leiste">
-        <h2 id="katTitel">Wonach suchen Sie?</h2>
-        <p>Fünf Bereiche</p>
-      </div>
-      <nav class="sh-kat reveal" aria-label="Warengruppen">
-%(kategorien)s
-      </nav>
+    <div class="sh-buehne__marke" aria-hidden="true">
+      <span>Trauringe</span><i>◆</i><span>Verlobungsringe</span><i>◆</i><span>Armbänder</span><i>◆</i>
+      <span>Gravur inklusive</span><i>◆</i><span>Eigene Werkstatt</span><i>◆</i>
+      <span>Trauringe</span><i>◆</i><span>Verlobungsringe</span><i>◆</i><span>Armbänder</span><i>◆</i>
+      <span>Gravur inklusive</span><i>◆</i><span>Eigene Werkstatt</span><i>◆</i>
     </div>
   </section>
 
@@ -62,10 +37,15 @@
   ═══════════════════════════════════ -->
   <section id="trauringe" aria-labelledby="trTitel">
     <div class="wrap">
-      <div class="sh-leiste">
-        <h2 id="trTitel">Trauringe</h2>
-        <p>Zehn Modelle · in Gelb-, Weiß- und Rotgold</p>
+      <div class="sh-marke">
+        <span class="sh-marke__zahl" aria-hidden="true">01</span>
+        <div class="sh-marke__text">
+          <h2 id="trTitel">Trauringe</h2>
+          <p>Zehn Modelle, jedes in Gelb-, Weiß- oder Rotgold und in Ihrer Breite.
+             Die Größe messen wir kostenlos und ändern sie später jederzeit.</p>
+        </div>
       </div>
+
       <div class="sh-raster">
 %(trauringe)s
       </div>
@@ -73,32 +53,71 @@
   </section>
 
   <!-- ═══════════════════════════════════
-       BAND
+       WERKSTATT
   ═══════════════════════════════════ -->
-  <figure class="sh-band reveal-img">
-    <img src="assets/trauringe/breit-2.webp" alt="Ein polierter Goldtrauring auf champagnerfarbener Seide" width="2000" height="848" loading="lazy">
-    <figcaption class="sh-band__text">
-      <strong>Jeder Ring geht durch dieselben Hände</strong>
-      <span>Löten · Feilen · Fassen · Polieren</span>
-    </figcaption>
-  </figure>
+  <section id="werkstatt" class="sh-werk" aria-labelledby="wkTitel">
+    <div class="wrap">
+      <div class="sh-werk__raster">
+        <figure class="sh-werk__film reveal-img">
+          <video autoplay muted loop playsinline preload="metadata"
+                 poster="assets/shop/werkstatt-poster.webp"
+                 aria-label="Nahaufnahme aus der Werkstatt: ein Ring wird gefeilt und gefasst">
+            <source src="assets/shop/werkstatt.mp4" type="video/mp4">
+          </video>
+          <figcaption>Aufnahme aus unserer Werkstatt</figcaption>
+        </figure>
+
+        <div class="sh-werk__text">
+          <span class="eyebrow reveal">Zwischen Auswahl und Finger</span>
+          <h2 class="reveal d1" id="wkTitel">Vier Schritte,<br><em>eine Werkbank</em></h2>
+          <ol class="sh-schritte reveal d2">
+            <li><b>01</b><strong>Löten</strong><span>Die Schiene wird geschlossen, die Naht verschwindet unter der Feile.</span></li>
+            <li><b>02</b><strong>Feilen</strong><span>Profil und Kanten bekommen ihre Form – hier entscheidet sich, wie der Ring sich anfühlt.</span></li>
+            <li><b>03</b><strong>Fassen</strong><span>Jeder Stein wird einzeln gesetzt und die Krappen werden angedrückt.</span></li>
+            <li><b>04</b><strong>Polieren</strong><span>Zum Schluss die Oberfläche – hochglanz, seidenmatt oder gebürstet.</span></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- ═══════════════════════════════════
        VERLOBUNGSRINGE
   ═══════════════════════════════════ -->
   <section id="verlobung" aria-labelledby="vrTitel">
     <div class="wrap">
-      <div class="sh-leiste">
-        <h2 id="vrTitel">Verlobungsringe</h2>
-        <p>Fünf Fassungen · Stein nach Wunsch</p>
+      <div class="sh-marke">
+        <span class="sh-marke__zahl" aria-hidden="true">02</span>
+        <div class="sh-marke__text">
+          <h2 id="vrTitel">Verlobungsringe</h2>
+          <p>Fünf Fassungen. Den Stein suchen wir gemeinsam aus – Größe, Farbe und
+             Reinheit bestimmen den Preis, und den sagen wir Ihnen vorher offen.</p>
+        </div>
       </div>
+
       <div class="sh-raster">
 %(fassungen)s
       </div>
-      <p class="sub-note reveal">
-        Die Preise gelten für die Fassung. Den Stein suchen wir gemeinsam aus –
-        Größe, Farbe und Reinheit bestimmen am Ende den Preis, und den sagen wir
-        Ihnen vorher offen.
-      </p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       ARMBÄNDER
+  ═══════════════════════════════════ -->
+  <section id="armbaender" class="sub-alt" aria-labelledby="abTitel">
+    <div class="wrap">
+      <div class="sh-marke">
+        <span class="sh-marke__zahl" aria-hidden="true">03</span>
+        <div class="sh-marke__text">
+          <h2 id="abTitel">Armbänder</h2>
+          <p>Diese Sparte ist im Entwurf noch nicht bestückt. Die beiden Stücke unten
+             sind erzeugte Beispielbilder und zeigen nur, wie die Sparte aussehen
+             könnte – nicht, was im Laden liegt.</p>
+        </div>
+      </div>
+
+      <div class="sh-raster sh-raster--zwei">
+%(armband)s
+      </div>
     </div>
   </section>

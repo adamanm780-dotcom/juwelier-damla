@@ -504,3 +504,253 @@
       .sh-karte:hover, .sh-kat a:hover { transform: none; }
       .sh-karte:hover .sh-karte__bett img, .sh-kat a:hover img { transform: none; }
     }
+
+    /* ═══════════════════════════════════════════
+       BUEHNE — der Laden als Auftakt
+       Der Film laeuft ueber die volle Breite, die Schrift liegt darin.
+       Das ist der Griff, den die Website nicht hat: dort steht der Hero
+       auf Marmor, hier steht er im Geschaeft.
+    ═══════════════════════════════════════════ */
+    .sh-buehne {
+      position: relative;
+      margin-top: 0;
+      padding: 0;
+      min-height: min(78vh, 660px);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      overflow: hidden;
+      background: #14110D;
+    }
+    .sh-buehne__film {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+    }
+    /* Von unten dicht, nach oben offen: die Schrift steht unten, die
+       beleuchtete Auslage soll oben sichtbar bleiben. */
+    .sh-buehne__schleier {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      /* Zwei Verlaeufe: der senkrechte traegt die untere Kante, der
+         schraege verdunkelt die linke Seite, wo die Schrift steht. Ohne
+         den zweiten steht die Zeile ueber der beleuchteten Auslage und
+         verliert dort ihren Kontrast — die Auslage rechts bleibt frei. */
+      background:
+        linear-gradient(100deg,
+          rgba(20, 17, 13, 0.88) 0%,
+          rgba(20, 17, 13, 0.78) 34%,
+          rgba(20, 17, 13, 0.52) 56%,
+          rgba(20, 17, 13, 0.10) 76%,
+          rgba(20, 17, 13, 0) 88%),
+        linear-gradient(180deg,
+          rgba(20, 17, 13, 0.34) 0%,
+          rgba(20, 17, 13, 0.18) 26%,
+          rgba(20, 17, 13, 0.62) 76%,
+          rgba(20, 17, 13, 0.92) 100%);
+    }
+    .sh-buehne__inhalt {
+      position: relative;
+      z-index: 2;
+      max-width: 1180px;
+      width: 100%;
+      margin: 0 auto;
+      padding: clamp(60px, 12vw, 130px) var(--pad-x) clamp(58px, 7vw, 84px);
+      color: #fff;
+    }
+    .sh-buehne__eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.34em;
+      text-transform: uppercase;
+      color: var(--gold-light);
+      margin-bottom: 20px;
+    }
+    .sh-buehne__eyebrow::before,
+    .sh-buehne__eyebrow::after {
+      content: '';
+      width: 24px; height: 1px; flex: none;
+      background: currentColor; opacity: 0.55;
+    }
+    .sh-buehne h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(2.1rem, 5vw, 4rem);
+      font-weight: 300;
+      line-height: 1.08;
+      margin-bottom: 18px;
+      /* Zwei Schatten: der weite traegt die Flaeche, der enge die
+         Kanten der Haarstriche — die Serife ist duenn und verschwindet
+         sonst ueber den hellen Stellen der Auslage. */
+      text-shadow: 0 2px 30px rgba(0, 0, 0, 0.45), 0 1px 4px rgba(0, 0, 0, 0.45);
+      max-width: 17ch;
+    }
+    .sh-buehne h1 em { font-style: italic; color: var(--gold-light); }
+    .sh-buehne__inhalt > p {
+      font-family: var(--font-serif);
+      font-size: clamp(1rem, 1.5vw, 1.2rem);
+      font-weight: 300;
+      line-height: 1.85;
+      color: rgba(255, 255, 255, 0.78);
+      max-width: 44ch;
+      margin-bottom: 30px;
+    }
+    .sh-buehne__aktionen { display: flex; flex-wrap: wrap; gap: 14px; }
+    .btn-line-light {
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.42);
+    }
+    .btn-line-light:hover { border-color: var(--gold-light); color: var(--gold-light); }
+
+    /* Laufband am unteren Rand der Buehne */
+    .sh-buehne__marke {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      gap: 26px;
+      padding: 12px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.16);
+      white-space: nowrap;
+      overflow: hidden;
+      font-size: 0.58rem;
+      font-weight: 600;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.6);
+      -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+      mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+    }
+    .sh-buehne__marke i { color: var(--gold); font-style: normal; font-size: 0.5rem; }
+    .sh-buehne__marke span, .sh-buehne__marke i {
+      animation: shLauf 34s linear infinite;
+    }
+    @keyframes shLauf { to { transform: translateX(-50%); } }
+    @media (prefers-reduced-motion: reduce) {
+      .sh-buehne__marke span, .sh-buehne__marke i { animation: none; }
+    }
+
+    /* ── Abschnittsmarke mit grosser Ziffer ──────────────── */
+    .sh-marke {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: clamp(18px, 3vw, 40px);
+      align-items: start;
+      padding-bottom: 20px;
+      margin-bottom: clamp(26px, 3.4vw, 44px);
+      border-bottom: 1px solid var(--border-gold);
+    }
+    .sh-marke__zahl {
+      font-family: var(--font-serif);
+      font-size: clamp(2.6rem, 6vw, 4.6rem);
+      font-weight: 300;
+      font-style: italic;
+      line-height: 0.86;
+      color: var(--border-gold);
+    }
+    .sh-marke h2 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.7rem, 3.2vw, 2.6rem);
+      font-weight: 400;
+      font-style: italic;
+      margin-bottom: 8px;
+    }
+    .sh-marke p {
+      font-size: 0.82rem;
+      line-height: 1.8;
+      color: var(--ink-muted);
+      max-width: 62ch;
+    }
+
+    /* ── Werkstattstreifen ───────────────────────────────── */
+    .sh-werk {
+      background: rgba(245, 242, 237, 0.55);
+      border-top: 1px solid var(--border-gold);
+      border-bottom: 1px solid var(--border-gold);
+    }
+    .sh-werk__raster {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: clamp(28px, 5vw, 70px);
+      align-items: center;
+    }
+    .sh-werk__film {
+      margin: 0;
+      border: 1px solid var(--border-gold);
+      box-shadow: 0 28px 66px rgba(27, 25, 22, 0.14);
+      background: var(--marble-warm);
+    }
+    .sh-werk__film video {
+      display: block;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+    }
+    .sh-werk__film figcaption {
+      padding: 10px 14px;
+      font-size: 0.52rem;
+      font-weight: 600;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold-dark);
+      border-top: 1px solid var(--border-gold);
+    }
+    .sh-werk__text h2 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.8rem, 3.4vw, 2.8rem);
+      font-weight: 300;
+      line-height: 1.12;
+      margin-bottom: 26px;
+    }
+    .sh-werk__text h2 em { font-style: italic; color: var(--gold-dark); }
+
+    .sh-schritte { list-style: none; }
+    .sh-schritte li {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      column-gap: 16px;
+      padding: 14px 0;
+      border-top: 1px solid var(--border-light);
+    }
+    .sh-schritte li:last-child { border-bottom: 1px solid var(--border-light); }
+    .sh-schritte b {
+      grid-row: span 2;
+      font-family: var(--font-serif);
+      font-size: 1.1rem;
+      font-style: italic;
+      font-weight: 400;
+      color: var(--gold-dark);
+      padding-top: 2px;
+    }
+    .sh-schritte strong {
+      font-family: var(--font-serif);
+      font-size: 1.08rem;
+      font-style: italic;
+      font-weight: 500;
+    }
+    .sh-schritte span { font-size: 0.76rem; line-height: 1.7; color: var(--ink-muted); }
+
+    /* Zwei Stuecke nebeneinander statt vier — sonst stehen die beiden
+       Armbaender verloren in einer Vierer-Reihe. */
+    .sh-raster--zwei {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      max-width: 640px;
+    }
+
+    @media (max-width: 900px) {
+      .sh-werk__raster { grid-template-columns: 1fr; }
+      .sh-buehne { min-height: min(70vh, 560px); }
+    }
+    @media (max-width: 620px) {
+      .sh-marke { grid-template-columns: 1fr; gap: 6px; }
+      .sh-marke__zahl { font-size: 2.2rem; }
+      .sh-raster--zwei { max-width: none; }
+      .sh-buehne__marke { gap: 18px; font-size: 0.52rem; }
+    }
