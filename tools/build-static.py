@@ -5,7 +5,7 @@ from pathlib import Path
 import shutil
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'dist'
-PREVIEW_ORIGIN='https://damla-ringatelier.comet-frost-3480.chatgpt.site'
+PREVIEW_ORIGIN='https://damla-ringatelier.benet-cool.chatgpt.site'
 if OUT.exists():
     assert OUT.resolve().parent==ROOT and OUT.name=='dist'
     shutil.rmtree(OUT)
