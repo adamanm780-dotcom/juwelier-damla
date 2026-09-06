@@ -542,7 +542,6 @@ const buehne = document.getElementById('kfBuehne');
 const hinweisWebgl = document.getElementById('kfWebglHinweis');
 
 let renderer, scene, camera, controls, ringGruppe;
-let letzteInteraktion = 0;
 let laeuft = false;
 let bereit = false;   // erstes gerendertes Bild da -> Ladezustand aus
 let drehen = !matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -610,7 +609,7 @@ function szeneAufbauen() {
   controls.minPolarAngle = Math.PI * 0.14;
   controls.maxPolarAngle = Math.PI * 0.62;
   controls.autoRotateSpeed = 0.7;
-  controls.addEventListener('start', () => { letzteInteraktion = performance.now(); });
+  // OrbitControls suspends rotation during a drag itself; zoom keeps rotating.
   renderer.domElement.setAttribute('aria-hidden', 'true');
   new IntersectionObserver(([entry]) => { sichtbar = entry.isIntersecting; }).observe(buehne);
   renderer.domElement.addEventListener('webglcontextlost', (e) => {
@@ -695,9 +694,8 @@ function kameraEinpassen(erzwingen) {
 
 function tick() {
   if (document.hidden || !sichtbar) return;
-  // Nach kurzer Ruhe kreist die Kamera weiter — das Paar bleibt stehen,
-  // waehrend Profil und Oberflaeche von allen Seiten sichtbar werden.
-  controls.autoRotate = drehen && performance.now() - letzteInteraktion > 2600;
+  // Die Kamera kreist auch beim Zoomen weiter; nur die Pausentaste stoppt sie.
+  controls.autoRotate = drehen;
   controls.update();
   renderer.render(scene, camera);
   if (!bereit) { bereit = true; buehne.classList.add('is-bereit'); }
@@ -1316,7 +1314,7 @@ function uiVerdrahten() {
         camera.position.copy(controls.target).add(dir.normalize().multiplyScalar(distance));
         kameraEinpassen(true);
       }
-      letzteInteraktion = performance.now(); controls.update();
+      controls.update();
     });
     if (button.dataset.kfView === 'rotate') {
       button.setAttribute('aria-pressed', String(drehen));

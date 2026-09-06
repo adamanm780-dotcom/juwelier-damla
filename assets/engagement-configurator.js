@@ -114,7 +114,7 @@ async function start(){
     renderer.outputColorSpace=THREE.SRGBColorSpace;stage.append(renderer.domElement);renderer.domElement.setAttribute('aria-hidden','true');
     scene=new THREE.Scene();studio=createStudio(renderer);scene.environment=studio.metal;
     camera=new THREE.PerspectiveCamera(32,1,.1,400);controls=new OrbitControls(camera,renderer.domElement);controls.enablePan=false;controls.enableDamping=true;controls.dampingFactor=.08;controls.autoRotateSpeed=.65;
-    controls.addEventListener('start',()=>{rotation=false;rotationLabel();});
+    // Keep the chosen rotation mode during wheel, pinch and button zoom.
     ready=true;buildRing();
     new ResizeObserver(()=>{camera.aspect=stage.clientWidth/stage.clientHeight;camera.updateProjectionMatrix();renderer.setSize(stage.clientWidth,stage.clientHeight);fit();}).observe(stage);
     new IntersectionObserver(([entry])=>{visible=entry.isIntersecting;}).observe(stage);

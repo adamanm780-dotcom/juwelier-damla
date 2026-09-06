@@ -22,3 +22,8 @@
 @media(max-width:760px){.contact-atelier__card{grid-template-columns:1fr;border-radius:110px 16px 16px 16px}.contact-atelier__aside{padding:44px 28px 30px;text-align:center;align-items:center}.contact-atelier__seal{margin-bottom:24px}.contact-atelier__aside figure{display:none}.contact-atelier__phone{align-self:center;margin:22px 0 0}.contact-atelier__form-wrap{padding:32px 24px}.contact-atelier__heading{margin-bottom:32px}.contact-atelier__heading p br{display:none}.contact-atelier button{width:100%}.inquiry-submit{gap:14px}.contact-atelier__aside h3{font-size:2.5rem}}
 .contact-atelier button{color:#2e2418}.contact-atelier button:hover{color:#fff}
 @media(prefers-reduced-motion:reduce){.inquiry-topics label>span{transition:none}}
+/* Preserve the home layout while allowing larger type to reflow inside it. */
+.contact-grid>*,.contact-atelier__card>*,.service-card{min-width:0}
+.service-title,.service-text,.contact-grid .section-title,.contact-grid .c-item{overflow-wrap:anywhere}
+.contact-grid .hour-row{flex-wrap:wrap;gap:6px 14px}.contact-grid .hour-time,.contact-grid .hour-closed{margin-left:auto}
+.eyebrow{max-width:100%;white-space:normal;overflow-wrap:anywhere}

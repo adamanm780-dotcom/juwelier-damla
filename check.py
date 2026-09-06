@@ -79,6 +79,7 @@ for name in PAGES:
         if not os.path.exists(os.path.join(DIR, href)):
             fail('toter Link: ' + href)
     for a in sorted(set(re.findall(r'(?:src|href)="(assets/[^"]+)"', src))):
+        a = a.split('?', 1)[0].split('#', 1)[0]
         if not os.path.exists(os.path.join(DIR, a)):
             fail('fehlendes Asset: ' + a)
     print('  Links + Assets geprueft')

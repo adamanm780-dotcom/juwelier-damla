@@ -2180,81 +2180,38 @@
 
     /* — Ring-Modelle (freigestellte Stücke) — */
     /* — Freigestellte Ringe: gepinnter Horizontal-Scroll — */
-    .ring-scroll { position: relative; height: 340vh; padding: 0; }
-    .ring-scroll__pin {
-      position: sticky; top: 0;
-      height: 100vh; overflow: hidden;
-      display: flex; flex-direction: column;
-    }
-    .ring-scroll__head {
-      text-align: center; z-index: 3;
-      padding: clamp(60px, 10vh, 116px) var(--pad-x) 0;
-    }
+    /* Native carousel by default; the desktop scene budgets space for its copy. */
+    .ring-scroll { position: relative; height: auto; padding: 0; }
+    .ring-scroll__pin { position: static; display: flex; flex-direction: column; height: auto; padding-bottom: 28px; }
+    .ring-scroll__head { flex: none; text-align: center; padding: clamp(24px,4svh,65px) var(--pad-x) 18px; }
     .ring-scroll__head .eyebrow { display: block; }
-    .ring-scroll__head .section-title { margin-top: 10px; }
+    .ring-scroll__head .section-title { margin-top: 10px; font-size: clamp(2.25rem,3.5vw,4.8rem); }
     .ring-scroll__head .gold-bar { margin: 16px auto 0; }
-    .ring-scroll__viewport {
-      flex: 1 1 auto;
-      display: flex; align-items: stretch;
-      overflow: hidden;
-    }
-    .ring-scroll__track {
-      display: flex; align-items: center;
-      will-change: transform;
-    }
-    .ring-panel {
-      flex: 0 0 100vw;
-      display: grid; place-items: center;
-      padding: 0 var(--pad-x);
-    }
-    .ring-panel__inner {
-      position: relative;
-      display: grid; justify-items: center; text-align: center;
-      width: min(720px, 86vw);
-    }
-    .ring-panel__num {
-      position: absolute; top: 50%; left: 50%;
-      transform: translate(-50%, -64%);
-      font-family: var(--font-serif); font-style: italic;
-      font-size: clamp(10rem, 30vh, 22rem); line-height: 1;
-      color: var(--gold-pale); opacity: 0.85; z-index: 0;
-      pointer-events: none; user-select: none;
-    }
-    .ring-panel__img {
-      position: relative; z-index: 1; display: block;
-      width: auto; max-width: min(540px, 76vw); max-height: 44vh;
-      object-fit: contain;
-      filter: drop-shadow(0 30px 48px rgba(150, 116, 42, 0.24));
-    }
-    .ring-panel__body { position: relative; z-index: 2; margin-top: clamp(16px, 3vh, 36px); }
-    .ring-panel__name {
-      font-family: var(--font-serif); font-style: italic; font-weight: 400;
-      font-size: clamp(1.5rem, 3vw, 2.35rem); color: var(--ink);
-    }
+    .ring-scroll__viewport { display: flex; min-height: 0; min-width: 0; overflow-x: auto; scroll-snap-type: x mandatory; }
+    .ring-scroll__viewport:focus-visible { outline: 2px solid var(--gold); outline-offset: -3px; }
+    .ring-scroll__track { display: flex; align-items: stretch; min-height: 0; width: 100%; }
+    .ring-panel { flex: 0 0 90%; min-width: 0; min-height: 0; display: grid; place-items: center; padding: 24px clamp(18px,4vw,64px); scroll-snap-align: center; }
+    .ring-panel__inner { position: relative; display: grid; justify-items: center; align-content: center; text-align: center; width: min(1200px,100%); min-width: 0; min-height: 0; gap: 22px; }
+    .ring-panel__img { display: block; width: 100%; height: clamp(240px,44svh,600px); max-width: 860px; min-height: 0; object-fit: contain; filter: drop-shadow(0 18px 24px #96742a26); }
+    .ring-panel__body { position: relative; min-width: 0; width: 100%; overflow-wrap: anywhere; }
+    .ring-panel__name { font-family: var(--font-serif); font-style: italic; font-weight: 400; font-size: clamp(2rem,3vw,3.2rem); line-height: 1.15; color: var(--ink); }
     .ring-panel__body .gold-bar { margin: 13px auto 15px; }
-    .ring-panel__desc {
-      max-width: 44ch; margin: 0 auto;
-      font-size: 0.9rem; font-weight: 300; line-height: 1.85; color: var(--ink-soft);
-    }
-    .ring-scroll__nav {
-      display: flex; align-items: center; justify-content: center; gap: 12px;
-      padding: 0 0 clamp(30px, 6vh, 56px); z-index: 3;
-    }
-    .ring-scroll__dot {
-      width: 8px; height: 8px; border-radius: 50%;
-      border: 1px solid var(--gold); background: transparent;
-      transition: background 0.4s var(--ease-out), transform 0.4s var(--ease-out);
-    }
+    .ring-panel__desc { max-width: 44ch; margin: 0 auto; font-size: 1rem; font-weight: 300; line-height: 1.8; color: var(--ink-soft); }
+    .ring-scroll__nav { flex: none; display: flex; align-items: center; justify-content: center; gap: 12px; padding: 18px 0; }
+    .ring-scroll__dot { width: 8px; height: 8px; border-radius: 50%; border: 1px solid var(--gold); background: transparent; }
     .ring-scroll__dot.is-active { background: var(--gold); transform: scale(1.4); }
-
-    @media (prefers-reduced-motion: reduce) {
-      .ring-scroll { height: auto; }
-      .ring-scroll__pin { position: static; height: auto; overflow: visible; padding-bottom: clamp(40px, 6vh, 60px); }
-      .ring-scroll__viewport { overflow-x: auto; scroll-snap-type: x mandatory; }
-      .ring-scroll__track { transform: none !important; }
-      .ring-panel { flex-basis: 88vw; scroll-snap-align: center; }
-      .ring-panel__num { font-size: 9rem; }
-      .ring-panel__img { max-height: 50vh; }
+    @media(min-width:901px) and (min-height:600px) and (prefers-reduced-motion:no-preference) {
+      .ring-scroll:not(.ring-scroll--native) { height: 340svh; }
+      .ring-scroll:not(.ring-scroll--native) .ring-scroll__pin { position: sticky; top: var(--nav-h); height: calc(100svh - var(--nav-h)); padding-bottom: 0; }
+      .ring-scroll:not(.ring-scroll--native) .ring-scroll__viewport { flex: 1 1 0; overflow: hidden; scroll-snap-type: none; }
+      .ring-scroll:not(.ring-scroll--native) .ring-scroll__track { height: 100%; will-change: transform; }
+      .ring-scroll:not(.ring-scroll--native) .ring-panel { flex-basis: 100%; height: 100%; padding-block: 12px; }
+      .ring-scroll:not(.ring-scroll--native) .ring-panel__inner { height: 100%; grid-template-rows: minmax(0,1fr) auto; align-content: stretch; gap: clamp(12px,2svh,28px); }
+      .ring-scroll:not(.ring-scroll--native) .ring-panel__img { width: 100%; height: 100%; max-height: none; }
+    }
+    @media(min-width:901px) and (min-height:600px) and (max-height:800px) {
+      .ring-scroll:not(.ring-scroll--native) .ring-panel__inner { grid-template-columns: minmax(0,1.2fr) minmax(0,1fr); grid-template-rows: minmax(0,1fr); gap: 40px; align-items: center; }
+      .ring-scroll__head { padding-top: 22px; }
     }
 
     /* — Portrait-Variante der Editorial-Reihen — */
@@ -2268,14 +2225,6 @@
       .ed-media { max-width: 100%; justify-self: start; }
       .ed-media--portrait { max-width: 100%; }
       .ed-text  { max-width: none; }
-      .ring-scroll { height: auto; }
-      .ring-scroll__pin { position: static; height: auto; overflow: visible; padding-bottom: 34px; }
-      .ring-scroll__head { padding-top: 0; }
-      .ring-scroll__viewport { overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
-      .ring-scroll__track { transform: none !important; }
-      .ring-panel { flex-basis: 86vw; scroll-snap-align: center; padding: 22px 14px; }
-      .ring-panel__num { font-size: 8.5rem; }
-      .ring-panel__img { max-height: 46vh; max-width: 72vw; }
       .flow-grid { grid-template-columns: 1fr; gap: 36px; }
       .flow-step + .flow-step::before { display: none; }
       .sub-actions a { width: 100%; text-align: center; }
@@ -2540,7 +2489,7 @@
       .tr-karte:hover .tr-karte__bild { transform: none; }
     }
   </style>
-  <link rel="stylesheet" href="site-design.css">
+  <link rel="stylesheet" href="site-design.css?v=20260906-layout">
 </head>
 
 <body>
@@ -3234,6 +3183,6 @@
     document.getElementById('year').textContent = new Date().getFullYear();
   </script>
 
-<script src="assets/site-design.js" defer></script>
+<script src="assets/site-design.js?v=20260906-layout" defer></script>
 </body>
 </html>

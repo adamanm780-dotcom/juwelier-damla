@@ -69,3 +69,15 @@
 }
 @media(max-width:520px){.atelier-title h1{font-size:2.15rem}.atelier .kf-panel{padding:20px 16px}.atelier-views{gap:6px}.atelier-views button{font-size:.75rem;padding:8px 10px}.atelier .kf-chip{flex-grow:1}.atelier-modes{width:100%;justify-content:space-between}.atelier-stage-label{font-size:1rem}.atelier .kf-stage{min-height:235px}.atelier .kf-feld legend{font-size:.9375rem}}
 @media(prefers-reduced-motion:reduce){.atelier *{scroll-behavior:auto!important;transition:none!important}}
+
+/* Flexible controls retain their full labels at narrow widths and larger text. */
+.atelier-modes{flex-wrap:wrap;min-width:0;max-width:100%;gap:8px 22px}.atelier-modes a{overflow-wrap:anywhere;min-width:0}
+.atelier .kf-grid>*,.atelier .kf-feld,.atelier-summary>*,.atelier .kf-switch__text{min-width:0}
+.atelier .kf-feld legend{max-width:100%;white-space:normal;overflow-wrap:anywhere}
+.atelier .kf-chip{max-width:100%;white-space:normal;overflow-wrap:anywhere;text-align:left;justify-content:center}
+.atelier .kf-chip svg,.atelier .kf-chip .kf-dot,.atelier .atelier-metal{flex-shrink:0}
+.atelier .kf-regler label,.atelier .kf-preis__zeile,.atelier .kf-preis__paar,.atelier .kf-preisleiste{flex-wrap:wrap;gap:6px 14px}
+.atelier .kf-regler output{margin-left:auto;white-space:nowrap}
+.atelier-summary pre,.atelier .kf-summary,.atelier .kf-notiz,.atelier .kf-hilfe,.atelier .kf-check,.atelier .kf-switch__text{overflow-wrap:anywhere}
+.atelier-actions a,.atelier-actions button,.atelier-views button{max-width:100%;white-space:normal;overflow-wrap:anywhere}
+.atelier .kf-tab{min-width:0;white-space:normal;overflow-wrap:anywhere}
