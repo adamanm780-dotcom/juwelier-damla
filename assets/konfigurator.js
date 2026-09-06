@@ -29,9 +29,9 @@ const LEGIERUNGEN = {
   gelbgold: {
     label: 'Gelbgold',
     karate: {
-      '333': { label: '333 / 8 kt',  farbe: 0xd8c79c, dichte: 11.0 },
-      '585': { label: '585 / 14 kt', farbe: 0xe2be79, dichte: 13.1 },
-      '750': { label: '750 / 18 kt', farbe: 0xecb857, dichte: 15.5 },
+      '333': { label: '333 / 8 kt',  farbe: 0xedd29e, dichte: 11.0 },
+      '585': { label: '585 / 14 kt', farbe: 0xf8d17c, dichte: 13.1 },
+      '750': { label: '750 / 18 kt', farbe: 0xf8c767, dichte: 15.5 },
     },
   },
   weissgold: {
@@ -505,7 +505,7 @@ function metallMaterial(farbe, oberflaeche) {
   const mat = new THREE.MeshPhysicalMaterial({
     color: farbe,
     metalness: 1.0,
-    roughness: Math.max(0.08, o.rauheit),
+    roughness: Math.max(0.14, o.rauheit),
     envMapIntensity: 1.05,
     clearcoat: 0,
     clearcoatRoughness: 0.08,
@@ -1312,7 +1312,8 @@ function uiVerdrahten() {
         camera.position.copy(controls.target).add(dir.setLength(THREE.MathUtils.clamp(dir.length() * (mode === 'in' ? .8 : 1.25), controls.minDistance, controls.maxDistance)));
       } else {
         const dir = mode === 'front' ? new THREE.Vector3(0, .05, 1) : mode === 'side' ? new THREE.Vector3(1, .3, .4) : new THREE.Vector3(.42, .32, 1);
-        camera.position.copy(controls.target).add(dir.normalize().multiplyScalar(camera.position.distanceTo(controls.target)));
+        const distance = camera.position.distanceTo(controls.target);
+        camera.position.copy(controls.target).add(dir.normalize().multiplyScalar(distance));
         kameraEinpassen(true);
       }
       letzteInteraktion = performance.now(); controls.update();

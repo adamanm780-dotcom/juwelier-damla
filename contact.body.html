@@ -1,0 +1,51 @@
+  <section id="anfrage" class="contact-atelier" aria-labelledby="inquiryTitle">
+    <div class="contact-atelier__heading">
+      <span class="eyebrow">Persönlich für Sie</span>
+      <h2 id="inquiryTitle">Was liegt Ihnen<br><em>am Herzen?</em></h2>
+      <p>Ein besonderer Ring. Ein Geschenk. Ein Lieblingsstück, das Pflege braucht.<br>Erzählen Sie uns von Ihrem Wunsch.</p>
+    </div>
+    <div class="contact-atelier__card">
+      <aside class="contact-atelier__aside">
+        <div class="contact-atelier__seal" aria-hidden="true">D<span>JUWELIER DAMLA</span></div>
+        <h3>Schönes beginnt<br>mit einem Gespräch.</h3>
+        <p>Wir nehmen uns Zeit für Sie.<br>Persönlich in der Wellritzstraße 3.</p>
+        <a class="contact-atelier__phone" href="tel:+496115807830"><span>Direkt mit uns sprechen</span>0611 5807830 <span aria-hidden="true">↗</span></a>
+        <figure><img src="assets/editorial/rings-silk.webp" srcset="assets/editorial/rings-silk-640.webp 640w, assets/editorial/rings-silk.webp 1536w" sizes="(max-width:760px) 90vw, 36vw" alt="Zwei Trauringe auf heller Seide" width="1536" height="1024" loading="lazy"></figure>
+      </aside>
+      <div class="contact-atelier__form-wrap">
+        <form id="damlaContact" class="contact-atelier__form" hidden>
+          <fieldset class="inquiry-topics"><legend><span>01</span> Worum geht es?</legend>
+            <div class="inquiry-topics__choices">
+              <label><input type="radio" name="topic" value="Trauringe" checked><span>Trauringe</span></label>
+              <label><input type="radio" name="topic" value="Verlobungsring"><span>Verlobungsring</span></label>
+              <label><input type="radio" name="topic" value="Schmuck & Geschenke"><span>Schmuck & Geschenke</span></label>
+              <label><input type="radio" name="topic" value="Service & Reparatur"><span>Service & Reparatur</span></label>
+              <label><input type="radio" name="topic" value="Etwas anderes"><span>Etwas anderes</span></label>
+            </div>
+          </fieldset>
+          <fieldset class="inquiry-details"><legend><span>02</span> Einander kennenlernen</legend>
+            <div class="inquiry-details__grid">
+              <label for="inquiryName">Ihr Name <input id="inquiryName" name="name" type="text" required maxlength="100" autocomplete="name" placeholder="Vor- und Nachname"></label>
+              <label for="inquiryReply">E-Mail oder Telefon <input id="inquiryReply" name="reply" type="text" required maxlength="180" placeholder="So erreichen wir Sie"></label>
+            </div>
+          </fieldset>
+          <fieldset class="inquiry-message"><legend><span>03</span> Ihr Wunsch</legend>
+            <label class="inquiry-sr-only" for="inquiryMessage">Ihre Nachricht</label>
+            <textarea id="inquiryMessage" name="message" required minlength="10" maxlength="2000" rows="4" placeholder="Was dürfen wir für Sie tun?"></textarea>
+            <span class="inquiry-count"><span id="inquiryCount">0</span> / 2000</span>
+          </fieldset>
+          <div class="inquiry-submit"><button type="submit">Anfrage vorbereiten <span aria-hidden="true">↗</span></button><p>Sie können Ihren Text anschließend kopieren.<br>Es wird noch keine Nachricht versendet.</p></div>
+        </form>
+        <noscript><p>Für Ihre Anfrage erreichen Sie uns persönlich unter <a href="tel:+496115807830">0611 5807830</a>. Aktivieren Sie JavaScript, um Ihren Nachrichtentext hier vorzubereiten.</p></noscript>
+        <div id="inquiryResult" class="inquiry-result" hidden>
+          <span class="eyebrow">Ihr persönlicher Entwurf</span>
+          <h3 id="inquiryResultTitle" tabindex="-1">Ihr Text ist bereit.</h3>
+          <p>Ihre Nachricht wurde noch nicht versendet. Kopieren Sie den Text für später oder besprechen Sie Ihren Wunsch direkt mit uns.</p>
+          <pre id="inquirySummary"></pre>
+          <div class="inquiry-result__actions"><button id="inquiryCopy" type="button">Text kopieren <span aria-hidden="true">↗</span></button><button id="inquiryEdit" class="inquiry-edit" type="button">Angaben bearbeiten</button></div>
+          <p id="inquiryStatus" role="status" aria-live="polite"></p>
+          <a class="inquiry-call" href="tel:+496115807830">Persönlich anfragen: 0611 5807830</a>
+        </div>
+      </div>
+    </div>
+  </section>

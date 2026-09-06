@@ -36,26 +36,39 @@ export function weddingGeometry(source, ri, thickness, width) {
 
 export function createStudio(renderer) {
   const environment = new THREE.Scene();
-  environment.background = new THREE.Color(0x383b42);
+  environment.background = new THREE.Color(0x858991);
   const box = new THREE.Mesh(new THREE.BoxGeometry(120,100,120),
-    new THREE.MeshBasicMaterial({color:0x666970,side:THREE.BackSide}));
+    new THREE.MeshBasicMaterial({color:0x858991,side:THREE.BackSide}));
   environment.add(box);
+  // Diffusion cloth provides broad gradients instead of a dark room with
+  // isolated hard white reflections across polished gold.
+  const cloth=document.createElement('canvas');cloth.width=cloth.height=128;
+  const context=cloth.getContext('2d');
+  const gradient=context.createRadialGradient(64,64,10,64,64,66);
+  gradient.addColorStop(0,'rgba(255,255,255,1)');
+  gradient.addColorStop(.5,'rgba(255,255,255,.94)');
+  gradient.addColorStop(1,'rgba(255,255,255,0)');
+  context.fillStyle=gradient;context.fillRect(0,0,128,128);
+  const softbox=new THREE.CanvasTexture(cloth);softbox.colorSpace=THREE.SRGBColorSpace;
   const panel=(w,h,position,intensity,color=0xffffff)=>{
     const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({
-      color:new THREE.Color(color).multiplyScalar(intensity),side:THREE.DoubleSide,toneMapped:false}));
+      color:new THREE.Color(color).multiplyScalar(intensity),map:softbox,transparent:true,depthWrite:false,side:THREE.DoubleSide,toneMapped:false}));
     m.position.set(...position);m.lookAt(0,0,0);environment.add(m);
   };
-  panel(18,55,[-30,20,30],5.5);
-  panel(8,45,[32,10,12],3.5);
-  panel(38,20,[0,42,-8],4);
-  panel(12,35,[-20,6,-35],2.8,0xe2eaff);
-  panel(22,14,[10,-20,30],1.8);
-  const cube=new THREE.WebGLCubeRenderTarget(256,{type:THREE.HalfFloatType,generateMipmaps:true,minFilter:THREE.LinearMipmapLinearFilter});
+  panel(70,90,[-30,20,35],2.8);
+  panel(42,78,[35,18,15],3.1);
+  panel(85,42,[0,44,-8],2.7);
+  panel(24,65,[-20,8,-45],3.8,0xf1f5ff);
+  panel(55,30,[15,-35,25],1.8);
+  panel(12,72,[40,4,-27],1,0x171b20);
+  panel(16,80,[-42,0,-12],1,0x292b30);
+  const cube=new THREE.WebGLCubeRenderTarget(512,{type:THREE.HalfFloatType,generateMipmaps:true,minFilter:THREE.LinearMipmapLinearFilter});
   const capture=new THREE.CubeCamera(.1,200,cube);capture.update(renderer,environment);
   const pmrem=new THREE.PMREMGenerator(renderer);
   const filtered=pmrem.fromCubemap(cube.texture);
   pmrem.dispose();
   environment.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});
+  softbox.dispose();
   return {metal:filtered.texture,diamond:cube.texture,dispose(){filtered.dispose();cube.dispose();}};
 }
 
@@ -134,6 +147,6 @@ export function diamondMesh(geometry, environment) {
   return mesh;
 }
 
-export function metalMaterial(color, roughness=.15) {
+export function metalMaterial(color, roughness=.14) {
   return new THREE.MeshPhysicalMaterial({color,metalness:1,roughness,envMapIntensity:1.05});
 }

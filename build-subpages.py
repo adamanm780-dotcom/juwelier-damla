@@ -40,7 +40,7 @@ NAV_ITEMS = [
     ('trauring-konfigurator.html', 'Ringatelier'),
     ('reparaturen.html', 'Service'),
     ('index.html#about', 'Über uns'),
-    ('index.html#contact', 'Kontakt'),
+    ('index.html#anfrage', 'Kontakt'),
 ]
 
 
@@ -774,7 +774,7 @@ VR_MODELLE_SECTION = """  <section id="modelle" class="ring-scroll" aria-labelle
         <div class="gold-bar" role="presentation"></div>
       </div>
 
-      <div class="ring-scroll__viewport">
+      <div class="ring-scroll__viewport" tabindex="0" role="group" aria-label="Ringmodelle – zum nächsten Modell scrollen oder wischen">
         <div class="ring-scroll__track">
 
 %s
@@ -796,8 +796,6 @@ VR_MODELLE_SECTION = """  <section id="modelle" class="ring-scroll" aria-labelle
       var panels = root.querySelectorAll('.ring-panel');
       var dots  = root.querySelectorAll('.ring-scroll__dot');
       if (!pin || !track || !view || !panels.length) return;
-      // The editorial grid does not need the former horizontal scroll handler.
-      if (getComputedStyle(pin).position === 'static') return;
 
       var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
       var small  = window.matchMedia('(max-width: 900px)');
@@ -809,12 +807,13 @@ VR_MODELLE_SECTION = """  <section id="modelle" class="ring-scroll" aria-labelle
         }
       }
       function measure() {
-        maxShift = Math.max(0, track.scrollWidth - pin.clientWidth);
+        maxShift = Math.max(0, track.scrollWidth - view.clientWidth);
       }
       function pinnedUpdate() {
-        var total = root.offsetHeight - window.innerHeight;
+        var total = root.offsetHeight - pin.offsetHeight;
         if (total <= 0) return;
-        var p = -root.getBoundingClientRect().top / total;
+        var navHeight = parseFloat(getComputedStyle(pin).top) || 0;
+        var p = (navHeight - root.getBoundingClientRect().top) / total;
         p = Math.min(1, Math.max(0, p));
         track.style.transform = 'translate3d(' + (-p * maxShift) + 'px,0,0)';
         setActive(Math.round(p * (panels.length - 1)));

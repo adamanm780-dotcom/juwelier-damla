@@ -1,6 +1,6 @@
 export const styles={solitaire:['Solitaire','Ein einzelner Diamant in einer offenen Krappenfassung.'],pave:['Pavé','Kleine Brillanten begleiten den Mittelstein auf beiden Schultern.'],halo:['Halo','Ein feiner Brillantkranz umrahmt den Mittelstein.']};
 export const cuts={round:'Brillant',oval:'Oval',emerald:'Smaragdschliff'};
-export const metals={yellow:['Gelbgold',0xe3bc72],white:['Weißgold',0xe2e4e8],rose:['Roségold',0xdca18a],platinum:['Platin',0xcdd1d8]};
+export const metals={yellow:['Gelbgold',0xf8d17c],white:['Weißgold',0xe2e4e8],rose:['Roségold',0xdca18a],platinum:['Platin',0xcdd1d8]};
 export const defaults=()=>({style:'solitaire',cut:'round',metal:'yellow',alloy:'585',carat:1,width:2.2,size:54,prongs:4,engraving:''});
 const clamp=(n,min,max,step,fallback)=>typeof n==='number'&&Number.isFinite(n)?Number((Math.round(Math.min(max,Math.max(min,n))/step)*step).toFixed(2)):fallback;
 export function validateConfig(raw={}) {

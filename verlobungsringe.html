@@ -2343,7 +2343,7 @@
       <li><a href="trauring-konfigurator.html">Ringatelier</a></li>
       <li><a href="reparaturen.html">Service</a></li>
       <li><a href="index.html#about">Über uns</a></li>
-      <li><a href="index.html#contact">Kontakt</a></li>
+      <li><a href="index.html#anfrage">Kontakt</a></li>
       <li><a href="tel:+496115807830" class="nav__cta">Anrufen</a></li>
     </ul>
 
@@ -2395,7 +2395,7 @@
         <div class="gold-bar" role="presentation"></div>
       </div>
 
-      <div class="ring-scroll__viewport">
+      <div class="ring-scroll__viewport" tabindex="0" role="group" aria-label="Ringmodelle – zum nächsten Modell scrollen oder wischen">
         <div class="ring-scroll__track">
 
           <article class="ring-panel">
@@ -2453,8 +2453,6 @@
       var panels = root.querySelectorAll('.ring-panel');
       var dots  = root.querySelectorAll('.ring-scroll__dot');
       if (!pin || !track || !view || !panels.length) return;
-      // The editorial grid does not need the former horizontal scroll handler.
-      if (getComputedStyle(pin).position === 'static') return;
 
       var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
       var small  = window.matchMedia('(max-width: 900px)');
@@ -2466,12 +2464,13 @@
         }
       }
       function measure() {
-        maxShift = Math.max(0, track.scrollWidth - pin.clientWidth);
+        maxShift = Math.max(0, track.scrollWidth - view.clientWidth);
       }
       function pinnedUpdate() {
-        var total = root.offsetHeight - window.innerHeight;
+        var total = root.offsetHeight - pin.offsetHeight;
         if (total <= 0) return;
-        var p = -root.getBoundingClientRect().top / total;
+        var navHeight = parseFloat(getComputedStyle(pin).top) || 0;
+        var p = (navHeight - root.getBoundingClientRect().top) / total;
         p = Math.min(1, Math.max(0, p));
         track.style.transform = 'translate3d(' + (-p * maxShift) + 'px,0,0)';
         setActive(Math.round(p * (panels.length - 1)));
@@ -2770,6 +2769,7 @@
             <li><a href="reparaturen.html">Reparaturen</a></li>
             <li><a href="index.html#services">Leistungen</a></li>
             <li><a href="index.html#reviews">Bewertungen</a></li>
+            <li><a href="index.html#anfrage">Kontaktformular</a></li>
             <li><a href="index.html#contact">Öffnungszeiten</a></li>
             <li><a href="index.html#location">Standort</a></li>
           </ul>
@@ -2813,7 +2813,7 @@
     (function () {
       const el  = document.getElementById('loader');
       const bar = document.getElementById('loaderBar');
-      if (!el || !document.querySelector('.hero__video')) return;
+      if (!el) return;
       document.body.classList.add('is-loading');
 
       // Nur der erste Clip wird abgewartet. Frueher waren es beide — dann

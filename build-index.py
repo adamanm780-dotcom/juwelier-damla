@@ -359,8 +359,8 @@ CSS = """
     }
 """
 
-src = src.replace('</head>', '<link rel="stylesheet" href="site-design.css">\n</head>')
 src = sub1(r'\n  </style>', CSS + '\n  </style>', src, 0, 'Style-Ende')
+src = src.replace('</head>', '<link rel="stylesheet" href="contact.css">\n</head>')
 
 
 # ══════════════════════════════════════════════════════════
@@ -399,10 +399,9 @@ NAV_LINKS = """    <ul class="nav__links" id="navLinks">
       <li><a href="trauring-konfigurator.html">Ringatelier</a></li>
       <li><a href="reparaturen.html">Service</a></li>
       <li><a href="#about">Über uns</a></li>
-      <li><a href="#contact">Kontakt</a></li>
+      <li><a href="#anfrage">Kontakt</a></li>
       <li><a href="tel:+496115807830" class="nav__cta">Anrufen</a></li>
     </ul>"""
-
 src = sub1(r'    <ul class="nav__links" id="navLinks">.*?</ul>', NAV_LINKS, src, re.S, 'Nav-Liste')
 
 # Footer-Navigation ebenfalls
@@ -420,7 +419,68 @@ src = sub1(
 # ══════════════════════════════════════════════════════════
 # 5) Hero ersetzen: Video-Hero + Intro + Ring
 # ══════════════════════════════════════════════════════════
-NEW_SECTIONS = io.open(os.path.join(DIR, 'home-hero.body.html'), encoding='utf-8').read()
+NEW_SECTIONS = """  <!-- ═══════════════════════════════════
+       HERO — Ladenfront und Ladenraum im Wechsel
+  ═══════════════════════════════════ -->
+  <section id="hero" aria-label="Juwelier Damla, Ladengeschäft in der Wellritzstraße">
+    <div class="hero__stage">
+      <video class="hero__video" src="assets/video/hero-front.mp4"
+             poster="assets/hero-front.webp" width="2196" height="940"
+             muted playsinline preload="auto" aria-hidden="true"></video>
+      <video class="hero__video" src="assets/video/hero-innen.mp4"
+             poster="assets/hero-innen.webp" width="2196" height="940"
+             muted playsinline preload="auto" aria-hidden="true"></video>
+      <div class="hero__shade" aria-hidden="true"></div>
+      <div class="hero__veil" aria-hidden="true"></div>
+      <img src="assets/logo-mark.webp" alt="Juwelier Damla"
+           class="hero__mark" width="900" height="917" fetchpriority="high">
+      <div class="hero__cue" id="heroCue" aria-hidden="true">
+        <span>Scrollen</span>
+        <i></i>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       INTRO — Text
+  ═══════════════════════════════════ -->
+  <section id="intro" aria-labelledby="heroTitle">
+    <div class="intro__inner">
+      <span class="intro__eyebrow reveal">Juwelier in Wiesbaden</span>
+      <h1 class="intro__title reveal d1" id="heroTitle">
+        Zeitlose <strong>Eleganz</strong><br>für besondere Momente
+      </h1>
+      <p class="intro__text reveal d2">
+        Schmuck und Trauringe – ausgewählt mit Sinn für Qualität,
+        begleitet von einer Beratung, die sich Zeit für Sie nimmt.
+      </p>
+      <div class="intro__actions reveal d3">
+        <a href="#collections" class="btn-solid">Kollektionen entdecken</a>
+        <a href="verlobungsringe.html" class="btn-ghost">Verlobungsringe</a>
+      </div>
+
+      <div class="hero__badge" id="openBadge" hidden>
+        <span class="hero__badge-dot" id="openDot" aria-hidden="true"></span>
+        <div class="hero__badge-text">
+          <strong id="openState">Jetzt geöffnet</strong>
+          <span>Mo–Fr 09:30–19:00 · Sa 09:30–17:00</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       RING — Scroll-Animation
+  ═══════════════════════════════════ -->
+  <section id="ring" aria-label="Ein Schmuckkästchen öffnet sich beim Scrollen">
+    <div class="ring__sticky">
+      <div class="ring__stage" id="ringStage" aria-hidden="true">
+        <div class="kasten__glanz" id="kastenGlanz"></div>
+        <canvas id="kastenCanvas" width="900" height="969"></canvas>
+      </div>
+      <div class="ring__caption">Handwerk · Wellritzstraße 3</div>
+    </div>
+  </section>"""
 
 src = sub1(r'  <section id="hero" aria-labelledby="heroTitle">.*?\n  </section>',
            NEW_SECTIONS, src, re.S, 'Hero-Sektion')
@@ -440,7 +500,7 @@ JS = """
     (function () {
       const el  = document.getElementById('loader');
       const bar = document.getElementById('loaderBar');
-      if (!el || !document.querySelector('.hero__video')) return;
+      if (!el) return;
       document.body.classList.add('is-loading');
 
       // Nur der erste Clip wird abgewartet. Frueher waren es beide — dann
@@ -601,7 +661,9 @@ JS = """
 
 src = sub1(r'\n  <script>\n', '\n  <script>\n' + JS, src, 0, 'Script-Anfang')
 
-src = src.replace('</body>', '<script src="assets/site-design.js" defer></script>\n</body>')
+contact = io.open(os.path.join(DIR, 'contact.body.html'), encoding='utf-8').read()
+src = src.replace('  <section id="contact"', contact + '\n  <section id="contact"', 1)
+src = src.replace('</body>', '<script src="assets/contact-form.js" defer></script>\n</body>')
 io.open(OUT, 'w', encoding='utf-8').write(src)
 print('index.html gebaut: %.0f KB | Hero-Clips %d a %.1f s | Kasten-Frames %d'
       % (len(src.encode('utf-8')) / 1024.0, N_CLIPS, SLOT_MS / 1000.0, N_RING))

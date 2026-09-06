@@ -53,7 +53,7 @@ function tube(points,radius,material){return new THREE.Mesh(new THREE.TubeGeomet
 function buildRing(){
   disposeRing();ring=new THREE.Group();scene.add(ring);
   const ri=state.size/(Math.PI*2),T=1.6,r=diameter()/2;
-  const tone=new THREE.Color(metals[state.metal][1]);if(state.alloy==='750'&&state.metal==='yellow')tone.multiplyScalar(.96);
+  const tone=new THREE.Color(state.alloy==='750'&&state.metal==='yellow'?0xf8c767:metals[state.metal][1]);
   const metal=metalMaterial(tone);
   const band=new THREE.Mesh(weddingGeometry(models.get('Wedding_oval'),ri,T,state.width),metal.clone());band.rotation.x=Math.PI/2;ring.add(band);
   const seat=ri+T+r*.92;

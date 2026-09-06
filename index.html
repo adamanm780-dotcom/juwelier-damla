@@ -1783,7 +1783,7 @@
     }
 
   </style>
-<link rel="stylesheet" href="site-design.css">
+<link rel="stylesheet" href="contact.css">
 </head>
 
 <body>
@@ -1849,7 +1849,7 @@
       <li><a href="trauring-konfigurator.html">Ringatelier</a></li>
       <li><a href="reparaturen.html">Service</a></li>
       <li><a href="#about">Über uns</a></li>
-      <li><a href="#contact">Kontakt</a></li>
+      <li><a href="#anfrage">Kontakt</a></li>
       <li><a href="tel:+496115807830" class="nav__cta">Anrufen</a></li>
     </ul>
 
@@ -1863,18 +1863,68 @@
   <!-- ═══════════════════════════════════
        HERO
   ═══════════════════════════════════ -->
-  <section id="hero" class="home-hero" aria-labelledby="heroTitle">
-    <div class="home-hero__copy">
-      <span class="eyebrow">Juwelier Damla · Wiesbaden</span>
-      <h1 id="heroTitle">Für heute.<br>Für immer.<br><em>Für Sie.</em></h1>
-      <p>Besondere Schmuckstücke und Ringe für die Momente, die bleiben. Entdecken Sie Ihre Lieblingsstücke – mit persönlicher Beratung in der Wellritzstraße.</p>
-      <div class="home-hero__actions"><a href="trauringe.html" class="btn-solid">Trauringe entdecken</a><a href="verlobungsring-konfigurator.html" class="text-link">Verlobungsring gestalten <span aria-hidden="true">↗</span></a></div>
-      <div class="home-hero__address"><span>Wellritzstraße 3</span><span>Persönlich. Mit Zeit für Sie.</span></div>
+  <!-- ═══════════════════════════════════
+       HERO — Ladenfront und Ladenraum im Wechsel
+  ═══════════════════════════════════ -->
+  <section id="hero" aria-label="Juwelier Damla, Ladengeschäft in der Wellritzstraße">
+    <div class="hero__stage">
+      <video class="hero__video" src="assets/video/hero-front.mp4"
+             poster="assets/hero-front.webp" width="2196" height="940"
+             muted playsinline preload="auto" aria-hidden="true"></video>
+      <video class="hero__video" src="assets/video/hero-innen.mp4"
+             poster="assets/hero-innen.webp" width="2196" height="940"
+             muted playsinline preload="auto" aria-hidden="true"></video>
+      <div class="hero__shade" aria-hidden="true"></div>
+      <div class="hero__veil" aria-hidden="true"></div>
+      <img src="assets/logo-mark.webp" alt="Juwelier Damla"
+           class="hero__mark" width="900" height="917" fetchpriority="high">
+      <div class="hero__cue" id="heroCue" aria-hidden="true">
+        <span>Scrollen</span>
+        <i></i>
+      </div>
     </div>
-    <figure class="home-hero__media"><img src="assets/editorial/rings-hero.webp" srcset="assets/editorial/rings-hero-640.webp 640w, assets/editorial/rings-hero.webp 1122w" sizes="(max-width:760px) 100vw, 50vw" alt="Ausgewählte Trauringe in warmem Gold und kühlem Weißgold" width="1122" height="1402" fetchpriority="high"><figcaption><span>Ein Versprechen, das bleibt.</span><a href="trauring-konfigurator.html">Zum Ringatelier <span aria-hidden="true">↗</span></a></figcaption></figure>
   </section>
-  <div class="home-trust" aria-label="Bei Juwelier Damla"><span>Schmuck &amp; Trauringe</span><span>Individuelle Gravuren</span><span>Pflege &amp; Reparaturen</span><a href="index.html#contact">Besuchen Sie uns in Wiesbaden <span aria-hidden="true">↗</span></a></div>
 
+  <!-- ═══════════════════════════════════
+       INTRO — Text
+  ═══════════════════════════════════ -->
+  <section id="intro" aria-labelledby="heroTitle">
+    <div class="intro__inner">
+      <span class="intro__eyebrow reveal">Juwelier in Wiesbaden</span>
+      <h1 class="intro__title reveal d1" id="heroTitle">
+        Zeitlose <strong>Eleganz</strong><br>für besondere Momente
+      </h1>
+      <p class="intro__text reveal d2">
+        Schmuck und Trauringe – ausgewählt mit Sinn für Qualität,
+        begleitet von einer Beratung, die sich Zeit für Sie nimmt.
+      </p>
+      <div class="intro__actions reveal d3">
+        <a href="#collections" class="btn-solid">Kollektionen entdecken</a>
+        <a href="verlobungsringe.html" class="btn-ghost">Verlobungsringe</a>
+      </div>
+
+      <div class="hero__badge" id="openBadge" hidden>
+        <span class="hero__badge-dot" id="openDot" aria-hidden="true"></span>
+        <div class="hero__badge-text">
+          <strong id="openState">Jetzt geöffnet</strong>
+          <span>Mo–Fr 09:30–19:00 · Sa 09:30–17:00</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       RING — Scroll-Animation
+  ═══════════════════════════════════ -->
+  <section id="ring" aria-label="Ein Schmuckkästchen öffnet sich beim Scrollen">
+    <div class="ring__sticky">
+      <div class="ring__stage" id="ringStage" aria-hidden="true">
+        <div class="kasten__glanz" id="kastenGlanz"></div>
+        <canvas id="kastenCanvas" width="900" height="969"></canvas>
+      </div>
+      <div class="ring__caption">Handwerk · Wellritzstraße 3</div>
+    </div>
+  </section>
 
   <!-- ═══════════════════════════════════
        ÜBER UNS
@@ -1882,7 +1932,6 @@
   <section id="about" aria-labelledby="aboutTitle">
     <div class="wrap">
       <div class="about-grid">
-        <figure class="about-photo"><img src="assets/editorial/storefront.webp" srcset="assets/editorial/storefront-640.webp 640w, assets/editorial/storefront.webp 1386w" sizes="(max-width:760px) 100vw, 45vw" alt="Juwelier Damla in der Wellritzstraße 3" width="1386" height="1135" loading="lazy"><figcaption>Hier beginnt die Suche nach Ihrem Lieblingsstück.</figcaption></figure>
 
         <div class="about-body">
           <span class="eyebrow reveal">Über uns</span>
@@ -2067,16 +2116,16 @@
 
       <div class="gallery-grid">
         <figure class="gallery-card gallery-card--tall reveal-img">
-          <img src="assets/editorial/window-detail.webp" srcset="assets/editorial/window-detail-640.webp 640w, assets/editorial/window-detail.webp 1116w" sizes="(max-width:760px) 46vw, 45vw" alt="Seitlicher Blick in das Schaufenster von Juwelier Damla" width="1116" height="1409" loading="lazy">
+          <img src="assets/editorial/window-detail.webp" srcset="assets/editorial/window-detail-640.webp 640w, assets/editorial/window-detail.webp 1116w" sizes="(max-width:760px) 90vw, 45vw" alt="Seitlicher Blick in das Schaufenster von Juwelier Damla" width="1116" height="1409" loading="lazy">
           <figcaption>Ein Blick in unsere Auslage</figcaption>
         </figure>
         <figure class="gallery-card gallery-card--tall reveal-img d1">
-          <img src="assets/editorial/display.webp" srcset="assets/editorial/display-640.webp 640w, assets/editorial/display.webp 1122w" sizes="(max-width:760px) 46vw, 45vw" alt="Schaufenster von Juwelier Damla mit Goldketten, Armbändern und Colliers" width="1122" height="1402" loading="lazy">
+          <img src="assets/editorial/display.webp" srcset="assets/editorial/display-640.webp 640w, assets/editorial/display.webp 1122w" sizes="(max-width:760px) 90vw, 45vw" alt="Schaufenster von Juwelier Damla mit Goldketten, Armbändern und Colliers" width="1122" height="1402" loading="lazy">
           <figcaption>Unser Schaufenster</figcaption>
         </figure>
         <figure class="gallery-card gallery-card--wide reveal-img d2">
-          <img src="assets/editorial/interior.webp" srcset="assets/editorial/interior-640.webp 640w, assets/editorial/interior.webp 1086w" sizes="90vw" alt="Innenraum von Juwelier Damla mit Beratungstheke und Schmuckvitrinen" width="1086" height="1448" loading="lazy">
-          <figcaption>Ein Platz für Ihre Wünsche</figcaption>
+          <img src="assets/editorial/storefront.webp" srcset="assets/editorial/storefront-640.webp 640w, assets/editorial/storefront.webp 1386w" sizes="90vw" alt="Außenansicht von Juwelier Damla in der Wellritzstraße 3 in Wiesbaden" width="1386" height="1135" loading="lazy">
+          <figcaption>Wellritzstraße 3, Wiesbaden</figcaption>
         </figure>
       </div>
     </div>
@@ -2167,6 +2216,58 @@
   <!-- ═══════════════════════════════════
        ÖFFNUNGSZEITEN & KONTAKT
   ═══════════════════════════════════ -->
+  <section id="anfrage" class="contact-atelier" aria-labelledby="inquiryTitle">
+    <div class="contact-atelier__heading">
+      <span class="eyebrow">Persönlich für Sie</span>
+      <h2 id="inquiryTitle">Was liegt Ihnen<br><em>am Herzen?</em></h2>
+      <p>Ein besonderer Ring. Ein Geschenk. Ein Lieblingsstück, das Pflege braucht.<br>Erzählen Sie uns von Ihrem Wunsch.</p>
+    </div>
+    <div class="contact-atelier__card">
+      <aside class="contact-atelier__aside">
+        <div class="contact-atelier__seal" aria-hidden="true">D<span>JUWELIER DAMLA</span></div>
+        <h3>Schönes beginnt<br>mit einem Gespräch.</h3>
+        <p>Wir nehmen uns Zeit für Sie.<br>Persönlich in der Wellritzstraße 3.</p>
+        <a class="contact-atelier__phone" href="tel:+496115807830"><span>Direkt mit uns sprechen</span>0611 5807830 <span aria-hidden="true">↗</span></a>
+        <figure><img src="assets/editorial/rings-silk.webp" srcset="assets/editorial/rings-silk-640.webp 640w, assets/editorial/rings-silk.webp 1536w" sizes="(max-width:760px) 90vw, 36vw" alt="Zwei Trauringe auf heller Seide" width="1536" height="1024" loading="lazy"></figure>
+      </aside>
+      <div class="contact-atelier__form-wrap">
+        <form id="damlaContact" class="contact-atelier__form" hidden>
+          <fieldset class="inquiry-topics"><legend><span>01</span> Worum geht es?</legend>
+            <div class="inquiry-topics__choices">
+              <label><input type="radio" name="topic" value="Trauringe" checked><span>Trauringe</span></label>
+              <label><input type="radio" name="topic" value="Verlobungsring"><span>Verlobungsring</span></label>
+              <label><input type="radio" name="topic" value="Schmuck & Geschenke"><span>Schmuck & Geschenke</span></label>
+              <label><input type="radio" name="topic" value="Service & Reparatur"><span>Service & Reparatur</span></label>
+              <label><input type="radio" name="topic" value="Etwas anderes"><span>Etwas anderes</span></label>
+            </div>
+          </fieldset>
+          <fieldset class="inquiry-details"><legend><span>02</span> Einander kennenlernen</legend>
+            <div class="inquiry-details__grid">
+              <label for="inquiryName">Ihr Name <input id="inquiryName" name="name" type="text" required maxlength="100" autocomplete="name" placeholder="Vor- und Nachname"></label>
+              <label for="inquiryReply">E-Mail oder Telefon <input id="inquiryReply" name="reply" type="text" required maxlength="180" placeholder="So erreichen wir Sie"></label>
+            </div>
+          </fieldset>
+          <fieldset class="inquiry-message"><legend><span>03</span> Ihr Wunsch</legend>
+            <label class="inquiry-sr-only" for="inquiryMessage">Ihre Nachricht</label>
+            <textarea id="inquiryMessage" name="message" required minlength="10" maxlength="2000" rows="4" placeholder="Was dürfen wir für Sie tun?"></textarea>
+            <span class="inquiry-count"><span id="inquiryCount">0</span> / 2000</span>
+          </fieldset>
+          <div class="inquiry-submit"><button type="submit">Anfrage vorbereiten <span aria-hidden="true">↗</span></button><p>Sie können Ihren Text anschließend kopieren.<br>Es wird noch keine Nachricht versendet.</p></div>
+        </form>
+        <noscript><p>Für Ihre Anfrage erreichen Sie uns persönlich unter <a href="tel:+496115807830">0611 5807830</a>. Aktivieren Sie JavaScript, um Ihren Nachrichtentext hier vorzubereiten.</p></noscript>
+        <div id="inquiryResult" class="inquiry-result" hidden>
+          <span class="eyebrow">Ihr persönlicher Entwurf</span>
+          <h3 id="inquiryResultTitle" tabindex="-1">Ihr Text ist bereit.</h3>
+          <p>Ihre Nachricht wurde noch nicht versendet. Kopieren Sie den Text für später oder besprechen Sie Ihren Wunsch direkt mit uns.</p>
+          <pre id="inquirySummary"></pre>
+          <div class="inquiry-result__actions"><button id="inquiryCopy" type="button">Text kopieren <span aria-hidden="true">↗</span></button><button id="inquiryEdit" class="inquiry-edit" type="button">Angaben bearbeiten</button></div>
+          <p id="inquiryStatus" role="status" aria-live="polite"></p>
+          <a class="inquiry-call" href="tel:+496115807830">Persönlich anfragen: 0611 5807830</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section id="contact" aria-labelledby="contactTitle">
     <div class="wrap">
       <div class="contact-grid">
@@ -2330,6 +2431,7 @@
             <li><a href="reparaturen.html">Reparaturen</a></li>
             <li><a href="#services">Leistungen</a></li>
             <li><a href="#reviews">Bewertungen</a></li>
+            <li><a href="#anfrage">Kontaktformular</a></li>
             <li><a href="#contact">Öffnungszeiten</a></li>
             <li><a href="#location">Standort</a></li>
           </ul>
@@ -2376,7 +2478,7 @@
     (function () {
       const el  = document.getElementById('loader');
       const bar = document.getElementById('loaderBar');
-      if (!el || !document.querySelector('.hero__video')) return;
+      if (!el) return;
       document.body.classList.add('is-loading');
 
       // Nur der erste Clip wird abgewartet. Frueher waren es beide — dann
@@ -2727,6 +2829,6 @@
     document.getElementById('year').textContent = new Date().getFullYear();
   </script>
 
-<script src="assets/site-design.js" defer></script>
+<script src="assets/contact-form.js" defer></script>
 </body>
 </html>
