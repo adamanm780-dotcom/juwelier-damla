@@ -1,0 +1,50 @@
+  <header class="atelier-head wrap">
+    <p class="sub-crumb"><a href="index.html">Startseite</a> · <a href="verlobungsringe.html">Verlobungsringe</a> · Konfigurator</p>
+    <div class="atelier-title"><div><span class="eyebrow">Ihr Ringatelier</span><h1>Ein Ring. Ihr Versprechen.</h1></div>
+      <nav class="atelier-modes" aria-label="Konfigurator wählen"><a href="trauring-konfigurator.html">Trauringe</a><a href="verlobungsring-konfigurator.html" aria-current="page">Verlobungsring</a></nav></div>
+    <p>Wählen Sie Fassung, Diamant und Goldton. Entdecken Sie Ihren Entwurf von allen Seiten.</p>
+  </header>
+  <section class="kf atelier" aria-label="Verlobungsring konfigurieren">
+    <div class="wrap"><div class="kf-grid">
+      <div class="kf-view">
+        <div class="kf-view__oben">
+          <div class="atelier-stage-wrap">
+            <div class="kf-stage" id="erStage" role="img" aria-label="3D-Ansicht Ihres Verlobungsrings"><p class="kf-laedt">Ihr Ring wird aufgebaut …</p></div>
+            <span class="atelier-stage-label" aria-hidden="true">DAMLA <span>RINGATELIER</span></span>
+          </div>
+          <p id="erFallback" class="kf-fallback" hidden>Die 3D-Ansicht konnte nicht geladen werden. Bitte laden Sie die Seite erneut. Ihre Auswahl und die Anfrage funktionieren weiterhin.</p>
+          <div class="atelier-views" aria-label="3D-Ansicht steuern">
+            <button type="button" data-er-view="hero">Perspektive</button><button type="button" data-er-view="top">Diamant</button><button type="button" data-er-view="side">Fassung</button>
+            <button type="button" data-er-view="in" aria-label="Vergrößern">+</button><button type="button" data-er-view="out" aria-label="Verkleinern">−</button>
+            <button type="button" data-er-view="rotate" aria-pressed="false">Drehung starten</button>
+          </div>
+          <p class="atelier-caption">Ziehen zum Drehen · Zwei Finger zum Zoomen</p>
+        </div>
+        <div class="atelier-note"><span class="eyebrow">Ihr Entwurf</span><h2 id="erName">Solitaire · Brillant</h2><p id="erSpecs" aria-live="polite"></p><p class="atelier-disclaimer">Die 3D-Ansicht veranschaulicht Ihren Entwurf. Steinproportionen, Farbe und Fassung können bei der Anfertigung abweichen. Verfügbarkeit und Preis klären wir persönlich.</p></div>
+      </div>
+      <div class="kf-panel" id="erPanel">
+        <fieldset class="kf-feld"><legend><i>1</i> Die Fassung</legend>
+          <div class="kf-chips atelier-choices" id="erStyle"></div><p class="kf-notiz" id="erStyleNote"></p>
+          <label class="atelier-label" for="erProngs">Krappen</label><select id="erProngs"><option value="4">Vier Krappen</option><option value="6">Sechs Krappen</option></select>
+        </fieldset>
+        <fieldset class="kf-feld"><legend><i>2</i> Der Diamant</legend>
+          <div class="kf-chips" id="erCut"></div>
+          <div class="kf-regler"><label for="erCarat">Steingröße <output id="erCaratValue"></output></label><input type="range" id="erCarat" min="0.3" max="2" step="0.05" value="1"></div>
+          <p class="kf-notiz" id="erDiamondSize"></p>
+        </fieldset>
+        <fieldset class="kf-feld"><legend><i>3</i> Das Edelmetall</legend>
+          <div class="kf-chips" id="erMetal"></div><div class="kf-chips kf-chips--klein" id="erAlloy"></div>
+          <div class="kf-regler"><label for="erWidth">Schienenbreite <output id="erWidthValue"></output></label><input type="range" id="erWidth" min="1.8" max="3" step="0.1" value="2.2"></div>
+        </fieldset>
+        <fieldset class="kf-feld"><legend><i>4</i> Ihre persönliche Note</legend>
+          <div class="kf-regler"><label for="erSize">Ringgröße <output id="erSizeValue"></output></label><input type="range" id="erSize" min="44" max="70" step="1" value="54"></div>
+          <p class="kf-notiz">Innenumfang in Millimetern. Wir bestimmen Ihre Größe gerne im Geschäft.</p>
+          <label class="atelier-label" for="erEngraving">Innengravur <span>optional</span></label><input type="text" id="erEngraving" maxlength="24" placeholder="Zum Beispiel: Für immer · 06.09.26" autocomplete="off"><p class="kf-notiz"><span id="erChars">0</span> / 24 Zeichen</p>
+        </fieldset>
+        <button class="kf-reset" id="erReset" type="button">Entwurf zurücksetzen</button>
+      </div>
+    </div>
+    <div class="atelier-summary"><div><span class="eyebrow">Vom Entwurf zum Lieblingsstück</span><h2>Gemeinsam machen wir ihn zu Ihrem Ring.</h2><p>Bringen Sie Ihre Konfiguration zur Beratung mit oder senden Sie uns Ihren Entwurf.</p><pre id="erSummary"></pre></div>
+      <div class="atelier-actions"><a id="erWhatsapp" class="btn-gold" target="_blank" rel="noopener">Entwurf per WhatsApp anfragen</a><button type="button" class="btn-ghost" id="erCopy">Konfiguration kopieren</button><button type="button" class="btn-ghost" id="erImage">Ansicht als Bild sichern</button><a href="tel:+496115807830">Persönliche Beratung: 0611 5807830</a><p id="erStatus" role="status"></p></div>
+    </div></div>
+  </section>

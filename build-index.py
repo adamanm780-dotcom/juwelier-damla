@@ -411,6 +411,7 @@ src = sub1(
     '            <li><a href="#collections">Kollektionen</a></li>\n'
     '            <li><a href="trauringe.html">Trauringe</a></li>\n'
     '            <li><a href="trauring-konfigurator.html">Konfigurator</a></li>\n'
+    '            <li><a href="verlobungsring-konfigurator.html">Verlobungsring konfigurieren</a></li>\n'
     '            <li><a href="verlobungsringe.html">Verlobungsringe</a></li>\n'
     '            <li><a href="reparaturen.html">Reparaturen</a></li>\n',
     src, 0, 'Footer-Navigation')

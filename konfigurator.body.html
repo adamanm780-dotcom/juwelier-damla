@@ -1,33 +1,17 @@
   <!-- ═══════════════════════════════════
        KOPF
   ═══════════════════════════════════ -->
-  <section class="sub-hero">
-    <div class="sub-band">
-      <img src="assets/trauringe-atelier.jpg" alt="Vier schlichte Trauringe in Gelbgold, Weißgold und Rotgold nebeneinander auf hellem Marmor" width="1920" height="1072" fetchpriority="high">
-      <div class="sub-band__veil" aria-hidden="true"></div>
-      <div class="sub-band__cap" aria-hidden="true">Trauringe · Wellritzstraße 3</div>
-    </div>
-
-    <div class="wrap">
-      <p class="sub-crumb"><a href="index.html">Startseite</a> &nbsp;·&nbsp; <span>Trauring-Konfigurator</span></p>
-
-      <div class="sub-hero__text">
-        <span class="eyebrow reveal">Eheringe konfigurieren</span>
-        <h1 class="sub-hero__title reveal d1">Ihr Paar,<br>Zug um Zug</h1>
-        <div class="gold-bar reveal d2" role="presentation"></div>
-        <p class="sub-hero__sub reveal d3">
-          Legierung, Profil, Breite, Oberfläche, Steinbesatz – Sie stellen Ihre Trauringe
-          hier zusammen und sehen jede Entscheidung sofort am dreidimensionalen Ring.
-          Am Ende nehmen Sie Ihre Konfiguration mit zu uns ins Geschäft.
-        </p>
-      </div>
-    </div>
-  </section>
+  <header class="atelier-head wrap">
+    <p class="sub-crumb"><a href="index.html">Startseite</a> · <a href="trauringe.html">Trauringe</a> · Konfigurator</p>
+    <div class="atelier-title"><div><span class="eyebrow">Ihr Ringatelier</span><h1>Zwei Ringe. Ganz Sie.</h1></div>
+      <nav class="atelier-modes" aria-label="Konfigurator wählen"><a href="trauring-konfigurator.html" aria-current="page">Trauringe</a><a href="verlobungsring-konfigurator.html">Verlobungsring</a></nav></div>
+    <p>Gestalten Sie Ihr Paar. Entdecken Sie Profile, Oberflächen und feine Details aus jedem Blickwinkel.</p>
+  </header>
 
   <!-- ═══════════════════════════════════
        KONFIGURATOR
   ═══════════════════════════════════ -->
-  <section class="kf" aria-labelledby="kfTitel">
+  <section class="kf atelier" aria-labelledby="kfTitel">
     <h2 id="kfTitel" class="visually-hidden">Trauring-Konfigurator</h2>
 
     <div class="wrap">
@@ -42,7 +26,10 @@
                aria-label="Dreidimensionale Ansicht des konfigurierten Ringpaars">
             <p class="kf-laedt" aria-hidden="true">Ringe werden aufgebaut …</p>
           </div>
-
+          <div class="atelier-views" aria-label="3D-Ansicht steuern">
+            <button type="button" data-kf-view="hero">Perspektive</button><button type="button" data-kf-view="front">Vorderseite</button><button type="button" data-kf-view="side">Profil</button>
+            <button type="button" data-kf-view="in" aria-label="Vergrößern">+</button><button type="button" data-kf-view="out" aria-label="Verkleinern">−</button><button type="button" data-kf-view="rotate" aria-pressed="true">Drehung pausieren</button>
+          </div>
           <p class="kf-fallback" id="kfWebglHinweis" hidden>
             Ihr Browser zeigt keine 3D-Grafik an. Die Konfiguration und der
             Preis-Richtwert funktionieren trotzdem – die Zusammenfassung unten

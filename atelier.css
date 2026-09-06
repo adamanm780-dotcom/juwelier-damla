@@ -1,0 +1,71 @@
+/* The existing Damla ivory / gold identity, with the ring as the working surface. */
+.atelier-head{padding-top:calc(var(--nav-h) + 30px);padding-bottom:26px}
+.atelier-head .sub-crumb{margin:0 0 28px;font-size:.875rem;letter-spacing:0;text-transform:none}
+.atelier-title{display:flex;align-items:flex-end;justify-content:space-between;gap:24px}
+.atelier-title h1{font-family:var(--font-serif);font-size:clamp(2rem,3.4vw,3.7rem);font-weight:400;line-height:1.12;margin:10px 0 0;color:var(--ink)}
+.atelier-head>p:last-child{font-size:1rem;line-height:1.65;color:var(--ink-soft);max-width:720px;margin-top:18px}
+.atelier-modes{display:flex;flex-shrink:0;border-bottom:1px solid var(--border-gold);gap:22px}
+.atelier-modes a{padding:14px 0;font-size:.875rem;color:var(--ink-soft);text-decoration:none;min-height:48px}
+.atelier-modes a[aria-current]{color:var(--gold-dark);border-bottom:2px solid var(--gold-dark)}
+.atelier.kf{padding-top:12px}
+.atelier .kf-grid{grid-template-columns:minmax(0,1.35fr) minmax(330px,.85fr);gap:32px}
+.atelier .kf-stage{aspect-ratio:1.13;border-radius:3px;background:radial-gradient(ellipse at 45% 36%,#fff 8%,#f4f2ee 59%,#e4e0da 100%);border-color:#ded8ce;min-height:280px}
+.atelier-stage-wrap{position:relative}
+.atelier-stage-label{position:absolute;top:24px;left:26px;font-family:var(--font-serif);font-size:1.25rem;letter-spacing:.24em;color:#796a4e;pointer-events:none}
+.atelier-stage-label span{display:block;font-family:var(--font-sans, sans-serif);font-size:.625rem;letter-spacing:.2em;margin-top:4px}
+.atelier-views{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.atelier-views button{min-width:44px;min-height:44px;padding:8px 12px;border:1px solid #d8d0c4;border-radius:3px;background:#fffefa;color:#544633;font:inherit;font-size:.8125rem;cursor:pointer}
+.atelier-views button:hover,.atelier-views button[aria-pressed=true]{background:#eee7da;border-color:#8c7146}
+.atelier-views button:disabled{opacity:.45;cursor:default}
+.atelier-caption{font-size:.8125rem;line-height:1.5;color:#70675c;margin-top:12px}
+.atelier-note{padding:26px 0 8px}
+.atelier-note h2{font-family:var(--font-serif);font-size:1.8rem;font-weight:400;margin:10px 0}
+.atelier-note p{font-size:1rem;line-height:1.65}
+.atelier-note .atelier-disclaimer{font-size:.875rem;color:#6d655b;line-height:1.7;margin-top:16px;max-width:590px}
+.atelier .kf-panel{border-radius:3px;padding:26px;background:#fffefa}
+.atelier .kf-feld{padding:0 0 25px;margin:0 0 25px;border-bottom:1px solid #e8e1d7}
+.atelier .kf-feld legend{font-size:.9375rem;letter-spacing:.04em;margin-bottom:20px;color:#493f32}
+.atelier .kf-feld legend i{font-size:.8125rem}
+.atelier .kf-chip,.atelier .kf-chips--klein .kf-chip{font-size:.875rem;line-height:1.4;min-height:46px;padding:10px 14px;letter-spacing:0;text-transform:none;border-radius:3px}
+.atelier .kf-chips{gap:8px}
+.atelier .kf-chip.is-on{border-color:#9b7b43;background:#f1eadc;color:#44351e;box-shadow:inset 0 0 0 1px #9b7b43}
+.atelier .kf-notiz,.atelier .kf-hilfe,.atelier .kf-switch__text small{font-size:.875rem;line-height:1.65;letter-spacing:0;color:#6b6358}
+.atelier .kf-regler label,.atelier .kf-check,.atelier .kf-switch__text,.atelier .kf-tab{font-size:.9375rem;line-height:1.5;letter-spacing:0}
+.atelier .kf-regler{margin-top:22px}
+.atelier .kf-regler input[type=range]{min-height:32px;height:32px;background:transparent;accent-color:#99743a;cursor:pointer}
+.atelier .kf-regler input[type=range]::-webkit-slider-runnable-track{height:3px;background:#d5c7af}
+.atelier .kf-regler input[type=range]::-webkit-slider-thumb{margin-top:-9px}
+.atelier .kf-regler input[type=range]::-moz-range-track{height:3px;background:#d5c7af}
+.atelier-label{display:block;font-size:.9375rem;margin:20px 0 10px;color:#514638}
+.atelier-label span{font-size:.875rem;color:#766c5d}
+.atelier select,.atelier input[type=text]{width:100%;min-height:48px;border:1px solid #d5cabb;border-radius:3px;padding:12px;background:#fff;color:#42392d;font:inherit;font-size:1rem}
+.atelier-metal{display:inline-block;width:18px;height:18px;border-radius:50%;background:linear-gradient(130deg,#fff 0%,var(--metal) 38%,var(--metal) 58%,#fff 100%);border:1px solid #0002;vertical-align:middle;margin-right:8px}
+.atelier .kf-laedt{font-size:.875rem;letter-spacing:.05em;text-transform:none}
+.atelier .kf-preis__fuss,.atelier .kf-preis__zeile em{font-size:.8125rem}
+.atelier .kf-preis__zeile{font-size:.9375rem}
+.atelier .kf-preis__paar{font-size:.8125rem;letter-spacing:.06em}
+.atelier .kf-reset{font-size:.875rem;min-height:44px;color:#685b46}
+.atelier .kf-summary{font-size:.9375rem;line-height:1.8}
+.atelier .kf-unterfeld__titel{font-size:.8125rem;letter-spacing:.06em}
+.atelier .kf-fallback{font-size:.9375rem;line-height:1.6}
+.atelier-summary{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(260px,.7fr);gap:50px;border-top:1px solid var(--border-gold);padding-top:40px;margin-top:56px}
+.atelier-summary h2{font-family:var(--font-serif);font-size:clamp(1.8rem,2.8vw,2.6rem);font-weight:400;line-height:1.2;margin:14px 0}
+.atelier-summary p{font-size:1rem;line-height:1.7}
+.atelier-summary pre{white-space:pre-wrap;font:inherit;font-size:.9375rem;line-height:1.85;border-left:2px solid #b4965a;padding-left:20px;margin-top:25px;color:#5f5445}
+.atelier-actions{display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:14px}
+.atelier-actions .btn-gold,.atelier-actions .btn-ghost{font-size:.875rem;letter-spacing:.03em;padding:18px;text-align:center;cursor:pointer}
+.atelier-actions>a:last-of-type{font-size:.875rem;text-align:center;color:#655235;line-height:1.6;padding:8px}
+.atelier button:focus-visible,.atelier a:focus-visible,.atelier input:focus-visible,.atelier select:focus-visible,.atelier-modes a:focus-visible{outline:3px solid #8a6932;outline-offset:4px}
+.atelier [hidden]{display:none!important}
+@media(min-width:1001px){.atelier .kf-view{top:calc(var(--nav-h) + 14px)}}
+@media(max-width:1000px){
+  .atelier-title{align-items:flex-start;flex-direction:column;gap:18px}.atelier-modes{gap:28px}
+  .atelier-head{padding-top:calc(var(--nav-h) + 22px)}.atelier-head .sub-crumb{margin-bottom:20px}
+  .atelier .kf-grid{gap:20px}.atelier .kf-view__oben{position:relative;top:auto;margin:0;padding:0;background:none;box-shadow:none}
+  .atelier .kf-stage{aspect-ratio:1.55;max-height:55svh;min-height:250px}
+  .atelier .kf-panel{order:2}.atelier-note{order:3}.atelier .kf-preis{order:3}
+  .atelier-stage-label{top:18px;left:18px}.atelier .kf-preisleiste span{font-size:.8125rem;letter-spacing:.02em}
+  .atelier-summary{grid-template-columns:1fr;gap:28px}.atelier-actions{max-width:480px}
+}
+@media(max-width:520px){.atelier-title h1{font-size:2.15rem}.atelier .kf-panel{padding:20px 16px}.atelier-views{gap:6px}.atelier-views button{font-size:.75rem;padding:8px 10px}.atelier .kf-chip{flex-grow:1}.atelier-modes{width:100%;justify-content:space-between}.atelier-stage-label{font-size:1rem}.atelier .kf-stage{min-height:235px}.atelier .kf-feld legend{font-size:.9375rem}}
+@media(prefers-reduced-motion:reduce){.atelier *{scroll-behavior:auto!important;transition:none!important}}

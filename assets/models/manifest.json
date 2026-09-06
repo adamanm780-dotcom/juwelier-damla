@@ -1,0 +1,46 @@
+{
+  "generator": "5.1.1",
+  "units": "millimetres",
+  "meshes": {
+    "Wedding_flach": {
+      "vertices": 25600,
+      "faces": 25600
+    },
+    "Wedding_bombiert": {
+      "vertices": 25600,
+      "faces": 25600
+    },
+    "Wedding_oval": {
+      "vertices": 25600,
+      "faces": 25600
+    },
+    "Wedding_konkav": {
+      "vertices": 25600,
+      "faces": 25600
+    },
+    "Wedding_kantig": {
+      "vertices": 28160,
+      "faces": 28160
+    },
+    "Diamond_round": {
+      "vertices": 57,
+      "faces": 73
+    },
+    "Diamond_oval": {
+      "vertices": 57,
+      "faces": 73
+    },
+    "Diamond_emerald": {
+      "vertices": 56,
+      "faces": 50
+    },
+    "Basket_4": {
+      "vertices": 5888,
+      "faces": 5984
+    },
+    "Basket_6": {
+      "vertices": 7488,
+      "faces": 7632
+    }
+  }
+}

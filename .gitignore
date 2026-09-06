@@ -1,0 +1,4 @@
+dist/
+tools/*.blend1
+tools/model-inspection.png
+__pycache__/

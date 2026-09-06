@@ -30,6 +30,8 @@ skip        = grab(r'  <a class="skip-link".*?</a>', 'Skip-Link')
 
 # Sprungmarken im Footer auf die Startseite umbiegen
 footer_sub = footer.replace('<a href="#', '<a href="index.html#')
+if 'verlobungsring-konfigurator.html' not in footer_sub:
+    footer_sub = footer_sub.replace('<li><a href="verlobungsringe.html">', '<li><a href="verlobungsring-konfigurator.html">Verlobungsring konfigurieren</a></li>\n            <li><a href="verlobungsringe.html">')
 
 NAV_ITEMS = [
     ('index.html#about',       'Über uns'),
@@ -1272,7 +1274,7 @@ TR_HEAD = '  <style>\n%s  </style>' % TR_CSS
 KF_BODY = io.open(os.path.join(DIR, 'konfigurator.body.html'), encoding='utf-8').read()
 KF_CSS = io.open(os.path.join(DIR, 'konfigurator.css'), encoding='utf-8').read()
 
-KF_HEAD = '  <style>\n%s  </style>' % KF_CSS
+KF_HEAD = '  <style>\n%s  </style>\n  <link rel="stylesheet" href="atelier.css">' % KF_CSS
 
 # three.js liegt lokal unter assets/vendor — kein CDN, damit die Seite
 # ohne Verbindung zu Dritten auskommt (DSGVO).
@@ -1289,6 +1291,13 @@ KF_BODY_ENDE = """
 """
 
 PAGES = [
+    dict(slug='verlobungsring-konfigurator.html',
+         title='Verlobungsring-Konfigurator in 3D | Juwelier Damla Wiesbaden',
+         desc='Gestalten Sie Ihren Verlobungsring in 3D: Solitaire, Pavé oder Halo, drei Diamantschliffe, Edelmetall, Steingröße und persönliche Gravur. Beratung bei Juwelier Damla.',
+         name='Verlobungsring-Konfigurator', active='verlobungsringe.html',
+         body=io.open(os.path.join(DIR, 'verlobungsring-konfigurator.body.html'), encoding='utf-8').read(),
+         services=None, extrahead=KF_HEAD,
+         extrabody=KF_BODY_ENDE.replace('assets/konfigurator.js', 'assets/engagement-configurator.js')),
     dict(slug='trauringe.html',
          title='Trauringe – zehn Modelle aus unserer Vitrine | Juwelier Damla Wiesbaden',
          desc='Trauringe bei Juwelier Damla in Wiesbaden: zehn Modelle in Gelb-, Weiß- und '
@@ -1315,7 +1324,7 @@ PAGES = [
          desc='Verlobungsringe bei Juwelier Damla in Wiesbaden: Solitäre, Trilogien und '
               'Halo-Fassungen in Gelb-, Weiß- und Rotgold. Persönliche Beratung in der '
               'Wellritzstraße 3.',
-         name='Verlobungsringe', active='verlobungsringe.html', body=VR_BODY,
+         name='Verlobungsringe', active='verlobungsringe.html', body=VR_BODY.replace('</h1>', '</h1><a href="verlobungsring-konfigurator.html" class="btn-gold" style="margin-top:24px">Verlobungsring in 3D gestalten</a>', 1),
          services=None),
     dict(slug='reparaturen.html',
          title='Reparaturen & Schmuckservice – Juwelier Damla Wiesbaden',
@@ -1355,6 +1364,18 @@ for page in PAGES:
     }
 
     assert footer_sub.count(page['slug']) == 1, 'Footer-Link doppelt/fehlt: ' + page['slug']
+
+    if page['slug'].endswith('-konfigurator.html'):
+        from html import escape
+        page['extrahead'] = page.get('extrahead', '') + '\n' + '\n'.join([
+            '<meta property="og:type" content="website">',
+            '<meta property="og:title" content="%s">' % escape(page['title'], quote=True),
+            '<meta property="og:description" content="%s">' % escape(page['desc'], quote=True),
+            '<meta property="og:url" content="%s/%s">' % (BASE, page['slug']),
+            '<meta name="twitter:card" content="summary">',
+            '<meta name="twitter:title" content="%s">' % escape(page['title'], quote=True),
+            '<meta name="twitter:description" content="%s">' % escape(page['desc'], quote=True),
+        ])
 
     html = TEMPLATE % dict(
         title=page['title'], desc=page['desc'], slug=page['slug'], fonts=font_links,

@@ -16,7 +16,8 @@
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/OrbitControls.js';
-import { RoomEnvironment } from 'three/RoomEnvironment.js';
+import { loadJewelry, weddingGeometry, createStudio, diamondMesh } from './jewelry-studio.js';
+let jewelry, studio;
 
 /* ══════════════════════════════════════════════════════════════
    1) KATALOG
@@ -187,6 +188,8 @@ for (let g = 44; g <= 70; g++) RINGGROESSEN.push(g);
  * @param {object} profil Eintrag aus PROFILE
  */
 function ringGeometrie(ri, T, W, profil) {
+  const key = Object.keys(PROFILE).find(k => PROFILE[k] === profil);
+  if (jewelry) return weddingGeometry(jewelry.get('Wedding_' + key), ri, T, W);
   const N = 64;                               // Abtastung ueber die Breite
   const er = Math.min(0.13, T * 0.26, W * 0.12); // Kantenradius
   const tf = 1 - (2 * er) / W;                // Beginn der Kantenfase
@@ -503,8 +506,8 @@ function metallMaterial(farbe, oberflaeche) {
     color: farbe,
     metalness: 1.0,
     roughness: Math.max(0.08, o.rauheit),
-    envMapIntensity: 1.55,
-    clearcoat: o.textur ? 0.0 : 0.45,
+    envMapIntensity: 1.05,
+    clearcoat: 0,
     clearcoatRoughness: 0.08,
   });
   if (o.textur === 'hammer') {
@@ -542,6 +545,8 @@ let renderer, scene, camera, controls, ringGruppe;
 let letzteInteraktion = 0;
 let laeuft = false;
 let bereit = false;   // erstes gerendertes Bild da -> Ladezustand aus
+let drehen = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+let sichtbar = true;
 
 function webglVerfuegbar() {
   try {
@@ -570,10 +575,8 @@ function szeneAufbauen() {
   scene = new THREE.Scene();
 
   // Studio-Environment ohne externe HDR-Datei
-  const pmrem = new THREE.PMREMGenerator(renderer);
-  // Kleinerer Sigma-Wert = schaerfere Spiegelungen im Metall. Der Ring
-  // bekommt dadurch definierte Lichtkanten statt eines diffusen Schimmers.
-  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.02).texture;
+  studio = createStudio(renderer);
+  scene.environment = studio.metal;
 
   camera = new THREE.PerspectiveCamera(32, buehne.clientWidth / buehne.clientHeight, 1, 400);
   // Dreiviertelblick: frontal sieht man nur den Kreis, hier auch das Profil
@@ -608,7 +611,12 @@ function szeneAufbauen() {
   controls.maxPolarAngle = Math.PI * 0.62;
   controls.autoRotateSpeed = 0.7;
   controls.addEventListener('start', () => { letzteInteraktion = performance.now(); });
-  controls.addEventListener('change', () => { letzteInteraktion = performance.now(); });
+  renderer.domElement.setAttribute('aria-hidden', 'true');
+  new IntersectionObserver(([entry]) => { sichtbar = entry.isIntersecting; }).observe(buehne);
+  renderer.domElement.addEventListener('webglcontextlost', (e) => {
+    e.preventDefault(); laeuft = false; renderer.setAnimationLoop(null);
+    hinweisWebgl.hidden = false; hinweisWebgl.textContent = 'Die 3D-Ansicht wurde unterbrochen. Laden Sie die Seite neu. Ihre Auswahl bleibt im Link erhalten.';
+  });
 
   new ResizeObserver(groesseAnpassen).observe(buehne);
   laeuft = true;
@@ -686,9 +694,10 @@ function kameraEinpassen(erzwingen) {
 }
 
 function tick() {
+  if (document.hidden || !sichtbar) return;
   // Nach kurzer Ruhe kreist die Kamera weiter — das Paar bleibt stehen,
   // waehrend Profil und Oberflaeche von allen Seiten sichtbar werden.
-  controls.autoRotate = performance.now() - letzteInteraktion > 2600;
+  controls.autoRotate = drehen && performance.now() - letzteInteraktion > 2600;
   controls.update();
   renderer.render(scene, camera);
   if (!bereit) { bereit = true; buehne.classList.add('is-bereit'); }
@@ -836,6 +845,7 @@ window.addEventListener('hashchange', () => {
    ══════════════════════════════════════════════════════════════ */
 
 const ringe = { eins: null, zwei: null };
+const ringSignaturen = { eins: '', zwei: '' };
 
 /* Geometrien und Materialien des alten Standes freigeben. Die prozeduralen
    Maps liegen im Cache und werden bewusst behalten — sie sind teuer und
@@ -843,7 +853,7 @@ const ringe = { eins: null, zwei: null };
 function altEntsorgen(gruppe) {
   gruppe.traverse((o) => {
     if (!o.isMesh) return;
-    o.geometry.dispose();
+    if (!o.userData.sharedGeometry) o.geometry.dispose();
     if (o.material !== BRILLANT_MATERIAL) {
       if (o.material.map && !texturGecacht(o.material.map)) o.material.map.dispose();
       o.material.dispose();
@@ -859,6 +869,9 @@ function texturGecacht(tex) {
 
 function ringBauen(seite) {
   const k = zustand[seite];
+  const signatur = JSON.stringify(k);
+  if (ringe[seite] && ringSignaturen[seite] === signatur) return ringe[seite];
+  ringSignaturen[seite] = signatur;
   const profil = PROFILE[k.profil];
   const leg = LEGIERUNGEN[k.legierung];
   const karat = leg.karate[k.karat] || Object.values(leg.karate)[0];
@@ -897,13 +910,19 @@ function ringBauen(seite) {
   // Brillanten in der Aussenflaeche — Zahl und Lage kommen aus steinPlan
   const plan = steinPlan(k);
   if (plan.punkte.length) {
-    const { krone, pavillon } = brillantGeometrie(plan.rStein);
     const hoch = new THREE.Vector3(0, 1, 0);
 
     plan.punkte.forEach((pkt) => {
       const stein = new THREE.Group();
-      stein.add(new THREE.Mesh(krone, BRILLANT_MATERIAL));
-      stein.add(new THREE.Mesh(pavillon, BRILLANT_MATERIAL));
+      const gem = diamondMesh(jewelry.get('Diamond_round'), studio.diamond);
+      gem.userData.sharedGeometry = true;
+      gem.scale.setScalar(plan.rStein);
+      stein.add(gem);
+      // A narrow burnished rim around each flush setting catches the light.
+      const rim = new THREE.Mesh(new THREE.TorusGeometry(plan.rStein * 1.025, plan.rStein * .065, 8, 32), metallMaterial(karat.farbe, 'poliert'));
+      rim.rotation.x = Math.PI / 2;
+      rim.position.y = -plan.rStein * .015;
+      stein.add(rim);
 
       // Die Steinachse (lokales +Y) auf die Flaechennormale drehen. Am Rand
       // einer bombierten Schiene zeigt die nicht radial nach aussen — ohne
@@ -915,7 +934,7 @@ function ringBauen(seite) {
 
       // Rundiste unter der Oberflaeche, nur die flache Krone schaut heraus.
       // Weniger tief und die Steine durchbrechen die Silhouette des Rings.
-      const tief = plan.rStein * 0.44;
+      const tief = plan.rStein * 0.035;
       stein.position.set(
         Math.cos(pkt.phi) * pkt.rA - norm.x * tief,
         pkt.y - norm.y * tief,
@@ -1025,15 +1044,18 @@ const $$ = (sel) => Array.from(document.querySelectorAll(sel));
  * oder Querschnitt-Piktogramm des Profils.
  */
 function knopfGruppe(container, eintraege, aktuell, beiWahl, schmuck) {
+  const focusedValue = container.contains(document.activeElement) ? document.activeElement.dataset.value : null;
   container.innerHTML = '';
   eintraege.forEach(([wert, label]) => {
     const b = document.createElement('button');
     b.type = 'button';
+    b.dataset.value = wert;
     b.className = 'kf-chip' + (wert === aktuell ? ' is-on' : '');
     b.setAttribute('aria-pressed', String(wert === aktuell));
     b.innerHTML = (schmuck ? schmuck(wert) : '') + '<span>' + label + '</span>';
     b.addEventListener('click', () => beiWahl(wert));
     container.appendChild(b);
+    if (wert === focusedValue) b.focus({preventScroll:true});
   });
 }
 
@@ -1135,6 +1157,7 @@ function zeichnen() {
     const an = t.dataset.seite === zustand.aktiv;
     t.classList.toggle('is-on', an);
     t.setAttribute('aria-selected', String(an));
+    t.tabIndex = an ? 0 : -1;
   });
   $('#kfKoppeln').checked = zustand.gekoppelt;
 
@@ -1277,6 +1300,36 @@ function zusammenfassung(mitLink) {
 /* ── Bedienung ────────────────────────────────────────────── */
 
 function uiVerdrahten() {
+  document.querySelectorAll('[data-kf-view]').forEach(button => {
+    button.disabled = !laeuft;
+    button.addEventListener('click', () => {
+      const mode = button.dataset.kfView;
+      if (mode === 'rotate') {
+        drehen = !drehen; button.setAttribute('aria-pressed', String(drehen));
+        button.textContent = drehen ? 'Drehung pausieren' : 'Drehung starten';
+      } else if (mode === 'in' || mode === 'out') {
+        const dir = camera.position.clone().sub(controls.target);
+        camera.position.copy(controls.target).add(dir.setLength(THREE.MathUtils.clamp(dir.length() * (mode === 'in' ? .8 : 1.25), controls.minDistance, controls.maxDistance)));
+      } else {
+        const dir = mode === 'front' ? new THREE.Vector3(0, .05, 1) : mode === 'side' ? new THREE.Vector3(1, .3, .4) : new THREE.Vector3(.42, .32, 1);
+        camera.position.copy(controls.target).add(dir.normalize().multiplyScalar(camera.position.distanceTo(controls.target)));
+        kameraEinpassen(true);
+      }
+      letzteInteraktion = performance.now(); controls.update();
+    });
+    if (button.dataset.kfView === 'rotate') {
+      button.setAttribute('aria-pressed', String(drehen));
+      button.textContent = drehen ? 'Drehung pausieren' : 'Drehung starten';
+    }
+  });
+  $$('.kf-tab').forEach((tab, index, tabs) => {
+    tab.addEventListener('keydown', e => {
+      if (!['ArrowLeft','ArrowRight','Home','End'].includes(e.key)) return;
+      e.preventDefault();
+      const next = e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1 : (index + (e.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+      tabs[next].click(); tabs[next].focus();
+    });
+  });
   $$('.kf-tab').forEach((t) => {
     t.addEventListener('click', () => { zustand.aktiv = t.dataset.seite; zeichnen(); });
   });
@@ -1358,7 +1411,17 @@ if (!webglVerfuegbar()) {
   // Preis, Zusammenfassung und Anfrage funktionieren auch ohne 3D
   zeichnen();
 } else {
-  szeneAufbauen();
+  try {
+    jewelry = await loadJewelry();
+    szeneAufbauen();
+  } catch (error) {
+    console.error('3D-Ansicht konnte nicht geladen werden', error);
+    laeuft = false;
+    renderer?.setAnimationLoop(null);
+    buehne.hidden = true;
+    hinweisWebgl.hidden = false;
+    hinweisWebgl.textContent = 'Die 3D-Ansicht konnte nicht geladen werden. Laden Sie die Seite erneut. Sie können Ihre Ringe trotzdem konfigurieren und die Zusammenfassung verwenden.';
+  }
   uiVerdrahten();
   zeichnen();
 }
