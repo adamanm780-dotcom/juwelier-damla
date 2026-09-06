@@ -1598,6 +1598,7 @@
   <section id="about" aria-labelledby="aboutTitle">
     <div class="wrap">
       <div class="about-grid">
+        <figure class="about-photo"><img src="assets/editorial/storefront.webp" srcset="assets/editorial/storefront-640.webp 640w, assets/editorial/storefront.webp 1386w" sizes="(max-width:760px) 100vw, 45vw" alt="Juwelier Damla in der Wellritzstraße 3" width="1386" height="1135" loading="lazy"><figcaption>Hier beginnt die Suche nach Ihrem Lieblingsstück.</figcaption></figure>
 
         <div class="about-body">
           <span class="eyebrow reveal">Über uns</span>
@@ -1782,16 +1783,16 @@
 
       <div class="gallery-grid">
         <figure class="gallery-card gallery-card--tall reveal-img">
-          <img src="assets/laden-innen-2.jpg" alt="Blick in die beleuchtete Auslage von Juwelier Damla mit Colliers, Ohrringen und Ringen" width="382" height="510" loading="lazy">
-          <figcaption>Unser Verkaufsraum</figcaption>
+          <img src="assets/editorial/window-detail.webp" srcset="assets/editorial/window-detail-640.webp 640w, assets/editorial/window-detail.webp 1116w" sizes="(max-width:760px) 46vw, 45vw" alt="Seitlicher Blick in das Schaufenster von Juwelier Damla" width="1116" height="1409" loading="lazy">
+          <figcaption>Ein Blick in unsere Auslage</figcaption>
         </figure>
         <figure class="gallery-card gallery-card--tall reveal-img d1">
-          <img src="assets/schaufenster.jpg" alt="Schaufenster von Juwelier Damla mit Goldketten, Armbändern und Colliers" width="900" height="1200" loading="lazy">
+          <img src="assets/editorial/display.webp" srcset="assets/editorial/display-640.webp 640w, assets/editorial/display.webp 1122w" sizes="(max-width:760px) 46vw, 45vw" alt="Schaufenster von Juwelier Damla mit Goldketten, Armbändern und Colliers" width="1122" height="1402" loading="lazy">
           <figcaption>Unser Schaufenster</figcaption>
         </figure>
         <figure class="gallery-card gallery-card--wide reveal-img d2">
-          <img src="assets/aussenansicht.jpg" alt="Außenansicht von Juwelier Damla in der Wellritzstraße 3 in Wiesbaden" width="1200" height="984" loading="lazy">
-          <figcaption>Wellritzstraße 3, Wiesbaden</figcaption>
+          <img src="assets/editorial/interior.webp" srcset="assets/editorial/interior-640.webp 640w, assets/editorial/interior.webp 1086w" sizes="90vw" alt="Innenraum von Juwelier Damla mit Beratungstheke und Schmuckvitrinen" width="1086" height="1448" loading="lazy">
+          <figcaption>Ein Platz für Ihre Wünsche</figcaption>
         </figure>
       </div>
     </div>
@@ -1954,8 +1955,8 @@
               </div>
               <div>
                 <span class="c-item__label">Website</span>
-                <a class="c-item__value" href="https://juwelier-damla.de"
-                   target="_blank" rel="noopener noreferrer">juwelier-damla.de</a>
+                <a class="c-item__value" href="index.html"
+                   target="_blank" rel="noopener noreferrer">Juwelier Damla</a>
               </div>
             </div>
 
@@ -2055,7 +2056,7 @@
                 Wellritzstraße 3<br>65183 Wiesbaden
               </a>
             </li>
-            <li><a href="https://juwelier-damla.de" target="_blank" rel="noopener noreferrer">juwelier-damla.de</a></li>
+            <li><a href="index.html" target="_blank" rel="noopener noreferrer">Juwelier Damla</a></li>
           </ul>
         </div>
 
@@ -2250,9 +2251,9 @@
     // ── Öffnungsstatus (Hero-Badge + "Heute"-Zeile) ───
     // Mo–Fr 09:30–19:00 · Sa 09:30–17:00 · So geschlossen
     (function () {
-      const now = new Date();
-      const day = now.getDay();               // 0 = Sonntag
-      const mins = now.getHours() * 60 + now.getMinutes();
+      const parts = Object.fromEntries(new Intl.DateTimeFormat('en-US', {timeZone:'Europe/Berlin',weekday:'short',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date()).map(p=>[p.type,p.value]));
+      const day = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].indexOf(parts.weekday);
+      const mins = Number(parts.hour) * 60 + Number(parts.minute);
 
       document.querySelectorAll('#hoursList .hour-row').forEach(row => {
         const days = (row.dataset.days || '').split(',');

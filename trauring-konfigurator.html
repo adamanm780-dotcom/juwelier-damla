@@ -2873,6 +2873,7 @@
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Trauring-Konfigurator – Eheringe selbst zusammenstellen | Juwelier Damla Wiesbaden">
 <meta name="twitter:description" content="Eheringe und Trauringe online konfigurieren: Legierung, Profil, Breite, Oberfläche, Steinbesatz und Gravur live in 3D — mit Preis-Richtwert. Beratung bei Juwelier Damla, Wellritzstraße 3 in Wiesbaden.">
+  <link rel="stylesheet" href="site-design.css">
 </head>
 
 <body>
@@ -2926,15 +2927,13 @@
     </a>
 
     <ul class="nav__links" id="navLinks">
-      <li><a href="index.html#about">Über uns</a></li>
-      <li><a href="index.html#collections">Kollektionen</a></li>
+      <li><a href="index.html#collections">Schmuck</a></li>
       <li><a href="trauringe.html">Trauringe</a></li>
-      <li><a href="trauring-konfigurator.html" class="is-active" aria-current="page">Konfigurator</a></li>
       <li><a href="verlobungsringe.html">Verlobungsringe</a></li>
-      <li><a href="reparaturen.html">Reparaturen</a></li>
-      <li><a href="index.html#services">Leistungen</a></li>
-      <li><a href="index.html#reviews">Bewertungen</a></li>
-      <li><a href="index.html#contact">Öffnungszeiten</a></li>
+      <li><a href="trauring-konfigurator.html" class="is-active" aria-current="page">Ringatelier</a></li>
+      <li><a href="reparaturen.html">Service</a></li>
+      <li><a href="index.html#about">Über uns</a></li>
+      <li><a href="index.html#contact">Kontakt</a></li>
       <li><a href="tel:+496115807830" class="nav__cta">Anrufen</a></li>
     </ul>
 
@@ -3182,7 +3181,7 @@
                 Wellritzstraße 3<br>65183 Wiesbaden
               </a>
             </li>
-            <li><a href="https://juwelier-damla.de" target="_blank" rel="noopener noreferrer">juwelier-damla.de</a></li>
+            <li><a href="index.html" target="_blank" rel="noopener noreferrer">Juwelier Damla</a></li>
           </ul>
         </div>
 
@@ -3210,7 +3209,7 @@
     (function () {
       const el  = document.getElementById('loader');
       const bar = document.getElementById('loaderBar');
-      if (!el) return;
+      if (!el || !document.querySelector('.hero__video')) return;
       document.body.classList.add('is-loading');
 
       // Nur der erste Clip wird abgewartet. Frueher waren es beide — dann
@@ -3536,9 +3535,9 @@
     // ── Öffnungsstatus (Hero-Badge + "Heute"-Zeile) ───
     // Mo–Fr 09:30–19:00 · Sa 09:30–17:00 · So geschlossen
     (function () {
-      const now = new Date();
-      const day = now.getDay();               // 0 = Sonntag
-      const mins = now.getHours() * 60 + now.getMinutes();
+      const parts = Object.fromEntries(new Intl.DateTimeFormat('en-US', {timeZone:'Europe/Berlin',weekday:'short',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date()).map(p=>[p.type,p.value]));
+      const day = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].indexOf(parts.weekday);
+      const mins = Number(parts.hour) * 60 + Number(parts.minute);
 
       document.querySelectorAll('#hoursList .hour-row').forEach(row => {
         const days = (row.dataset.days || '').split(',');
@@ -3571,5 +3570,6 @@
   </script>
   <script type="module" src="assets/konfigurator.js"></script>
 
+<script src="assets/site-design.js" defer></script>
 </body>
 </html>

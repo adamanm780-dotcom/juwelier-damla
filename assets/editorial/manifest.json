@@ -1,0 +1,44 @@
+[
+  {
+    "file": "storefront.webp",
+    "width": 1386,
+    "height": 1135,
+    "source": "damla-storefront-enhanced.png",
+    "kind": "AI-edited shop photograph"
+  },
+  {
+    "file": "window-detail.webp",
+    "width": 1116,
+    "height": 1409,
+    "source": "damla-window-perspective-enhanced.png",
+    "kind": "AI-edited shop photograph"
+  },
+  {
+    "file": "display.webp",
+    "width": 1122,
+    "height": 1402,
+    "source": "damla-display-enhanced.png",
+    "kind": "AI-edited shop photograph"
+  },
+  {
+    "file": "rings-hero.webp",
+    "width": 1122,
+    "height": 1402,
+    "source": "damla-rings-hero-editorial.png",
+    "kind": "AI-generated editorial inspiration"
+  },
+  {
+    "file": "rings-silk.webp",
+    "width": 1536,
+    "height": 1024,
+    "source": "damla-rings-silk-editorial.png",
+    "kind": "AI-generated editorial inspiration"
+  },
+  {
+    "file": "interior.webp",
+    "width": 1086,
+    "height": 1448,
+    "source": "damla-interior-enhanced.png",
+    "kind": "AI-edited shop photograph"
+  }
+]

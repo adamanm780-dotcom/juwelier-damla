@@ -34,15 +34,13 @@ if 'verlobungsring-konfigurator.html' not in footer_sub:
     footer_sub = footer_sub.replace('<li><a href="verlobungsringe.html">', '<li><a href="verlobungsring-konfigurator.html">Verlobungsring konfigurieren</a></li>\n            <li><a href="verlobungsringe.html">')
 
 NAV_ITEMS = [
-    ('index.html#about',       'Über uns'),
-    ('index.html#collections', 'Kollektionen'),
-    ('trauringe.html',         'Trauringe'),
-    ('trauring-konfigurator.html', 'Konfigurator'),
-    ('verlobungsringe.html',   'Verlobungsringe'),
-    ('reparaturen.html',       'Reparaturen'),
-    ('index.html#services',    'Leistungen'),
-    ('index.html#reviews',     'Bewertungen'),
-    ('index.html#contact',     'Öffnungszeiten'),
+    ('index.html#collections', 'Schmuck'),
+    ('trauringe.html', 'Trauringe'),
+    ('verlobungsringe.html', 'Verlobungsringe'),
+    ('trauring-konfigurator.html', 'Ringatelier'),
+    ('reparaturen.html', 'Service'),
+    ('index.html#about', 'Über uns'),
+    ('index.html#contact', 'Kontakt'),
 ]
 
 
@@ -798,6 +796,8 @@ VR_MODELLE_SECTION = """  <section id="modelle" class="ring-scroll" aria-labelle
       var panels = root.querySelectorAll('.ring-panel');
       var dots  = root.querySelectorAll('.ring-scroll__dot');
       if (!pin || !track || !view || !panels.length) return;
+      // The editorial grid does not need the former horizontal scroll handler.
+      if (getComputedStyle(pin).position === 'static') return;
 
       var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
       var small  = window.matchMedia('(max-width: 900px)');
@@ -1135,6 +1135,7 @@ TEMPLATE = """<!DOCTYPE html>
 %(style)s
   <style>%(subcss)s  </style>
 %(extrahead)s
+  <link rel="stylesheet" href="site-design.css">
 </head>
 
 <body>
@@ -1157,6 +1158,7 @@ TEMPLATE = """<!DOCTYPE html>
 
 %(script)s
 %(extrabody)s
+<script src="assets/site-design.js" defer></script>
 </body>
 </html>
 """

@@ -235,6 +235,7 @@ TEMPLATE = """<!DOCTYPE html>
   <link rel="icon" href="assets/logo-mark.webp" type="image/webp">
 %(fonts)s
 %(style)s
+<link rel="stylesheet" href="site-design.css">
 </head>
 <body>
 %(skip)s
@@ -249,6 +250,7 @@ TEMPLATE = """<!DOCTYPE html>
 %(footer)s
 %(script)s
 %(shopjs)s
+<script src="assets/site-design.js" defer></script>
 </body>
 </html>
 """

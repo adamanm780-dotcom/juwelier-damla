@@ -8,7 +8,7 @@ The production site remains on GitHub Pages. `.openai/hosting.json` identifies t
 python build-index.py
 python build-subpages.py
 python check.py
-node tools/check-config.mjs
+node --experimental-loader ./tools/node-loader.mjs tools/check-config.mjs
 node --experimental-loader ./tools/node-loader.mjs tools/check-models.mjs
 python tools/build-static.py
 ```
@@ -22,10 +22,18 @@ python tools/build-static.py
 & 'C:\Program Files\Blender Foundation\Blender 5.1\blender.exe' --background tools/damla-jewelry.blend --python tools/check-jewelry.py
 ```
 
-The second command validates manifold topology and convex, planar gemstone facets, then renders an inspection image using Cycles. This is an asset check; it does not represent a browser render. Browser visual/interaction QA has not been performed.
+The second command validates manifold topology and convex, planar gemstone facets, then renders an inspection image using Cycles. This is an asset check; it does not represent a browser render. Both configurators have also been checked in Chromium with rendered WebGL models and changes to metal, profile, setting and cut.
 
 `assets/models/jewelry.glb` uses millimetre-scale geometry. Runtime radial deformation preserves the specified inner circumference independently of width and thickness, with inverse-Jacobian normals. Gemstone geometry remains flat shaded and uses actual facet-plane intersection, five internal reflection bounces and three refractive indices for subtle dispersion. This is a real-time approximation, not an optical or manufacturing simulation.
 
 The linked configuration is validated before use. Engagement price and availability require a consultation; wedding price assumptions are preserved from the existing project. Inquiry buttons prepare a message only after the visitor chooses that action.
 
 The pre-existing, untracked `assets/katalog/` directory is unrelated and excluded from the private build.
+
+## Site design and photography
+
+`site-design.css` supplies the shared visual treatment. `home-hero.body.html` is the homepage opening; `trauringe.body.html` contains the three bounded sticky story cards. `assets/site-design.js` adds their restrained desktop transition, with static cards on mobile and for reduced motion. The engagement model overview uses a responsive grid instead of horizontal scroll capture.
+
+`assets/editorial/` contains four AI-edited photographs of the actual shop and two generated editorial ring images, plus responsive WebP sizes. Sources and full image-generation prompts are recorded in `generation-notes.md`, `ring-generation-notes.md` and the asset manifest. Small merchandise details in enhanced photographs are not inventory references. No verified Instagram profile was available, so these assets are not represented as Instagram downloads.
+
+The redesign was visually checked at 390, 1440 and 3440 pixels. All ten pages were checked in Chromium for loading images, script errors and mobile overflow. The mobile navigation and both ring configurators were exercised. The existing business identity/contact placeholders in the imprint still require verified information from the owner.
