@@ -396,7 +396,7 @@ NAV_LINKS = """    <ul class="nav__links" id="navLinks">
       <li><a href="#collections">Schmuck</a></li>
       <li><a href="trauringe.html">Trauringe</a></li>
       <li><a href="verlobungsringe.html">Verlobungsringe</a></li>
-      <li><a href="trauring-konfigurator.html">Ringatelier</a></li>
+      <li><a href="trauring-konfigurator.html">Konfigurator</a></li>
       <li><a href="reparaturen.html">Service</a></li>
       <li><a href="#about">Über uns</a></li>
       <li><a href="#anfrage">Kontakt</a></li>

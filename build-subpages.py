@@ -37,7 +37,7 @@ NAV_ITEMS = [
     ('index.html#collections', 'Schmuck'),
     ('trauringe.html', 'Trauringe'),
     ('verlobungsringe.html', 'Verlobungsringe'),
-    ('trauring-konfigurator.html', 'Ringatelier'),
+    ('trauring-konfigurator.html', 'Konfigurator'),
     ('reparaturen.html', 'Service'),
     ('index.html#about', 'Über uns'),
     ('index.html#anfrage', 'Kontakt'),
