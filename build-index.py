@@ -546,6 +546,8 @@ JS = """
       const FADE = 800;      // muss zur CSS-Transition passen
 
       // Fortschritt fuer den Ladescreen: jeder Clip meldet sich einmal.
+      // Beide Clips werden ausdruecklich angestossen, damit der zweite
+      // bereits gepuffert ist, wenn die erste Blende kommt.
       vids.forEach(function (v) {
         let told = false;
         function ready() {
@@ -553,12 +555,18 @@ JS = """
           told = true;
           if (window.__heroWarm) window.__heroWarm();
         }
+        v.muted = true;
+        v.setAttribute('muted', '');
+        try { v.load(); } catch (e) {}
         if (v.readyState >= 2) ready();
         else {
           v.addEventListener('loadeddata', ready, { once: true });
           v.addEventListener('error', ready, { once: true });
         }
       });
+      // Ein Clip gilt als spielbereit, wenn er ueber das erste Bild hinaus
+      // gepuffert hat oder fehlgeschlagen ist (dann zeigt er sein Poster).
+      function canShow(v) { return v.readyState >= 3 || !!v.error; }
 
       // Wer weniger Bewegung moechte, bekommt nur das Standbild.
       const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -592,12 +600,33 @@ JS = """
             if (vids[idx] !== prev) prev.classList.remove('is-on');
           }, FADE);
         }
-        try { next.currentTime = 0; } catch (e) {}
-        next.classList.add('is-on');
+        try { if (next.currentTime > 0.05) next.currentTime = 0; } catch (e) {}
+        // Erst einblenden, wenn der Clip wirklich laeuft (oder nach kurzer
+        // Frist mit seinem Poster) — so gibt es kein leeres Bild.
+        clearTimeout(next.__reveal);
+        const reveal = function () { clearTimeout(next.__reveal); next.classList.add('is-on'); };
+        if (!prev) reveal();
+        else {
+          next.addEventListener('playing', reveal, { once: true });
+          next.__reveal = setTimeout(reveal, 350);
+        }
         play(next);
         clearTimeout(timer);
         nextAt = Date.now() + SLOT;
-        timer = setTimeout(function () { show((i + 1) %% vids.length, next); }, SLOT);
+        timer = setTimeout(function () { advance(i, next); }, SLOT);
+      }
+
+      // Weiter zum naechsten Clip — aber nur, wenn der schon gepuffert
+      // ist. Sonst laeuft der aktuelle noch einmal von vorn, statt dass
+      // eine leere oder ruckelnde Blende zu sehen ist.
+      function advance(i, cur) {
+        const n = (i + 1) %% vids.length;
+        const next = vids[n];
+        if (canShow(next) || Date.now() > nextAt + 4000) { show(n, cur); return; }
+        if (cur.paused || cur.ended) { try { cur.currentTime = 0; } catch (e) {} play(cur); }
+        nextAt = Date.now() + 700;
+        clearTimeout(timer);
+        timer = setTimeout(function () { advance(i, cur); }, 700);
       }
 
       // Sicherheitsnetz, damit die Schleife wirklich nie endet: iOS haelt
@@ -607,7 +636,7 @@ JS = """
       function watch() {
         if (!running) return;
         const v = vids[idx];
-        if (Date.now() > nextAt + 900) { show((idx + 1) %% vids.length, v); return; }
+        if (Date.now() > nextAt + 900) { advance(idx, v); return; }
         if (v.paused && !v.ended) play(v);
       }
 
@@ -640,6 +669,18 @@ JS = """
         if (document.hidden) stop();
         else if (sec.getBoundingClientRect().bottom > 0) start();
       });
+      // Zurueck aus dem Browser-Cache: Timer und Videos neu anstossen.
+      window.addEventListener('pageshow', function (e) {
+        if (e.persisted) { stop(); if (sec.getBoundingClientRect().bottom > 0) start(); }
+      });
+      // Wenn der Browser das automatische Abspielen verweigert (z. B. iOS
+      // Stromsparmodus), startet die erste Beruehrung die Clips.
+      const unlock = function () {
+        const v = vids[idx];
+        if (running && v.paused) play(v);
+      };
+      window.addEventListener('touchstart', unlock, { passive: true, once: true });
+      window.addEventListener('pointerdown', unlock, { passive: true, once: true });
       start();
 
       // Scroll-Hinweis verblasst, sobald es losgeht.

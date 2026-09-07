@@ -2177,8 +2177,10 @@
 
     // ── Schmuckkästchen: Scroll-Animation (Frame-Scrubbing) ──
     // 50 Frames aus einem Greenscreen-Video, beim Freistellen schon
-    // mit Alphakanal versehen. Deshalb hier kein Keying mehr pro Bild
-    // wie beim alten Ring — das Canvas zeichnet nur noch.
+    // mit Alphakanal versehen. Das Canvas zeichnet nur noch.
+    // Die Frames werden früh, in Scroll-Nähe zuerst und mit begrenzter
+    // Parallelität geladen und vor dem Zeichnen dekodiert, damit die
+    // Bewegung von Anfang an ohne Sprünge läuft.
     (function () {
       const canvas  = document.getElementById('kastenCanvas');
       const sektion = document.getElementById('ring');
@@ -2186,40 +2188,92 @@
       if (!canvas || !sektion) return;
       const ctx = canvas.getContext('2d');
       const FRAMES = 50;
+      const PARALLEL = 3;
       const SRC = i => 'assets/kasten/kasten-' + String(i + 1).padStart(3, '0') + '.webp';
       const imgs = new Array(FRAMES);
+      const done = new Array(FRAMES).fill(false);
       const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      let current = -1;
-      const ready = i => imgs[i] && imgs[i].complete && imgs[i].naturalWidth;
+      let current = -1, target = 0, loading = 0, started = false;
 
       function draw(i) {
-        if (!ready(i)) return;
+        if (!done[i]) return;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(imgs[i], 0, 0, canvas.width, canvas.height);
         current = i;
       }
-      function load(i, cb) {
+      // Das dem Ziel nächste bereits geladene Bild, bevorzugt davor.
+      function nearest(i) {
+        for (let d = 0; d < FRAMES; d++) {
+          if (i - d >= 0 && done[i - d]) return i - d;
+          if (i + d < FRAMES && done[i + d]) return i + d;
+        }
+        return -1;
+      }
+      function settle() {
+        const j = nearest(target);
+        if (j >= 0 && j !== current) draw(j);
+      }
+      function finished(i) {
+        done[i] = true;
+        loading--;
+        settle();
+        pump();
+      }
+      function load(i) {
         if (imgs[i]) return;
         const im = new Image();
         im.decoding = 'async';
-        if (cb) im.onload = cb;
-        im.src = SRC(i);
         imgs[i] = im;
+        loading++;
+        im.onload = function () {
+          if (im.decode) im.decode().then(() => finished(i), () => finished(i));
+          else finished(i);
+        };
+        im.onerror = function () { loading--; imgs[i] = null; pump(); };
+        im.src = SRC(i);
+      }
+      // Reihenfolge: Ziel-Frame, dann abwechselnd davor und danach.
+      function next() {
+        for (let d = 0; d < FRAMES; d++) {
+          const a = target + d, b = target - d;
+          if (a < FRAMES && !imgs[a]) return a;
+          if (b >= 0 && !imgs[b]) return b;
+        }
+        return -1;
+      }
+      function pump() {
+        if (!started) return;
+        while (loading < PARALLEL) {
+          const i = next();
+          if (i < 0) return;
+          load(i);
+        }
+      }
+      function start() {
+        if (started) return;
+        started = true;
+        pump();
       }
 
       if (reduced) {                       // offener Kasten genügt
-        load(FRAMES - 1, () => draw(FRAMES - 1));
+        target = FRAMES - 1;
+        start();
         return;
       }
 
-      load(0, () => draw(0));
-      // Die restlichen Bilder sind zusammen gut zwei Megabyte. Erst
-      // laden, wenn die Seite steht — sonst nehmen sie dem Hero-Video
-      // die Leitung weg.
-      const rest = () => { for (let i = 1; i < FRAMES; i++) load(i); };
-      if (document.readyState === 'complete') rest();
-      else window.addEventListener('load', rest, { once: true });
+      // Das erste Bild sofort; die übrigen, sobald der Kasten in die
+      // Nähe rückt oder die Seite kurz gestanden hat — nicht erst nach
+      // dem vollständigen Laden der Hero-Videos.
+      load(0);
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(function (es, obs) {
+          if (es.some(e => e.isIntersecting)) { start(); obs.disconnect(); }
+        }, { rootMargin: '150% 0px' }).observe(sektion);
+      }
+      window.addEventListener('DOMContentLoaded', () => setTimeout(start, 900), { once: true });
+      window.addEventListener('load', start, { once: true });
+      setTimeout(start, 2500);
 
       let ticking = false;
       function update() {
@@ -2227,12 +2281,8 @@
         const runway = sektion.offsetHeight - window.innerHeight;
         if (runway <= 0) return;
         const p = Math.min(1, Math.max(0, -sektion.getBoundingClientRect().top / runway));
-        const idx = Math.min(FRAMES - 1, Math.round(p * (FRAMES - 1)));
-        if (idx !== current) {
-          let j = idx;
-          while (j >= 0 && !ready(j)) j--;        // nächstes geladenes Frame
-          if (j >= 0 && j !== current) draw(j);
-        }
+        target = Math.min(FRAMES - 1, Math.round(p * (FRAMES - 1)));
+        if (target !== current) { settle(); pump(); }
         canvas.style.transform = 'scale(' + (0.95 + p * 0.08).toFixed(4) + ')';
         // Gegenbewegung: der Schimmer wandert nach unten, während die
         // Seite nach oben läuft. Bewusst klein gehalten — er soll Tiefe
@@ -2241,10 +2291,10 @@
           schimmer.style.transform = 'translateY(' + ((p - 0.5) * 96).toFixed(1) + 'px)';
         }
       }
-      window.addEventListener('scroll', () => {
-        if (!ticking) { ticking = true; requestAnimationFrame(update); }
-      }, { passive: true });
-      window.addEventListener('resize', update);
+      const schedule = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
+      window.addEventListener('scroll', schedule, { passive: true });
+      window.addEventListener('resize', schedule);
+      window.addEventListener('pageshow', schedule);
       update();
     })();
 
