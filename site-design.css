@@ -96,7 +96,7 @@ a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible,s
 /* Let labels and long German words determine their boxes, without clipping. */
 .tr-karte,.service-card,.review-card,.ed-text,.fassung figcaption,.footer-col,.shop-card{min-width:0;overflow-wrap:anywhere}
 .btn-solid,.btn-gold,.btn-ghost,.btn-gold-inv,.btn-line-light,.text-link{max-width:100%;white-space:normal;overflow-wrap:anywhere;text-align:center}
-.text-link{min-width:0;text-align:left}.text-link svg{flex-shrink:0}
+.text-link{min-width:0;text-align:left}.text-link svg{flex-shrink:0}.arrow-icon{width:1em;height:1em;display:inline-block;flex-shrink:0}
 .sub-hero__title,.section-title,.ed-title,.tr-karte__name,.service-title{overflow-wrap:break-word;hyphens:auto}
 .tr-konf>*,.atelier-title>*{min-width:0;max-width:100%}
 .atelier-title h1{overflow-wrap:anywhere}
