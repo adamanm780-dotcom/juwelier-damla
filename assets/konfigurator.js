@@ -16,7 +16,8 @@
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/OrbitControls.js';
-import { loadJewelry, weddingGeometry, createStudio, diamondMesh } from './jewelry-studio.js';
+import { loadJewelry, weddingGeometry, createStudio, createWeddingStudio, diamondMesh } from './jewelry-studio.js?v=20260921-blender2';
+import { weddingMetal, assignRingMaterials, sampleRingProfile } from './wedding-materials.js?v=20260921-blender2';
 let jewelry, studio;
 
 /* ══════════════════════════════════════════════════════════════
@@ -29,9 +30,9 @@ const LEGIERUNGEN = {
   gelbgold: {
     label: 'Gelbgold',
     karate: {
-      '333': { label: '333 / 8 kt',  farbe: 0xedd29e, dichte: 11.0 },
-      '585': { label: '585 / 14 kt', farbe: 0xf8d17c, dichte: 13.1 },
-      '750': { label: '750 / 18 kt', farbe: 0xf8c767, dichte: 15.5 },
+      '333': { label: '333 / 8 kt',  farbe: 0xf0ddb6, dichte: 11.0 },
+      '585': { label: '585 / 14 kt', farbe: 0xf8d69a, dichte: 13.1 },
+      '750': { label: '750 / 18 kt', farbe: 0xf2d18b, dichte: 15.5 },
     },
   },
   weissgold: {
@@ -324,12 +325,12 @@ function steinPlan(k) {
         start = -Math.PI / 2;
       } else {
         schritt = abstand / rA;
-        start = -Math.PI / 2 - ((n - 1) / 2) * schritt;
+        start = -.25 - ((n - 1) / 2) * schritt;
       }
     } else {
       n = b.anzahl;
       schritt = abstand / rA;
-      start = -Math.PI / 2 - ((n - 1) / 2) * schritt;
+      start = -.25 - ((n - 1) / 2) * schritt;
     }
 
     for (let i = 0; i < n; i++) {
@@ -561,16 +562,16 @@ function webglVerfuegbar() {
   }
 }
 
-function szeneAufbauen() {
+async function szeneAufbauen() {
   // preserveDrawingBuffer haelt das Bild nach dem Zeichnen im Puffer —
   // ohne das liefert toDataURL() fuer den Export ein leeres Bild.
   renderer = new THREE.WebGLRenderer({
     antialias: true, alpha: true, preserveDrawingBuffer: true,
   });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setPixelRatio(Math.min(Math.max(window.devicePixelRatio, 1.5), 2));
   renderer.setSize(buehne.clientWidth, buehne.clientHeight);
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 0.95;
+  renderer.toneMapping = THREE.NeutralToneMapping;
+  renderer.toneMappingExposure = 0.96;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   buehne.appendChild(renderer.domElement);
 
@@ -579,22 +580,23 @@ function szeneAufbauen() {
   scene = new THREE.Scene();
 
   // Studio-Environment ohne externe HDR-Datei
-  studio = createStudio(renderer);
+  try { studio = await createWeddingStudio(renderer); buehne.dataset.studio = 'blender'; }
+  catch (error) { console.warn('Studio-Reflexionen: Ersatzbeleuchtung aktiv',error); studio = createStudio(renderer); buehne.dataset.studio = 'fallback'; }
   scene.environment = studio.metal;
 
   camera = new THREE.PerspectiveCamera(32, buehne.clientWidth / buehne.clientHeight, 1, 400);
   // Dreiviertelblick: frontal sieht man nur den Kreis, hier auch das Profil
-  camera.position.set(48, 32, 62);
+  camera.position.set(5, 24, 82);
 
   // Dreipunktlicht: Fuehrung von links oben, weiche Aufhellung von rechts,
   // Kante von hinten. Mit nur zwei Lichtern blieb die abgewandte Seite tot.
-  const key = new THREE.DirectionalLight(0xfff6e8, 1.35);
+  const key = new THREE.DirectionalLight(0xfff6e8, 0.3);
   key.position.set(-18, 26, 34);
   scene.add(key);
-  const fill = new THREE.DirectionalLight(0xfffaf2, 0.55);
+  const fill = new THREE.DirectionalLight(0xfffaf2, 0.15);
   fill.position.set(26, 8, 20);
   scene.add(fill);
-  const rim = new THREE.DirectionalLight(0xffffff, 0.85);
+  const rim = new THREE.DirectionalLight(0xffffff, 0.25);
   rim.position.set(10, 14, -30);
   scene.add(rim);
 
@@ -675,19 +677,19 @@ function groesseAnpassen() {
 function kameraEinpassen(erzwingen) {
   needsRender = true;
   if (!camera || !controls) return;
-  const rEins = zustand.eins.groesse / (2 * Math.PI) + zustand.eins.staerke;
-  const rZwei = zustand.zwei.groesse / (2 * Math.PI) + zustand.zwei.staerke;
-  const breite = 2 * (rEins + rZwei) + 3.6;
-  const hoehe = 2 * Math.max(rEins, rZwei);
+  const bounds=new THREE.Box3().setFromObject(ringGruppe);
+  const size=bounds.getSize(new THREE.Vector3());
+  const center=bounds.getCenter(new THREE.Vector3());
+  const breite=size.x, hoehe=size.y;
 
   const fovY = THREE.MathUtils.degToRad(camera.fov);
   const fovX = 2 * Math.atan(Math.tan(fovY / 2) * camera.aspect);
   const noetig = Math.max(
     breite / 2 / Math.tan(fovX / 2),
     hoehe / 2 / Math.tan(fovY / 2)
-  ) * 1.3;
+  ) * 1.26;
 
-  controls.target.set(0, hoehe / 2, 0);
+  controls.target.copy(center);
   controls.minDistance = noetig * 0.5;
   controls.maxDistance = noetig * 2.4;
 
@@ -754,7 +756,7 @@ const standard = () => ({
   teilung: 'mitte',
   fuge: 'ohne',
   schrift: 'klassisch',
-  profil: 'bombiert',
+  profil: 'flach',
   breite: 4.5,
   staerke: 1.6,
   oberflaeche: 'poliert',
@@ -869,12 +871,16 @@ const ringSignaturen = { eins: '', zwei: '' };
    Maps liegen im Cache und werden bewusst behalten — sie sind teuer und
    fuer alle Ringe gleich. Ebenso das gemeinsame Brillant-Material. */
 function altEntsorgen(gruppe) {
-  gruppe.traverse((o) => {
-    if (!o.isMesh) return;
-    if (!o.userData.sharedGeometry) o.geometry.dispose();
-    if (o.material !== BRILLANT_MATERIAL) {
-      if (o.material.map && !texturGecacht(o.material.map)) o.material.map.dispose();
-      o.material.dispose();
+  const disposed=new Set();
+  gruppe.traverse(o=>{
+    if(!o.isMesh)return;
+    if(!o.userData.sharedGeometry)o.geometry.dispose();
+    const materials=Array.isArray(o.material)?o.material:[o.material];
+    for(const material of materials){
+      if(disposed.has(material)||material===BRILLANT_MATERIAL||material.userData.sharedJewelry)continue;
+      disposed.add(material);
+      for(const key of ['map','normalMap','roughnessMap','bumpMap'])if(material[key]&&!texturGecacht(material[key]))material[key].dispose();
+      material.dispose();
     }
   });
   gruppe.clear();
@@ -886,23 +892,26 @@ function texturGecacht(tex) {
 }
 
 function rillenAnwenden(geo, k, ri) {
-  const positions = FUGEN[k.fuge].positions;
-  if (!positions.length) return;
-  const vertices = geo.attributes.position;
-  for (let i = 0; i < vertices.count; i++) {
-    const x = vertices.getX(i), y = vertices.getY(i), z = vertices.getZ(i);
-    const radius = Math.hypot(x,z);
-    if (radius < ri + k.staerke * .45) continue;
-    let depth = 0;
-    for (const position of positions) {
-      const distance = Math.abs(y - position * k.breite / 2);
-      depth += Math.max(0, 1 - distance / .16) * .12;
+  const positions=FUGEN[k.fuge].positions;
+  if(!positions.length)return;
+  const p=geo.attributes.position,n=geo.attributes.normal;
+  for(let i=0;i<p.count;i++){
+    const x=p.getX(i),y=p.getY(i),z=p.getZ(i),r=Math.hypot(x,z);
+    if(r<ri+k.staerke*.45)continue;
+    let depth=0,slope=0;
+    for(const position of positions){
+      const distance=y-position*k.breite/2;
+      if(Math.abs(distance)<.19){
+        const phase=distance/.19*Math.PI;
+        depth+=.06*(1+Math.cos(phase));
+        slope+=-.06*Math.PI/.19*Math.sin(phase);
+      }
     }
-    const factor = (radius - depth) / radius;
-    vertices.setXYZ(i, x * factor, y, z * factor);
+    const u=x/r,v=z/r,radial=n.getX(i)*u+n.getZ(i)*v,tangent=-n.getX(i)*v+n.getZ(i)*u;
+    const normal=new THREE.Vector3(u*radial-v*tangent*r/(r-depth),n.getY(i)+slope*radial,v*radial+u*tangent*r/(r-depth)).normalize();
+    p.setXYZ(i,u*(r-depth),y,v*(r-depth));n.setXYZ(i,normal.x,normal.y,normal.z);
   }
-  vertices.needsUpdate = true;
-  geo.computeVertexNormals();
+  p.needsUpdate=n.needsUpdate=true;
 }
 
 function ringBauen(seite) {
@@ -926,26 +935,24 @@ function ringBauen(seite) {
     altEntsorgen(gruppe);
   }
 
-  // Grundring
-  const koerper = new THREE.Mesh(
-    ringGeometrie(ri, T, W, profil),
-    metallMaterial(karat.farbe, k.oberflaeche)
-  );
-  rillenAnwenden(koerper.geometry, k, ri);
+  // A continuous Blender mesh with polished comfort interior and finish-specific exterior.
+  const geometry=ringGeometrie(ri,T,W,profil);
+  rillenAnwenden(geometry,k,ri);
+  assignRingMaterials(geometry,k,TEILUNGEN[k.teilung].bands);
+  const partner=LEGIERUNGEN[k.zweitmetall];
+  const partnerKarat=partner.karate[k.karat]||Object.values(partner.karate)[0];
+  const source=jewelry.get('Wedding_'+k.profil);
+  const profileLength=source.userData.profile_perimeter_mm||12.4;
+  const dimensions={circumference:2*Math.PI*(ri+T),width:Math.max(3,profileLength+(W-4.5)*2+(T-1.7)*2)};
+  const materials=[
+    weddingMetal(karat.farbe,k.oberflaeche,dimensions,maxAniso),
+    weddingMetal(karat.farbe,'poliert',dimensions,maxAniso),
+    weddingMetal(partnerKarat.farbe,k.oberflaeche,dimensions,maxAniso),
+    weddingMetal(partnerKarat.farbe,'poliert',dimensions,maxAniso),
+  ];
+  materials[1].envMapIntensity=materials[3].envMapIntensity=1;
+  const koerper=new THREE.Mesh(geometry,materials);
   gruppe.add(koerper);
-
-  // Material zones follow the selected cross-section and share its grooves.
-  if (k.bicolor) {
-    const partner = LEGIERUNGEN[k.zweitmetall];
-    const pKarat = partner.karate[k.karat] || Object.values(partner.karate)[0];
-    for (const [start, end] of TEILUNGEN[k.teilung].bands) {
-      const geo = bandGeometrie(ri, T, W, profil, start, end);
-      rillenAnwenden(geo, k, ri);
-      const band = new THREE.Mesh(geo, metallMaterial(pKarat.farbe, k.oberflaeche));
-      band.material.side = THREE.DoubleSide;
-      gruppe.add(band);
-    }
-  }
 
   // Brillanten in der Aussenflaeche — Zahl und Lage kommen aus steinPlan
   const plan = steinPlan(k);
@@ -986,16 +993,18 @@ function ringBauen(seite) {
 
   // Innengravur
   if (k.gravur.trim()) {
-    gruppe.add(gravurMesh(ri, W, k.gravur.trim(), k.schrift));
+    gruppe.add(gravurMesh(ri, W, k.gravur.trim(), k.schrift, geometry, karat.farbe));
   }
 
   // Ring aufstellen: Lochachse zeigt zum Betrachter
-  gruppe.rotation.set(Math.PI / 2, seite === 'eins' ? -.12 : .12, seite === 'eins' ? -.12 : .12);
+  gruppe.rotation.set(Math.PI / 2, 0, 0);
+  gruppe.rotateOnWorldAxis(new THREE.Vector3(0,1,0),seite === 'eins' ? -1.18 : .95);
+  gruppe.rotateOnWorldAxis(new THREE.Vector3(0,0,1),seite === 'eins' ? -.04 : -.19);
   return gruppe;
 }
 
 /** Innengravur als halbtransparente Textur auf der Innenwand. */
-function gravurMesh(ri, W, text, schrift) {
+function gravurMesh(ri, W, text, schrift, ringGeometry, color) {
   const S = 2048, H = 256;
   const c = document.createElement('canvas');
   c.width = S; c.height = H;
@@ -1004,7 +1013,7 @@ function gravurMesh(ri, W, text, schrift) {
   ctx.save();
   ctx.translate(S, 0);
   ctx.scale(-1, 1);              // Innenseite wird gespiegelt betrachtet
-  ctx.fillStyle = 'rgba(40,34,26,0.62)';
+  ctx.fillStyle = 'rgba(190,180,157,0.95)';
   ctx.font = '92px ' + SCHRIFTEN[schrift].font;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
@@ -1013,9 +1022,16 @@ function gravurMesh(ri, W, text, schrift) {
 
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
-  const geo = new THREE.CylinderGeometry(ri - 0.012, ri - 0.012, W * 0.9, 160, 1, true);
-  const mat = new THREE.MeshBasicMaterial({
-    map: tex, transparent: true, side: THREE.BackSide, depthWrite: false,
+  const innerRows=new Map(),positions=ringGeometry.attributes.position;
+  for(let i=0;i<positions.count;i++){
+    const y=positions.getY(i);if(Math.abs(y)>W*.42)continue;
+    const key=y.toFixed(5),radius=Math.hypot(positions.getX(i),positions.getZ(i));
+    if(!innerRows.has(key)||radius<innerRows.get(key))innerRows.set(key,radius);
+  }
+  const curve=[...innerRows].sort((a,b)=>Number(a[0])-Number(b[0])).map(([y,r])=>new THREE.Vector2(r-.018,Number(y)));
+  const geo = new THREE.LatheGeometry(curve,256);
+  const mat = new THREE.MeshPhysicalMaterial({
+    color,metalness:1,roughness:.33,map:tex,bumpMap:tex,bumpScale:-.04,transparent:true,side:THREE.BackSide,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-1,
   });
   return new THREE.Mesh(geo, mat);
 }
@@ -1025,13 +1041,17 @@ function paarNeuBauen() {
   if (!laeuft) return;
   ringBauen('eins');
   ringBauen('zwei');
-  // Nebeneinander, jeder auf seinem tatsaechlichen Aussenradius stehend
   const rEins = zustand.eins.groesse / (2 * Math.PI) + zustand.eins.staerke;
   const rZwei = zustand.zwei.groesse / (2 * Math.PI) + zustand.zwei.staerke;
-  ringe.eins.position.set(-(rEins + 1.8), rEins, 1.4);
-  ringe.zwei.position.set(rZwei + 1.8, rZwei, -1.4);
-  schattenSetzen(schatten.eins, -(rEins + 1.8), 1.4, rEins);
-  schattenSetzen(schatten.zwei, rZwei + 1.8, -1.4, rZwei);
+  // Editorial product pose, with each actual mesh resting on the studio floor.
+  for(const [side,sign,z] of [['zwei',-1,-1],['eins',1,1.6]]) {
+    const group=ringe[side];group.position.set(0,0,0);group.updateMatrixWorld(true);
+    const bounds=new THREE.Box3().setFromObject(group,true);
+    const x=sign*((bounds.max.x-bounds.min.x)/2+.55);
+    group.position.set(x,-bounds.min.y,z);
+    const radius=side==='eins'?rEins:rZwei;
+    schattenSetzen(schatten[side],x,z,radius);
+  }
   kameraEinpassen(false);
 }
 
@@ -1388,7 +1408,7 @@ function uiVerdrahten() {
         const dir = camera.position.clone().sub(controls.target);
         camera.position.copy(controls.target).add(dir.setLength(THREE.MathUtils.clamp(dir.length() * (mode === 'in' ? .8 : 1.25), controls.minDistance, controls.maxDistance)));
       } else {
-        const dir = mode === 'front' ? new THREE.Vector3(0, .05, 1) : mode === 'side' ? new THREE.Vector3(1, .3, .4) : new THREE.Vector3(.42, .32, 1);
+        const dir = mode === 'front' ? new THREE.Vector3(0, .05, 1) : mode === 'side' ? new THREE.Vector3(1, .3, .4) : new THREE.Vector3(.06, .18, 1);
         const distance = camera.position.distanceTo(controls.target);
         camera.position.copy(controls.target).add(dir.normalize().multiplyScalar(distance));
         kameraEinpassen(true);
@@ -1491,7 +1511,11 @@ if (!webglVerfuegbar()) {
 } else {
   try {
     jewelry = await loadJewelry();
-    szeneAufbauen();
+    for(const [key,profile] of Object.entries(PROFILE)){
+      const curves=sampleRingProfile(jewelry.get('Wedding_'+key));
+      profile.aussen=curves.outside;profile.innen=curves.inside;
+    }
+    await szeneAufbauen();
   } catch (error) {
     console.error('3D-Ansicht konnte nicht geladen werden', error);
     laeuft = false;

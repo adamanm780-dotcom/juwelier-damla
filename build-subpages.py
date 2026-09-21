@@ -1244,7 +1244,7 @@ KF_BODY_ENDE = """
     }
   }
   </script>
-  <script type="module" src="assets/konfigurator.js?v=20260921-atelier"></script>
+  <script type="module" src="assets/konfigurator.js?v=20260921-blender2"></script>
 """
 
 PAGES = [

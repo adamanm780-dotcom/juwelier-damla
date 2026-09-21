@@ -25,49 +25,128 @@ def mesh(name, verts, faces, smooth=False):
     for p in data.polygons: p.use_smooth = smooth
     return obj
 
+# Profile geometry is constructed directly; no bevel modifier may clamp or distort it.
+# The section is sampled by surface region and revolved with exact analytical normals.
+PROFILE_REPORT = {}
+RING_SEGMENTS = 320
+
 def wedding(name):
-    # Closed cross-section with continuously rounded inner AND outer edges.
-    ri, T, W, bevel = 9., 1.7, 4.5, .16
-    def outer(t):
-        if name == 'bombiert': return T * (1 - .30*t*t)
-        if name == 'oval': return T * (1 - .40*t*t)
-        if name == 'konkav': return T * (1 - .26*(1-t*t))
-        if name == 'kantig': return T*(1-.34*max(0,(abs(t)-.72)/.28))
-        return T*(1-.04*abs(t)**8)
-    def inner(t): return (.20*T*t*t if name == 'oval' else .07*T*t*t)
-    # Sample a closed profile then bevel in Blender for jewelry-quality edge normals.
-    n = 40
-    pts = [(ri+inner(-1+2*i/n), W/2*(-1+2*i/n)) for i in range(n+1)]
-    pts += [(ri+outer(1-2*i/n), W/2*(1-2*i/n)) for i in range(n+1)]
-    verts, faces = [], []
-    seg = 256
-    for j in range(seg):
-        a = j*2*math.pi/seg
-        verts.extend((r*math.cos(a),r*math.sin(a),z) for r,z in pts)
-    p = len(pts)
-    for j in range(seg):
-        for i in range(p):
-            faces.append((j*p+i, ((j+1)%seg)*p+i, ((j+1)%seg)*p+(i+1)%p, j*p+(i+1)%p))
-    obj = mesh('Wedding_'+name, verts, faces, True)
-    bpy.context.view_layer.objects.active = obj
-    mod = obj.modifiers.new('Soft polished edges', 'BEVEL')
-    mod.width=bevel; mod.segments=5; mod.limit_method='ANGLE'; mod.angle_limit=.35
-    bpy.ops.object.modifier_apply(modifier=mod.name)
-    import bmesh
-    bm=bmesh.new();bm.from_mesh(obj.data)
-    bmesh.ops.remove_doubles(bm,verts=bm.verts,dist=.00001)
-    bmesh.ops.dissolve_degenerate(bm,edges=bm.edges,dist=.00001)
-    bmesh.ops.recalc_face_normals(bm,faces=bm.faces)
-    bm.to_mesh(obj.data);bm.free();obj.data.update()
-    # Cylindrical UVs: u runs around the ring, v across its width.
-    uv = obj.data.uv_layers.new(name='JewelryUV')
-    for poly in obj.data.polygons:
-        angles = [math.atan2(obj.data.vertices[obj.data.loops[l].vertex_index].co.y,
-                             obj.data.vertices[obj.data.loops[l].vertex_index].co.x)/(2*math.pi)%1 for l in poly.loop_indices]
-        seam = max(angles)-min(angles)>.5
-        for l,u in zip(poly.loop_indices, angles):
-            co=obj.data.vertices[obj.data.loops[l].vertex_index].co
-            uv.data[l].uv=(u+1 if seam and u<.5 else u, co.z/W+.5)
+    ri, T, W = 9., 1.7, 4.5
+    h = W / 2
+    settings = {
+        'flach':    dict(comfort=.12, outer_edge=.19, outer_round=.22),
+        'bombiert': dict(comfort=.14, outer_edge=.33, outer_round=.32),
+        'oval':     dict(comfort=.30, outer_edge=.43, outer_round=.43),
+        'konkav':   dict(comfort=.12, outer_edge=.29, outer_round=.28),
+        'kantig':   dict(comfort=.12, outer_edge=.12, outer_round=.28),
+    }[name]
+    ai, bi = h-.19, .18
+    ao, bo = h-settings['outer_edge'], settings['outer_round']
+    ci = settings['comfort']
+    # Half section: bore centre -> comfort fit -> flank -> outer crown centre.
+    # Each tuple is (radius, axial position, radial tangent, axial tangent, region).
+    half = [(ri, 0., 0., 1., 'inner')]
+    def point(r, z, dr, dz, region):
+        half.append((r,z,dr,dz,region))
+    def bezier(p0, p1, p2, p3, region, count=10):
+        for i in range(1,count+1):
+            t=i/count; u=1-t
+            r=u*u*u*p0[0]+3*u*u*t*p1[0]+3*u*t*t*p2[0]+t*t*t*p3[0]
+            z=u*u*u*p0[1]+3*u*u*t*p1[1]+3*u*t*t*p2[1]+t*t*t*p3[1]
+            dr=3*u*u*(p1[0]-p0[0])+6*u*t*(p2[0]-p1[0])+3*t*t*(p3[0]-p2[0])
+            dz=3*u*u*(p1[1]-p0[1])+6*u*t*(p2[1]-p1[1])+3*t*t*(p3[1]-p2[1])
+            point(r,z,dr,dz,region)
+    for i in range(1,13):
+        z=ai*i/12
+        point(ri+ci*(z/ai)**2,z,2*ci*z/(ai*ai),1.,'inner')
+    k=.5522847498307936
+    slope=2*ci/ai
+    bezier((ri+ci,ai),(ri+ci+k*.19*slope,ai+k*.19),
+           (ri+ci+bi-k*bi,h),(ri+ci+bi,h),'inner_edge')
+
+    def outer(z):
+        t=z/ao
+        if name=='flach': return ri+T-.016*t**4, -.064*t**3/ao
+        if name=='bombiert': return ri+T-.40*t*t, -.80*t/ao
+        if name=='oval': return ri+T-.54*t*t-.035*t**4, (-1.08*t-.14*t**3)/ao
+        if name=='konkav': return ri+T-.32*(1-t*t)**2, 1.28*t*(1-t*t)/ao
+        # The bevelled profile has a true planar chamfer and a tiny rounded join.
+        bend_z, bend_r = 1.53, .09
+        z_end=bend_z+bend_r*math.sin(math.pi/4)
+        r_end=ri+T-bend_r+bend_r*math.cos(math.pi/4)
+        return r_end-(z-z_end), -1.
+
+    ro, slope=outer(ao)
+    point(ro-bo,h,1.,0.,'flank')
+    bezier((ro-bo,h),(ro-bo+k*bo,h),(ro+k*(h-ao)*slope,ao+k*(h-ao)),
+           (ro,ao),'outer_edge')
+    if name=='kantig':
+        bend_z,bend_r=1.53,.09
+        z_end=bend_z+bend_r*math.sin(math.pi/4)
+        for i in range(1,7):
+            z=ao+(z_end-ao)*i/6
+            r,slope=outer(z)
+            point(r,z,-slope,-1.,'chamfer')
+        for i in range(1,9):
+            a=math.pi/4*(1-i/8)
+            point(ri+T-bend_r+bend_r*math.cos(a),bend_z+bend_r*math.sin(a),
+                  math.sin(a),-math.cos(a),'outer_edge')
+        for i in range(1,13):
+            point(ri+T,bend_z*(1-i/12),0.,-1.,'outer')
+    else:
+        for i in range(1,17):
+            z=ao*(1-i/16)
+            r,slope=outer(z)
+            point(r,z,-slope,-1.,'outer')
+    pts=half+[(r,-z,-dr,dz,region) for r,z,dr,dz,region in reversed(half[1:-1])]
+    count=len(pts)
+    # V follows distance around the entire section, so flank UVs have real area.
+    lengths=[math.hypot(pts[(i+1)%count][0]-p[0],pts[(i+1)%count][1]-p[1]) for i,p in enumerate(pts)]
+    perimeter=sum(lengths)
+    cumulative=[0.]
+    for distance in lengths: cumulative.append(cumulative[-1]+distance)
+    vs=[d/perimeter for d in cumulative]
+    verts,faces,normals=[],[],[]
+    for j in range(RING_SEGMENTS):
+        a=j*2*math.pi/RING_SEGMENTS; ca,sa=math.cos(a),math.sin(a)
+        for r,z,dr,dz,region in pts:
+            scale=math.hypot(dr,dz)
+            verts.append((r*ca,r*sa,z))
+            normals.append((-dz/scale*ca,-dz/scale*sa,dr/scale))
+    for j in range(RING_SEGMENTS):
+        for i in range(count):
+            # Outward winding; smooth normals are the exact revolved section normals.
+            faces.append((j*count+i,j*count+(i+1)%count,
+                          ((j+1)%RING_SEGMENTS)*count+(i+1)%count,
+                          ((j+1)%RING_SEGMENTS)*count+i))
+    obj=mesh('Wedding_'+name,verts,faces,True)
+    obj.data.normals_split_custom_set_from_vertices(normals)
+    uv=obj.data.uv_layers.new(name='JewelryUV')
+    for j in range(RING_SEGMENTS):
+        for i in range(count):
+            poly=obj.data.polygons[j*count+i]
+            # BMesh may rotate a polygon's first corner, so assign by vertex index.
+            for loop in poly.loop_indices:
+                index=obj.data.loops[loop].vertex_index
+                jj,ii=divmod(index,count)
+                u=1. if j==RING_SEGMENTS-1 and jj==0 else jj/RING_SEGMENTS
+                v=1. if i==count-1 and ii==0 else vs[ii]
+                uv.data[loop].uv=(u,v)
+    # These fields travel in glTF extras and make browser scaling explicit.
+    outer_indices=[i for i,p in enumerate(pts) if p[4]=='outer']
+    spec={
+        'inner_radius_mm':ri,'thickness_mm':T,'width_mm':W,
+        'profile_perimeter_mm':round(perimeter,8),
+        'outer_v_min':round(min(vs[i] for i in outer_indices),8),
+        'outer_v_max':round(max(vs[i] for i in outer_indices),8),
+        'radial_segments':RING_SEGMENTS,'profile_samples':count,
+        'max_circumference_chord_error_mm':round((ri+T)*(1-math.cos(math.pi/RING_SEGMENTS)),8),
+        'normal_method':'analytical revolution with continuous section tangents',
+        'uv_method':'circumference U / closed section arc-length V',
+        'profile_method':'comfort fit and tangent-matched rounded edges; no bevel modifier',
+    }
+    for key,value in spec.items(): obj[key]=value
+    PROFILE_REPORT[obj.name]=spec
     return obj
 
 def brilliant(name='Diamond_round', oval=1.):
@@ -144,9 +223,13 @@ for count in [4,6]:
     bm.to_mesh(parts[0].data);bm.free()
     bpy.ops.object.select_all(action='DESELECT')
 
+bpy.context.scene.unit_settings.system='METRIC'
+bpy.context.scene.unit_settings.scale_length=.001
+bpy.context.scene.unit_settings.length_unit='MILLIMETERS'
+bpy.context.preferences.filepaths.save_version=0
 bpy.ops.wm.save_as_mainfile(filepath=os.path.join(ROOT,'tools','damla-jewelry.blend'))
 bpy.ops.export_scene.gltf(filepath=os.path.join(OUT,'jewelry.glb'),export_format='GLB',
-    export_animations=False,export_yup=True,export_apply=True,export_materials='NONE')
+    export_animations=False,export_yup=True,export_apply=True,export_materials='NONE',export_extras=True)
 report={o.name:{'vertices':len(o.data.vertices),'faces':len(o.data.polygons)} for o in bpy.context.scene.objects if o.type=='MESH'}
-with open(os.path.join(OUT,'manifest.json'),'w') as f:json.dump({'generator':bpy.app.version_string,'units':'millimetres','meshes':report},f,indent=2)
+with open(os.path.join(OUT,'manifest.json'),'w') as f:json.dump({'generator':bpy.app.version_string,'units':'millimetres','reference_dimensions':{'inner_radius_mm':9.,'thickness_mm':1.7,'width_mm':4.5},'profiles':PROFILE_REPORT,'meshes':report},f,indent=2)
 print('DAMLA_MODELS_READY',json.dumps(report))

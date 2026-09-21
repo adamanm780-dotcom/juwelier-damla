@@ -19,7 +19,7 @@ for(const name of ['flach','bombiert','oval','konkav','kantig']){
     assert(Math.abs(minR-ri)<.025,`${name}: inner size ${minR} vs ${ri}`);
     assert(maxR<=ri+T+.01);assert(Math.abs(maxY-minY-W)<.025);geo.dispose();
   }
-  console.log('DIMENSIONS_OK',name,'81 combinations');
+  console.log('DIMENSIONS_OK',name,'27 combinations');
 }
 for(const name of ['round','oval','emerald']){
   const geo=library.get('Diamond_'+name);assert(geo,name);

@@ -1,26 +1,103 @@
 {
   "generator": "5.1.1",
   "units": "millimetres",
-  "meshes": {
+  "reference_dimensions": {
+    "inner_radius_mm": 9.0,
+    "thickness_mm": 1.7,
+    "width_mm": 4.5
+  },
+  "profiles": {
     "Wedding_flach": {
-      "vertices": 25600,
-      "faces": 25600
+      "inner_radius_mm": 9.0,
+      "thickness_mm": 1.7,
+      "width_mm": 4.5,
+      "profile_perimeter_mm": 11.79399153,
+      "outer_v_min": 0.33624374,
+      "outer_v_max": 0.66375626,
+      "radial_segments": 320,
+      "profile_samples": 98,
+      "max_circumference_chord_error_mm": 0.00051564,
+      "normal_method": "analytical revolution with continuous section tangents",
+      "uv_method": "circumference U / closed section arc-length V",
+      "profile_method": "comfort fit and tangent-matched rounded edges; no bevel modifier"
     },
     "Wedding_bombiert": {
-      "vertices": 25600,
-      "faces": 25600
+      "inner_radius_mm": 9.0,
+      "thickness_mm": 1.7,
+      "width_mm": 4.5,
+      "profile_perimeter_mm": 10.95871353,
+      "outer_v_min": 0.33166505,
+      "outer_v_max": 0.66833495,
+      "radial_segments": 320,
+      "profile_samples": 98,
+      "max_circumference_chord_error_mm": 0.00051564,
+      "normal_method": "analytical revolution with continuous section tangents",
+      "uv_method": "circumference U / closed section arc-length V",
+      "profile_method": "comfort fit and tangent-matched rounded edges; no bevel modifier"
     },
     "Wedding_oval": {
-      "vertices": 25600,
-      "faces": 25600
+      "inner_radius_mm": 9.0,
+      "thickness_mm": 1.7,
+      "width_mm": 4.5,
+      "profile_perimeter_mm": 10.33318704,
+      "outer_v_min": 0.32563775,
+      "outer_v_max": 0.67436225,
+      "radial_segments": 320,
+      "profile_samples": 98,
+      "max_circumference_chord_error_mm": 0.00051564,
+      "normal_method": "analytical revolution with continuous section tangents",
+      "uv_method": "circumference U / closed section arc-length V",
+      "profile_method": "comfort fit and tangent-matched rounded edges; no bevel modifier"
     },
     "Wedding_konkav": {
-      "vertices": 25600,
-      "faces": 25600
+      "inner_radius_mm": 9.0,
+      "thickness_mm": 1.7,
+      "width_mm": 4.5,
+      "profile_perimeter_mm": 11.82066986,
+      "outer_v_min": 0.34190588,
+      "outer_v_max": 0.65809412,
+      "radial_segments": 320,
+      "profile_samples": 98,
+      "max_circumference_chord_error_mm": 0.00051564,
+      "normal_method": "analytical revolution with continuous section tangents",
+      "uv_method": "circumference U / closed section arc-length V",
+      "profile_method": "comfort fit and tangent-matched rounded edges; no bevel modifier"
     },
     "Wedding_kantig": {
-      "vertices": 28160,
-      "faces": 28160
+      "inner_radius_mm": 9.0,
+      "thickness_mm": 1.7,
+      "width_mm": 4.5,
+      "profile_perimeter_mm": 11.16691226,
+      "outer_v_min": 0.37440575,
+      "outer_v_max": 0.62559425,
+      "radial_segments": 320,
+      "profile_samples": 118,
+      "max_circumference_chord_error_mm": 0.00051564,
+      "normal_method": "analytical revolution with continuous section tangents",
+      "uv_method": "circumference U / closed section arc-length V",
+      "profile_method": "comfort fit and tangent-matched rounded edges; no bevel modifier"
+    }
+  },
+  "meshes": {
+    "Wedding_flach": {
+      "vertices": 31360,
+      "faces": 31360
+    },
+    "Wedding_bombiert": {
+      "vertices": 31360,
+      "faces": 31360
+    },
+    "Wedding_oval": {
+      "vertices": 31360,
+      "faces": 31360
+    },
+    "Wedding_konkav": {
+      "vertices": 31360,
+      "faces": 31360
+    },
+    "Wedding_kantig": {
+      "vertices": 37760,
+      "faces": 37760
     },
     "Diamond_round": {
       "vertices": 57,

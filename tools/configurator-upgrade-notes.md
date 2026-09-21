@@ -10,7 +10,7 @@
 - Vorhandene Blender-Geometrien und facettenbasierte Diamantdarstellung bleiben erhalten.
 
 ## Referenzgrenze
-https://konfigurator.schwarz-trauringe.de/configurator lieferte im Pr?fzeitpunkt auch nach 45 Sekunden nur einen leeren Ladecontainer. Die vollst?ndige Auswahl, Fertigungsregeln und Qualit?tsgleichheit sind daher nicht verifiziert. Keine fremden 3D-Assets ?bernommen. Material- und Fertigungsfreigaben sowie verbindliche Preise ben?tigen den tats?chlichen Lieferantenkatalog.
+Die Referenz https://konfigurator.schwarz-trauringe.de/configurator wurde beim zweiten Vergleich erfolgreich visuell geladen. Ihr geschlossenes Shadow DOM hatte im ersten Pr?fverfahren nur einen Ladecontainer geliefert. Der Modell- und Materialvergleich ist jetzt erfolgt; eine vollst?ndige Gleichheit aller Auswahl- und Fertigungsregeln ist weiterhin nicht implementiert. Keine fremden 3D-Assets ?bernommen. Material- und Fertigungsfreigaben sowie verbindliche Preise ben?tigen den tats?chlichen Lieferantenkatalog.
 
 ## Bildherkunft
 Built-in image_gen. Projektdatei: assets/configurator-finishes/finish-collection.png. Das originale Kontaktblatt wird unver?ndert verwendet, sechs Ausschnitte werden ausschlie?lich mit CSS als Optionskacheln angezeigt.

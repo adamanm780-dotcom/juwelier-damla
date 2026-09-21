@@ -1,14 +1,18 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/GLTFLoader.js';
+import { RGBELoader } from './vendor/RGBELoader.js';
 
 let library;
 export async function loadJewelry() {
-  if (!library) library = new GLTFLoader().loadAsync(new URL('./models/jewelry.glb', import.meta.url).href)
+  if (!library) library = new GLTFLoader().loadAsync(new URL('./models/jewelry.glb?v=20260921-blender2', import.meta.url).href)
     .then(gltf => {
       const meshes = new Map();
       gltf.scene.updateMatrixWorld(true);
       gltf.scene.traverse(o => {
-        if (o.isMesh) meshes.set(o.name, o.geometry.clone().applyMatrix4(o.matrixWorld));
+        if (o.isMesh) {
+          const geometry=o.geometry.clone().applyMatrix4(o.matrixWorld);
+          geometry.userData={...o.userData};meshes.set(o.name,geometry);
+        }
       });
       return meshes;
     }).catch(error => { library = null; throw error; });
@@ -31,6 +35,7 @@ export function weddingGeometry(source, ri, thickness, width) {
   }
   p.needsUpdate=n.needsUpdate=true;
   geo.computeBoundingSphere();
+  geo.computeBoundingBox();
   return geo;
 }
 
@@ -72,7 +77,20 @@ export function createStudio(renderer) {
   return {metal:filtered.texture,diamond:cube.texture,dispose(){filtered.dispose();cube.dispose();}};
 }
 
+// This environment is authored and rendered in Blender, in linear HDR.
+export async function createWeddingStudio(renderer) {
+  const hdr=await new RGBELoader().loadAsync(new URL('./models/wedding-studio.hdr?v=20260921',import.meta.url).href);
+  hdr.mapping=THREE.EquirectangularReflectionMapping;
+  const pmrem=new THREE.PMREMGenerator(renderer);
+  const filtered=pmrem.fromEquirectangular(hdr);
+  const cube=new THREE.WebGLCubeRenderTarget(512,{type:THREE.HalfFloatType,generateMipmaps:true,minFilter:THREE.LinearMipmapLinearFilter});
+  cube.fromEquirectangularTexture(renderer,hdr);
+  pmrem.dispose();hdr.dispose();
+  return {metal:filtered.texture,diamond:cube.texture,dispose(){filtered.dispose();cube.dispose();}};
+}
+
 const planeCache=new WeakMap();
+const diamondMaterialCache=new WeakMap();
 function facetPlanes(geo) {
   if(planeCache.has(geo))return planeCache.get(geo);
   const pos=geo.attributes.position, idx=geo.index;
@@ -95,7 +113,9 @@ function facetPlanes(geo) {
 // All intersections use the actual Blender cut; no glitter sprites or painted facets.
 export function diamondMesh(geometry, environment) {
   const facets=facetPlanes(geometry);
-  const material=new THREE.ShaderMaterial({
+  let variants=diamondMaterialCache.get(geometry);
+  if(!variants){variants=new Map();diamondMaterialCache.set(geometry,variants);}
+  const material=variants.get(environment)||new THREE.ShaderMaterial({
     uniforms:{env:{value:environment},facets:{value:facets.planes},facetCount:{value:facets.count},
       eye:{value:new THREE.Vector3()},orientation:{value:new THREE.Matrix3()}},
     vertexShader:`varying vec3 localPosition; varying vec3 localNormal;
@@ -138,6 +158,8 @@ export function diamondMesh(geometry, environment) {
         #include <colorspace_fragment>
       }`,
   });
+  material.userData.sharedJewelry=true;
+  variants.set(environment,material);
   const mesh=new THREE.Mesh(geometry,material);
   mesh.onBeforeRender=(_renderer,_scene,camera)=>{
     mesh.worldToLocal(material.uniforms.eye.value.setFromMatrixPosition(camera.matrixWorld));

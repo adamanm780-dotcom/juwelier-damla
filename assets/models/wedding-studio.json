@@ -1,0 +1,25 @@
+{
+  "name": "Damla original wedding jewelry studio",
+  "generator": "Blender 5.1.1 / Cycles",
+  "source": "tools/build-wedding-studio.py",
+  "editable_scene": "tools/wedding-studio.blend",
+  "environment": "assets/models/wedding-studio.hdr",
+  "preview": "assets/models/wedding-studio-preview.jpg",
+  "resolution": [
+    2048,
+    1024
+  ],
+  "color_space": "scene-linear RGB; Rec.709/sRGB primaries; Radiance RGBE",
+  "display_transform_baked": false,
+  "samples": 24,
+  "revision": 2,
+  "base_linear_rgb": [
+    0.65,
+    0.67,
+    0.7
+  ],
+  "adjustment": "Brighter reference-matched fill, wider rectangular key/rim diffusion, thin gray contour cards.",
+  "copyright": "Original generated studio; no third-party HDR imagery or textures.",
+  "design": "Bright neutral fill, five broad rectangular ivory/silver softboxes, pearl floor bounce, three thin feathered gray contour cards.",
+  "file_bytes": 1261463
+}
