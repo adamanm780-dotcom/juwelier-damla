@@ -1,1529 +1,183 @@
-/* ══════════════════════════════════════════════════════════════
-   Trauring-Konfigurator — Juwelier Damla
-   ──────────────────────────────────────────────────────────────
-   Rendert das Ringpaar live in 3D (three.js). Jede Kombination aus
-   Legierung, Profil, Breite, Staerke, Oberflaeche und Steinbesatz
-   entsteht als echte Geometrie — es gibt KEINE vorgerenderten Bilder.
-
-   Aufbau:
-     1) KATALOG      Stammdaten: Legierungen, Profile, Oberflaechen, Steine
-     2) PREISE       Kalkulationsgrundlage — vom Haus zu pflegen
-     3) GEOMETRIE    Querschnitt -> LatheGeometry
-     4) MATERIAL     PBR-Metall + prozedurale Oberflaechen-Maps
-     5) SZENE        Kamera, Licht, Environment, Bodenschatten
-     6) ZUSTAND/UI   Bedienfeld, Preis, Zusammenfassung, Anfrage
-   ══════════════════════════════════════════════════════════════ */
-
-import * as THREE from 'three';
-import { OrbitControls } from 'three/OrbitControls.js';
-import { loadJewelry, weddingGeometry, createStudio, createWeddingStudio, diamondMesh } from './jewelry-studio.js?v=20260921-blender2';
-import { weddingMetal, assignRingMaterials, sampleRingProfile } from './wedding-materials.js?v=20260921-blender2';
-let jewelry, studio;
-
-/* ══════════════════════════════════════════════════════════════
-   1) KATALOG
-   ══════════════════════════════════════════════════════════════ */
-
-/* Basisfarben fuer metalness = 1. Hoeherer Feingoldanteil = satterer Ton.
-   dichte in g/cm3 — geht in die Gewichts- und damit Preisrechnung ein. */
-const LEGIERUNGEN = {
-  gelbgold: {
-    label: 'Gelbgold',
-    karate: {
-      '333': { label: '333 / 8 kt',  farbe: 0xf0ddb6, dichte: 11.0 },
-      '585': { label: '585 / 14 kt', farbe: 0xf8d69a, dichte: 13.1 },
-      '750': { label: '750 / 18 kt', farbe: 0xf2d18b, dichte: 15.5 },
-    },
-  },
-  weissgold: {
-    label: 'Weißgold',
-    karate: {
-      '333': { label: '333 / 8 kt',  farbe: 0xdedee0, dichte: 11.4 },
-      '585': { label: '585 / 14 kt', farbe: 0xe4e5e8, dichte: 13.0 },
-      '750': { label: '750 / 18 kt', farbe: 0xeaebee, dichte: 15.0 },
-    },
-  },
-  rotgold: {
-    label: 'Rotgold',
-    karate: {
-      '333': { label: '333 / 8 kt',  farbe: 0xd8b39c, dichte: 11.2 },
-      '585': { label: '585 / 14 kt', farbe: 0xdfa77f, dichte: 13.2 },
-      '750': { label: '750 / 18 kt', farbe: 0xe49a6a, dichte: 15.2 },
-    },
-  },
-  platin: {
-    label: 'Platin',
-    karate: {
-      '950': { label: '950 Platin', farbe: 0xd6d7da, dichte: 20.1 },
-    },
-  },
-};
-
-/* Zweitmetall fuer Bicolor — als schmales Mittelband auf der Aussenseite. */
-const BICOLOR_PARTNER = {
-  gelbgold:  'weissgold',
-  rotgold:   'weissgold',
-  weissgold: 'gelbgold',
-  platin:    'gelbgold',
-};
-
-/* Profile: beschreiben den Querschnitt.
-   aussen(t) / innen(t) liefern den radialen Abstand zur Innenkante,
-   t laeuft von -1 (eine Ringkante) bis +1 (andere Ringkante).
-   volumen = Fuellgrad gegenueber dem umschriebenen Rechteck (fuer das Gewicht). */
-const PROFILE = {
-  flach: {
-    label: 'Flach',
-    hinweis: 'Klarer, moderner Klassiker mit gerader Außenfläche.',
-    volumen: 0.97,
-    aussen: (t, T) => T - 0.04 * T * Math.pow(Math.abs(t), 8),
-    innen:  ()      => 0,
-  },
-  bombiert: {
-    label: 'Halbrund / bombiert',
-    hinweis: 'Die meistgewählte Form — außen sanft gewölbt, trägt sich weich.',
-    volumen: 0.88,
-    aussen: (t, T) => T - 0.30 * T * t * t,
-    innen:  ()      => 0,
-  },
-  oval: {
-    label: 'Oval',
-    hinweis: 'Außen und innen gerundet. Die bequemste Form, auch für breite Ringe.',
-    volumen: 0.78,
-    aussen: (t, T) => T - 0.40 * T * t * t,
-    innen:  (t, T) => 0.20 * T * t * t,
-  },
-  konkav: {
-    label: 'Konkav',
-    hinweis: 'Nach innen geschwungene Außenfläche mit markanten Kanten.',
-    volumen: 0.84,
-    aussen: (t, T) => T - 0.26 * T * (1 - t * t),
-    innen:  ()      => 0,
-  },
-  kantig: {
-    label: 'Kantig mit Fase',
-    hinweis: 'Gerade Fläche mit angeschrägten Kanten — ruhig und markant.',
-    volumen: 0.92,
-    aussen: (t, T) => {
-      const a = Math.abs(t), k = 0.72;
-      if (a <= k) return T;
-      return T - 0.34 * T * ((a - k) / (1 - k));
-    },
-    innen: () => 0,
-  },
-};
-
-/* Oberflaechen: rauheit steuert den Glanz, textur die prozedurale Map. */
-const OBERFLAECHEN = {
-  poliert:     { label: 'Poliert',        rauheit: 0.05, textur: null,      aufpreis: 0 },
-  seidenmatt:  { label: 'Seidenmatt',     rauheit: 0.34, textur: 'feinkorn', aufpreis: 25 },
-  eismatt:     { label: 'Eismatt',        rauheit: 0.58, textur: 'grobkorn', aufpreis: 30 },
-  laengsmatt:  { label: 'Längsmattiert',  rauheit: 0.28, textur: 'buerste',  aufpreis: 30 },
-  quermatt:    { label: 'Quermattiert', rauheit: 0.3, textur: 'quer', aufpreis: 30 },
-  hammer:      { label: 'Hammerschlag',   rauheit: 0.22, textur: 'hammer',   aufpreis: 55 },
-};
-
-/* Steinbesatz — Brillanten in der Aussenflaeche, mittig auf der Breite. */
-/* `anzahl` = feste Zahl fuer einen Akzent. `anteil` = Bruchteil des
-   Umfangs, der besetzt wird; die Steinzahl ergibt sich dann aus der
-   Ringgroesse — eine Vollmemoire in Groesse 62 traegt mehr Steine als
-   eine in 48, genau wie in echt. */
-const BESATZ = {
-  ohne:   { label: 'Ohne Stein',    anzahl: 0,  karat: 0 },
-  eins:   { label: '1 Brillant',    anzahl: 1,  karat: 0.03 },
-  drei:   { label: '3 Brillanten',  anzahl: 3,  karat: 0.03 },
-  fuenf:  { label: '5 Brillanten',  anzahl: 5,  karat: 0.02 },
-  sieben: { label: '7 Brillanten',  anzahl: 7,  karat: 0.02 },
-  drittel:{ label: 'Drittelmemoire', anteil: 0.34, karat: 0.015, memoire: true },
-  halb:   { label: 'Halbmemoire',   anteil: 0.5,  karat: 0.015, memoire: true },
-  voll:   { label: 'Vollmemoire — rundum', anteil: 1, karat: 0.015, memoire: true },
-};
-
-/* Wo die Steine ueber die Ringbreite sitzen. `reihen` sind Positionen in
-   t (-1 = eine Kante, 0 = Mitte, +1 = andere Kante).
-   Zwei Reihen gibt es nur bei den Memoire-Besaetzen — ein Akzent aus drei
-   Steinen wird in der Werkstatt nicht auf zwei Reihen verteilt. */
-const STEINLAGE = {
-  mitte: { label: 'Mittig',      hinweis: 'mittig auf der Schiene', reihen: [0] },
-  rand:  { label: 'Am Rand',     hinweis: 'an einer Kante',         reihen: [0.5] },
-  zwei:  { label: 'Zwei Reihen', hinweis: 'auf beiden Kanten',      reihen: [-0.5, 0.5],
-           nurMemoire: true },
-};
-
-/* ══════════════════════════════════════════════════════════════
-   2) PREISE  —  Kalkulationsgrundlage
-   ──────────────────────────────────────────────────────────────
-   ACHTUNG: Diese Saetze sind die einzige Stelle, an der der Preis
-   haengt. Sie sind Richtwerte und muessen vom Haus gepflegt werden;
-   die Seite weist den Preis ausdruecklich als unverbindlich aus.
-   ══════════════════════════════════════════════════════════════ */
-const TEILUNGEN = {mitte: {label:'Mittelband', bands:[[-.3,.3]]}, halb:{label:'Zweifarbig 1:1',bands:[[0,.995]]}, rand:{label:'Zwei Außenbänder',bands:[[-.995,-.6],[.6,.995]]}};
-const FUGEN = {ohne:{label:'Ohne Fuge',positions:[]}, mitte:{label:'Mittige Fuge',positions:[0]}, doppelt:{label:'Zwei Fugen',positions:[-.5,.5]}};
-const SCHRIFTEN = {klassisch:{label:'Klassisch',font:'Georgia, serif'}, modern:{label:'Modern',font:'Arial, sans-serif'}, handschrift:{label:'Schreibschrift',font:'cursive'}};
-
-const PREISE = {
-  /* Euro je Gramm, inkl. Fertigung des Rohrings */
-  grammpreis: { '333': 32, '585': 52, '750': 68, '950': 78 },
-  /* Grundpauschale je Ring: Anfertigung, Innenpolitur, Endkontrolle */
-  grundpreis: 130,
-  /* Aufpreis Bicolor je Ring */
-  bicolor: 90,
-  /* Brillant je Stein, gefasst (0,015–0,03 ct) */
-  stein: 48,
-  /* Innengravur je Ring */
-  gravur: 25,
-  /* auf diesen Betrag runden */
-  rundung: 10,
-};
-
-const RINGGROESSEN = []; // Innenumfang in mm
-for (let g = 44; g <= 70; g++) RINGGROESSEN.push(g);
-
-/* ══════════════════════════════════════════════════════════════
-   3) GEOMETRIE — Querschnitt als LatheGeometry
-   ══════════════════════════════════════════════════════════════ */
-
-/**
- * Baut den geschlossenen Ringquerschnitt in der r/y-Ebene und rotiert
- * ihn um die Y-Achse. Die Aussenkanten bekommen eine kleine Fase, sonst
- * faengt das Licht dort keine Kante und der Ring wirkt wie ein Rohr.
- *
- * @param {number} ri  Innenradius in mm
- * @param {number} T   Wandstaerke in mm
- * @param {number} W   Ringbreite in mm
- * @param {object} profil Eintrag aus PROFILE
- */
-function ringGeometrie(ri, T, W, profil) {
-  const key = Object.keys(PROFILE).find(k => PROFILE[k] === profil);
-  if (jewelry) return weddingGeometry(jewelry.get('Wedding_' + key), ri, T, W);
-  const N = 64;                               // Abtastung ueber die Breite
-  const er = Math.min(0.13, T * 0.26, W * 0.12); // Kantenradius
-  const tf = 1 - (2 * er) / W;                // Beginn der Kantenfase
-  const y = (t) => (t * W) / 2;
-  const rAussen = (t) => ri + profil.aussen(t, T);
-  const rInnen = (t) => ri + profil.innen(t, T);
-
-  const pts = [];
-
-  // Innenflaeche: von der einen Kante zur anderen
-  for (let i = 0; i <= N; i++) {
-    const t = -1 + (2 * i) / N;
-    pts.push(new THREE.Vector2(rInnen(t), y(t)));
-  }
-
-  // Seitenflaeche oben: von innen nach aussen
-  const rOben = rAussen(tf);
-  pts.push(new THREE.Vector2(rOben - er, y(1)));
-
-  // Kantenfase oben (Viertelbogen, nach aussen einlaufend)
-  for (let i = 1; i <= 14; i++) {
-    const a = (Math.PI / 2) * (1 - i / 14);
-    pts.push(new THREE.Vector2(rOben - er * (1 - Math.cos(a)), y(tf) + er * Math.sin(a)));
-  }
-
-  // Aussenflaeche zurueck ueber die Breite
-  for (let i = 0; i <= N; i++) {
-    const t = tf - (2 * tf * i) / N;
-    pts.push(new THREE.Vector2(rAussen(t), y(t)));
-  }
-
-  // Kantenfase unten
-  const rUnten = rAussen(-tf);
-  for (let i = 1; i <= 14; i++) {
-    const a = (Math.PI / 2) * (i / 14);
-    pts.push(new THREE.Vector2(rUnten - er * (1 - Math.cos(a)), y(-tf) - er * Math.sin(a)));
-  }
-
-  // Seitenflaeche unten: zurueck nach innen, Kontur schliessen
-  pts.push(new THREE.Vector2(rInnen(-1), y(-1)));
-
-  // 320 statt 192 Segmente: bei poliertem Gold zeichnet die Silhouette
-  // sonst sichtbare Facetten, gerade auf grossen Bildschirmen.
-  const geo = new THREE.LatheGeometry(pts, 320);
-  geo.computeVertexNormals();
-  return geo;
+import {individualMarkup,mountIndividual} from './wedding-engraving.js?v=3';
+import * as C from './wedding-catalog.js?v=3';
+import * as S from './wedding-state.js?v=3';
+import {WeddingViewer} from './wedding-viewer.js?v=3';
+const $=s=>document.querySelector(s), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money=n=>n.toLocaleString('de-DE',{style:'currency',currency:'EUR',maximumFractionDigits:0});
+let state=S.normalizeState(C.initialState()),step=0,segment=0,divisionCount=1,undo=[],notice='',viewer,saveTimer;
+try{if(/^#[dk]=/.test(location.hash))state=S.decode(location.href);}catch{notice='Der gespeicherte Link konnte nicht geladen werden.';}
+const current=()=>state.rings[Math.min(state.active,state.rings.length-1)];
+const pathGet=(o,p)=>p.split('.').reduce((a,k)=>a?.[k],o);
+function pathSet(o,p,v){const parts=p.split('.');let node=o;for(const key of parts.slice(0,-1))node=node[key];node[parts.at(-1)]=v;}
+function remember(){const json=JSON.stringify(state);if(undo.at(-1)!==json){undo.push(json);if(undo.length>80)undo.shift();}}
+function persist(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{const code=S.encode(state);history.replaceState(null,'',location.pathname+location.search+'#d='+code);try{localStorage.setItem('damla-draft-v3',JSON.stringify(state));}catch{}},300);}
+function apply(path,value,refresh=true){
+ if(refresh)remember();notice='';
+ const targetMatch=path.match(/^@(\d)\.(.*)$/);if(targetMatch)path=targetMatch[2];const targets=targetMatch?[state.rings[Number(targetMatch[1])]]:state.pair?state.rings:[current()];
+ for(const ring of targets){
+  const previous=pathGet(ring,path);pathSet(ring,path,value);
+  const gradeChange=path.match(/^metals\.(\d)\.grade$/);if(gradeChange){const color=ring.metals[Number(gradeChange[1])].color;for(const m of ring.metals)if(m.color===color||(S.isGold(color)&&S.isGold(m.color)))m.grade=Number(value);if(color==='palladium')for(const m of ring.metals)if(S.isGold(m.color))m.grade=Number(value)===950?750:585;}
+  if(path==='division'){ring.surfaceDivision='none';segment=0;const division=S.OPTIONS.divisions.find(d=>d.id===value);ring.separations=Array.from({length:Math.max(0,(division?.rates.length||1)-1)},()=>true);if(value!=='none'&&previous==='none'){ring.metals[1].color='white';ring.metals[2].color='red';}}
+  if(path==='surfaceDivision'){segment=0;if(value!=='none'){ring.metals[1].finish='sandmatte-fine';ring.division=value;ring.surfaceDivision='none';}}
+  if(path==='groove.form'&&value!=='none'){ring.groove.quantity=ring.groove.quantity||1;ring.groove.width=C.GROOVES[value].widths[0];}
+  if(path==='groove.quantity'){const n=Number(value);ring.groove.positions=Array.from({length:n},(_,i)=>ring.groove.positions[i]??([.5,.75,.25,.875][i]-.5)*ring.width);}
+  if(path==='stone.preset'){ring.stone.rows=1;ring.stone.quantity=1;if(value.startsWith('memoire')){ring.stone.memoireQuantity='ringDependent50';ring.metals=ring.metals.map(()=>({...ring.metals[0]}));ring.separations=[];}if(value==='top')ring.stone.size='brilliant-1000-0';}
+  if(path==='engraving.type'&&value==='laser')ring.engraving.font='amazonebt';
+  const before={width:ring.width,height:ring.height,division:ring.division,preset:ring.stone.preset};
+  Object.assign(ring,S.normalizeRing(ring));
+  const changes=[];if(before.width!==ring.width)changes.push('Breite '+C.mm(ring.width));if(before.height!==ring.height)changes.push('Höhe '+C.mm(ring.height));if(before.division!==ring.division)changes.push('Farbaufteilung einfarbig');if(before.preset!==ring.stone.preset)changes.push('Steinbesatz ohne Steine');if(changes.length)notice='An diese Ausführung angepasst: '+changes.join(' · ')+'.';
+ }
+ persist();viewer?.update(state);
+ if(refresh)render();else{renderSummary();renderPrices();}
 }
-
-/** Duenne Aussenhaut fuer das Bicolor-Mittelband. */
-function bandGeometrie(ri, T, W, profil, start = -0.30, end = 0.30) {
-  const pts = [];
-  for (let i = 0; i <= 128; i++) {
-    const t = start + (end - start) * i / 128;
-    pts.push(new THREE.Vector2(ri + profil.aussen(t, T) + 0.02, (t * W) / 2));
-  }
-  return new THREE.LatheGeometry(pts, 192);
+function option(path,id,text,selected,disabled=false,visual='',title=''){
+ return `<button type="button" class="wc-option" data-path="${esc(path)}" data-value="${esc(id)}" aria-pressed="${String(selected)===String(id)}" ${disabled?'disabled':''} ${title?`title="${esc(title)}"`:''}>${visual}${esc(text)}</button>`;
 }
-
-/**
- * Brillant nach den ueblichen Proportionen des Rundschliffs:
- * Tafel 56 %, Kronenhoehe 16 %, Pavillontiefe 43 % des Durchmessers.
- * 16 Facetten statt 8 — das Feuer entsteht ueber die Kanten, mit acht
- * Seiten sieht der Stein von der Seite aus wie ein Dreieck.
- */
-function brillantGeometrie(r) {
-  const d = r * 2;
-  const krone = new THREE.CylinderGeometry(r * 0.56, r, d * 0.16, 16, 1);
-  krone.translate(0, d * 0.08, 0);
-  const pavillon = new THREE.ConeGeometry(r, d * 0.43, 16, 1);
-  pavillon.rotateX(Math.PI);
-  pavillon.translate(0, -d * 0.215, 0);
-  return { krone, pavillon };
+function choices(title,path,values,selected,{allowed,visual,cls='',help=''}={}){
+ const entries=Array.isArray(values)?values.map(x=>typeof x==='object'?[x.id,x.label||x.id]:[x,x]):Object.entries(values).map(([id,v])=>[id,v.label||v]);
+ return `<fieldset class="wc-group"><legend>${esc(title)}</legend><div class="wc-options ${cls}">${entries.map(([id,text])=>option(path,id,text,selected,allowed&&!allowed.includes(id),visual?.(id)||'',allowed&&!allowed.includes(id)?'Für die gewählten Maße oder das Profil nicht verfügbar':'')).join('')}</div>${help?`<p class="wc-note">${esc(help)}</p>`:''}</fieldset>`;
 }
-
-/**
- * Wo sitzt welcher Stein? Eine Quelle fuer Darstellung UND Preis — sonst
- * zeigt der Ring eine andere Zahl an, als die Rechnung ansetzt.
- *
- * Liefert den Steinradius und je Stein Winkel, Position und Flaechen-
- * normale. Die Normale ist noetig, weil ein Stein am Rand einer bombierten
- * Schiene nicht radial nach aussen zeigt, sondern gekippt sitzt.
- */
-function steinPlan(k) {
-  const b = BESATZ[k.besatz];
-  const profil = PROFILE[k.profil];
-  const lage = erlaubteLage(k);
-  const reihen = STEINLAGE[lage].reihen;
-  const ri = k.groesse / (2 * Math.PI);
-  const T = k.staerke;
-  const W = k.breite;
-
-  const punkte = [];
-  if (!b.anzahl && !b.anteil) return { rStein: 0, punkte };
-
-  // Der Stein muss in die Wandstaerke passen und in die Breite, die in
-  // seiner Reihe noch frei ist — am Rand ist das weniger als in der Mitte.
-  const engsteReihe = Math.max.apply(null, reihen.map(Math.abs));
-  const rStein = Math.min(
-    (W * (1 - engsteReihe)) / 2 - 0.05,
-    T * 0.42,
-    0.85
-  );
-  if (rStein <= 0.12) return { rStein: 0, punkte };
-
-  // 2.6 statt 2.4: bei einer Vollmemoire stossen die Steine sonst fast
-  // aneinander und es bleibt kein Metall dazwischen stehen.
-  const abstand = rStein * 2.6;                 // Bogenlaenge zwischen Steinen
-
-  reihen.forEach((t) => {
-    const y = (t * W) / 2;
-    const rA = ri + profil.aussen(t, T);
-
-    // Flaechennormale aus der Steigung des Aussenprofils an dieser Stelle
-    const h = 0.01;
-    const dr = (profil.aussen(t + h, T) - profil.aussen(t - h, T)) / (2 * h);
-    const dy = W / 2;                            // dy/dt
-    const len = Math.hypot(dy, dr) || 1;
-    const nR = dy / len;                         // radialer Anteil
-    const nY = -dr / len;                        // axialer Anteil
-
-    let n, schritt, start;
-    if (b.anteil) {
-      n = Math.max(1, Math.floor((b.anteil * 2 * Math.PI * rA) / abstand));
-      if (b.anteil >= 1) {
-        // Rundum: exakt gleichmaessig, damit sich Anfang und Ende treffen
-        schritt = (2 * Math.PI) / n;
-        start = -Math.PI / 2;
-      } else {
-        schritt = abstand / rA;
-        start = -.25 - ((n - 1) / 2) * schritt;
-      }
-    } else {
-      n = b.anzahl;
-      schritt = abstand / rA;
-      start = -.25 - ((n - 1) / 2) * schritt;
-    }
-
-    for (let i = 0; i < n; i++) {
-      const phi = start + i * schritt;
-      punkte.push({ phi, y, rA, nR, nY });
-    }
-  });
-
-  return { rStein, punkte };
+function select(title,path,values,selected){return `<label class="wc-field"><span>${esc(title)}</span><select data-path="${esc(path)}">${values.map(x=>{const id=typeof x==='object'?x.id:x,text=typeof x==='object'?x.label:x;return `<option value="${esc(id)}" ${String(id)===String(selected)?'selected':''} ${x.disabled?'disabled':''}>${esc(text)}</option>`;}).join('')}</select></label>`;}
+function slider(title,path,value,min,max,step=1,unit='mm',offset=0){return `<label class="wc-field"><span>${esc(title)}<output>${esc(Number(value+offset).toLocaleString('de-DE'))}${unit?' '+unit:''}</output></span><input type="range" data-path="${esc(path)}" data-offset="${offset}" min="${min+offset}" max="${max+offset}" step="${step}" value="${value+offset}"></label>`;}
+function check(title,path,value){return `<label class="wc-check"><input type="checkbox" data-path="${path}" ${value?'checked':''}>${esc(title)}</label>`;}
+function profileIcon(id){return viewer?.profileIcon(id)||`<svg viewBox="0 0 76 32" aria-hidden="true"><rect x="7" y="9" width="62" height="14" rx="${id==='PB08'?8:3}"/></svg>`;}
+function render(){
+ const k=current();segment=Math.min(segment,S.effectiveDivision(k).rates.length-1);
+ $('#wcSteps').innerHTML=C.STEPS.map((name,i)=>`<button type="button" data-step="${i}" ${i===step?'aria-current="step"':''}><span>${String(i+1).padStart(2,'0')}</span>${esc(name)}</button>`).join('');
+ $('#wcStepCount').textContent=`Schritt ${step+1} von 6`;
+ $('#wcStepTitle').textContent=C.STEPS[step];$('#wcEditing').textContent=state.pair&&state.rings.length===2?'Ringpaar bearbeiten · Änderungen gelten für beide Ringe':`Ring ${state.active+1} bearbeiten`;
+ $('#wcNotice').hidden=!notice;$('#wcNotice').textContent=notice;
+ $('#wcPrev').disabled=step===0;$('#wcNext').textContent=step===5?'Zusammenfassung ↓':'Weiter →';$('#wcUndo').disabled=!undo.length;
+ $('#wcControls').innerHTML=[profiles,dimensions,metals,stones,grooves,engraving][step](k);
+ if(step===5&&k.engraving.type==='individual')setupArt();
+ renderPrices();renderSummary();
 }
-
-/** Zwei Reihen gibt es nur bei Memoire — sonst auf mittig zurueckfallen. */
-function erlaubteLage(k) {
-  const lage = STEINLAGE[k.steinlage] ? k.steinlage : 'mitte';
-  if (STEINLAGE[lage].nurMemoire && !BESATZ[k.besatz].memoire) return 'mitte';
-  return lage;
+function profiles(k){return choices('Ringprofil','profile',Object.keys(S.PROFILES),k.profile,{cls:'wc-profile-grid',visual:profileIcon})+`<p class="wc-note">${profileDescription(k.profile)}. Der Querschnitt zeigt die Außenform und die Rundung auf der Innenseite.</p>`;}
+const profileDescription=id=>({PB01:'Außen flach, innen leicht gerundet',PB02:'Außen leicht gewölbt, innen stark gerundet',PB03:'Außen gewölbt, innen komfortabel gerundet',PB04:'Innen und außen sanft gerundet',PB05:'Oval mit weichen Übergängen',PB06:'Leichte Außenwölbung, kräftige Innenrundung',PB07:'Schmale ovale Kontur',PB08:'Runder Querschnitt',PB09:'Gewölbte Form mit schrägen Seiten',PB10:'Konkave Außenfläche',PB11:'Kräftig gewölbte Außenfläche',PB12:'Innen und außen flach, gerundete Kanten',PB13:'Flache Außenfläche mit schrägen Seiten'}[id]||id);
+function dimensions(k){
+ return select('Ringbreite','width',S.widths(k).map(v=>({id:v,label:C.mm(v)})),k.width)+select('Ringhöhe','height',S.heights(k).map(v=>({id:v,label:C.mm(v)})),k.height)+select('Ringgröße · Innenumfang','size',Array.from({length:61},(_,i)=>({id:45+i*.5,label:(45+i*.5).toLocaleString('de-DE')+' · Ø '+((45+i*.5)/Math.PI).toLocaleString('de-DE',{maximumFractionDigits:2})+' mm'})),k.size)+`<div class="wc-section-diagram">${viewer?.sectionDiagram(k)||profileIcon(k.profile)}<p>${esc(k.profile)} · ${C.mm(k.width)} breit · ${C.mm(k.height)} hoch</p></div><p class="wc-note">Die wählbaren Höhen richten sich nach Profil und Breite. Ihre genaue Ringgröße messen wir gerne bei Damla.</p>`;
 }
-
-/* ══════════════════════════════════════════════════════════════
-   3b) QUERSCHNITT ALS ZEICHNUNG
-   ──────────────────────────────────────────────────────────────
-   Dieselben Profilfunktionen wie fuer die 3D-Geometrie, nur flach
-   gezeichnet — „konkav" oder „bombiert" versteht man am Bild sofort.
-   ══════════════════════════════════════════════════════════════ */
-
-/**
- * SVG-Pfad des Querschnitts. Breite laeuft waagerecht, Staerke senkrecht;
- * (0,0) liegt links oben im Kasten.
- *
- * @param {object} profil Eintrag aus PROFILE
- * @param {number} bx     Kastenbreite in px  (entspricht der Ringbreite)
- * @param {number} by     Kastenhoehe in px   (entspricht der Wandstaerke)
- */
-function querschnittPfad(profil, bx, by) {
-  const N = 40;
-  const T = 1;                              // normiert, by skaliert
-  const oben = [];
-  const unten = [];
-  for (let i = 0; i <= N; i++) {
-    const t = -1 + (2 * i) / N;
-    const x = ((t + 1) / 2) * bx;
-    oben.push([x, by - profil.aussen(t, T) * by]);
-    unten.push([x, by - profil.innen(t, T) * by]);
-  }
-  const p = oben.map(([x, y], i) => (i ? 'L' : 'M') + x.toFixed(2) + ' ' + y.toFixed(2));
-  unten.reverse().forEach(([x, y]) => p.push('L' + x.toFixed(2) + ' ' + y.toFixed(2)));
-  return p.join(' ') + ' Z';
+function divisions(k,path){
+ const selected=path==='division'?k.division:k.surfaceDivision||'none';
+ return choices(path==='division'?'Farbaufteilung':'Oberflächenaufteilung',path,S.OPTIONS.divisions.map(d=>({id:d.id,label:C.divisionLabel(d)})),selected,{allowed:S.availableDivisions(k),visual:id=>{const d=S.OPTIONS.divisions.find(x=>x.id===id);return `<span class="wc-division-swatch" style="display:flex;height:14px;margin:1px 5px 9px;overflow:hidden;border:1px solid #d4c6ae;border-radius:3px">${d.rates.map((r,i)=>`<i style="flex:${r};background:${['#ddc399','#dedddb','#d1a494'][i]}"></i>`).join('')}</span>`;}});
 }
-
-/** Kleines Piktogramm fuer die Profil-Knoepfe — feste Vergleichsmasse. */
-function profilPiktogramm(profil) {
-  const bx = 30, by = 11;
-  return '<svg class="kf-pikto" viewBox="0 0 ' + bx + ' ' + (by + 2) + '" aria-hidden="true">' +
-         '<path d="' + querschnittPfad(profil, bx, by) + '"/></svg>';
+function metals(k){
+ const d=S.effectiveDivision(k),m=k.metals[segment],count=d.rates.length;
+ let out=d.id==='memoire'?'<p class="wc-note">Die Kranzfassung teilt den Ring automatisch in Ringschiene und Kranzband auf. Metall, Feingehalt und Oberfläche lassen sich je Segment gestalten.</p>':divisions(k,'division');
+ if(k.division==='none'&&d.id!=='memoire')out+=`<details ${k.surfaceDivision&&k.surfaceDivision!=='none'?'open':''}><summary class="wc-label">Ein Metall, mehrere Oberflächen</summary>${divisions(k,'surfaceDivision')}</details>`;
+ if(d.type==='wave')out+=select('Wellenanzahl','cycles',Array.from({length:count===3?6:4},(_,i)=>i+1),k.cycles);
+ if(count>1)out+=`<div class="wc-segments" aria-label="Segment auswählen">${d.rates.map((r,i)=>`<button type="button" data-segment="${i}" aria-pressed="${i===segment}">${d.type==='horizontal'?(i===0?'Außen':'Innen'):`Segment ${i+1}`}</button>`).join('')}</div>`;
+ out+=choices('Edelmetall',`metals.${d.rates.length===1?0:segment}.color`,C.METALS,m.color,{visual:id=>`<span class="wc-metal-dot" style="--metal:#${C.METALS[id].color.toString(16)}"></span>`});
+ out+=choices('Feingehalt',`metals.${d.rates.length===1?0:segment}.grade`,S.grades(k,segment).map(n=>({id:n,label:String(n)+(S.isGold(m.color)?' / '+({333:'8',375:'9',585:'14',750:'18',900:'21,6',916:'22'}[n]||'')+' kt':'')})),m.grade,{cls:'wc-compact'});
+ out+=choices('Oberfläche',`metals.${segment}.finish`,C.FINISHES,m.finish,{visual:id=>`<img class="wc-finish-thumb" data-finish="${id}" src="assets/configurator-finishes/${id}.jpg" alt="" loading="lazy" width="300" height="180">`});
+ return out;
 }
-
-/* ══════════════════════════════════════════════════════════════
-   4) MATERIAL — prozedurale Oberflaechen
-   ══════════════════════════════════════════════════════════════ */
-
-const texturCache = new Map();
-
-/* Ohne anisotrope Filterung zerfallen die Oberflaechen-Maps auf der
-   stark gekruemmten Aussenflaeche zu Streifen. Wird gesetzt, sobald
-   der Renderer da ist, und auf alle bereits gebauten Texturen angewandt. */
-let maxAniso = 1;
-function anisoAnwenden(tex) {
-  tex.anisotropy = maxAniso;
-  tex.needsUpdate = true;
-  return tex;
+function stoneQuantity(k,secondary=false){const path=secondary?'secondaryQuantity':k.stone.preset.startsWith('memoire')?'memoireQuantity':'quantity',max=S.maxQuantity(k,secondary);const values=[{id:'ringDependent33',label:'⅓ Ringumfang'},{id:'ringDependent50',label:'½ Ringumfang'},{id:'ringDependent100',label:'Ganzer Ringumfang'},...Array.from({length:max},(_,i)=>({id:i+1,label:(i+1)+' '+(i?'Steine':'Stein')})).filter(x=>!secondary||Number(x.id)%2===0)];return select(secondary?'Anzahl der Nebensteine':'Steinanzahl','stone.'+path,values,k.stone[path]);}
+const spreadLabels={together:'Zusammenhängend','stoneDependent-25':'Abstand ¼ Stein','stoneDependent-50':'Abstand ½ Stein','stoneDependent-100':'Abstand 1 Stein','stoneDependent-200':'Abstand 2 Steine','ringDependent-33':'Über ⅓ des Rings','ringDependent-50':'Über ½ des Rings','ringDependent-100':'Über den ganzen Ring'};
+function sizeSelect(k,secondary=false){const path=secondary?'secondarySize':'size';const cut=secondary?'brilliant':k.stone.cut,available=S.sizes(k,secondary).map(x=>x.id);return select(secondary?'Größe der Nebensteine':'Steingröße','stone.'+path,(S.STONE_DATA.size_catalogs[cut]||S.OPTIONS.sizes).map(s=>({id:s.id,label:s.carat.toLocaleString('de-DE',{maximumFractionDigits:3})+' ct · '+C.mm(s.width)+(s.height!==s.width?' × '+C.mm(s.height):'')+(s.rotation?' · '+s.rotation+'° gedreht':''),disabled:!available.includes(s.id)})),k.stone[path]);}
+function stones(k){
+ const s=k.stone,available=S.availablePresets(k);
+ let out=choices('Fassart','stone.preset',C.PRESETS,s.preset,{allowed:available});
+ if(available.length<15)out+='<p class="wc-note">Weitere Fassarten werden mit passenden Profilen und Maßen wählbar. Breite, Höhe und Seitenform bestimmen den verfügbaren Platz.</p>';
+ if(s.preset==='none')return out;
+ if(s.preset==='free')return out+freeStones(k);
+ out+=choices('Steinform','stone.cut',C.CUTS,s.cut,{allowed:S.cuts(k),cls:'wc-compact'});
+ out+=select('Steinqualität / Farbe','stone.quality',Object.entries(C.QUALITIES).map(([id,label])=>({id,label})),s.quality)+sizeSelect(k);
+ if(!['top','clamping-open','combined','cross-channel'].includes(s.preset))out+=stoneQuantity(k);
+ if(['section','cross-channel'].includes(s.preset))out+=select('Steinreihen','stone.rows',Array.from({length:S.maxRows(k)},(_,i)=>i+1),s.rows);
+ if(S.count(k)>=2&&!s.preset.startsWith('memoire')&&!['cross-channel','top','combined'].includes(s.preset))out+=select('Verteilung','stone.spreading',Object.entries(spreadLabels).map(([id,label])=>({id,label})),s.spreading);
+ if(['bezel','section','channel'].includes(s.preset))out+=choices('Position über die Ringbreite','stone.orientation',C.ORIENTATIONS,s.orientation,{allowed:s.preset==='channel'?['center','free']:Object.keys(C.ORIENTATIONS),cls:'wc-compact'});
+ if(s.orientation==='free'){const margin=S.stoneSize(k).width/2+.35;out+=slider('Abstand von der Mitte','stone.position',s.position,-Math.max(0,k.width/2-margin),Math.max(0,k.width/2-margin),.01);}
+ if(s.preset.startsWith('memoire'))out+=check('Kranzfassung auf beiden Seiten','stone.bothSides',s.bothSides);
+ if(s.preset==='top'||(s.preset==='combined'&&s.setting==='top'))out+=(s.cut==='brilliant'?choices('Aufsatzfassung','stone.mounting',{round4:'4 Krappen',round6:'6 Krappen'},s.mounting):'')+select('Metall der Fassung','stone.mountingMetal',[{id:'585-yellow',label:'Gelbgold 585'},{id:'585-white',label:'Weißgold 585'},{id:'585-red',label:'Rotgold 585'},{id:'950-platinum',label:'Platin 950'}],s.mountingMetal);
+ if(s.preset==='combined')out+=choices('Fassung des Hauptsteins','stone.setting',{rubbed:'Eingerieben',tension:'Spannfassung',top:'Aufsatz'},s.setting,{allowed:S.stoneOptions(k,'setting')?.map(x=>x.id)||['rubbed']})+`<h3 class="wc-label">Nebensteine</h3>`+choices('Fassart der Nebensteine','stone.secondarySetting',{rubbed:'Eingerieben',section:'Verschnitt',channel:'Kanal'},s.secondarySetting)+select('Qualität der Nebensteine','stone.secondaryQuality',Object.entries(C.QUALITIES).map(([id,label])=>({id,label})),s.secondaryQuality)+sizeSelect(k,true)+stoneQuantity(k,true);
+ out+=`<p class="wc-note">${S.estimate(k).stones} Steine in Ihrer aktuellen Konfiguration. Die Anzahl bei Teil- und Vollbesatz passt sich an Ringgröße und Steindurchmesser an.</p>`;
+ return out;
 }
-
-function leinwand(groesse) {
-  const c = document.createElement('canvas');
-  c.width = c.height = groesse;
-  return c;
+function freeStones(k){return `<p class="wc-note">Platzieren Sie jeden Stein einzeln auf dem Ring. Winkel und Position lassen sich unabhängig einstellen.</p><div class="wc-free-list">${k.stone.free.map((s,i)=>`<div class="wc-free-stone"><button type="button" data-delete-stone="${i}" aria-label="Stein ${i+1} entfernen">×</button><span class="wc-label">Stein ${i+1}</span>${select('Größe',`stone.free.${i}.size`,S.sizes(k).map(x=>({id:x.id,label:x.carat+' ct · '+C.mm(x.width)})),s.size)}${select('Qualität',`stone.free.${i}.quality`,Object.entries(C.QUALITIES).map(([id,label])=>({id,label})),s.quality)}${slider('Position am Umfang',`stone.free.${i}.angle`,s.angle,0,359,1,'°')}${slider('Position über die Breite',`stone.free.${i}.position`,s.position,-k.width/2+.6,k.width/2-.6,.01)}</div>`).join('')}</div><button type="button" class="wc-free-add" id="wcAddStone">+ Stein hinzufügen</button>${k.stone.free.length?'<button type="button" class="wc-free-add" id="wcClearStones">Alle entfernen</button>':''}`;}
+function grooves(k){
+ let out='';const d=S.effectiveDivision(k);
+ if(d.rates.length>1&&d.type!=='horizontal')out+=`<fieldset class="wc-group"><legend>Trennfugen</legend>${d.rates.slice(1).map((_,i)=>check(`Trennfuge ${i+1}`,`separations.${i}`,k.separations[i])).join('')}<p class="wc-note">Betont die Grenze zwischen den Segmenten.</p></fieldset>`+select('Breite der Trennfugen','separation.width',[.4,.6,.8,1,1.5,1.8].map(v=>({id:v,label:C.mm(v),disabled:v>k.width/d.rates.length-.5})),k.separation.width)+choices('Beschichtung der Trennfugen','separation.color',{none:'Keine',yellow:'Gelb',white:'Weiß',red:'Rot'},k.separation.color,{cls:'wc-compact'});
+ out+=choices('Designfuge','groove.form',C.GROOVES,k.groove.form);
+ if(k.groove.form!=='none'){
+ out+=`<div class="wc-two">${select('Fugenbreite','groove.width',C.GROOVES[k.groove.form].widths.map(v=>({id:v,label:C.mm(v),disabled:!S.grooveWidths(k).includes(v)})),k.groove.width)}${select('Fugenanzahl','groove.quantity',[0,1,2,3,4],k.groove.quantity)}</div>`;
+ out+=k.groove.positions.map((v,i)=>slider(`Position Fuge ${i+1}`,`groove.positions.${i}`,v,-k.width/2+.2,k.width/2-.2,.01,'mm',k.width/2)).join('');
+ if(!['v-groove-60','perlage'].includes(k.groove.form))out+=choices('Fugenfarbe · Beschichtung','groove.color',{none:'Keine',yellow:'Gelb',white:'Weiß',red:'Rot'},k.groove.color,{cls:'wc-compact'});
+ if(k.groove.form!=='perlage')out+=select('Fugenoberfläche','groove.surface',[{id:'polished',label:'Poliert'}],k.groove.surface);
+ }
+ out+=choices('Stufen','edge.type',C.EDGE_TYPES,k.edge.type,{cls:'wc-compact'});
+ for(const side of ['left','right'])if(k.edge.type===side||k.edge.type==='both')out+=`<div class="wc-two">${select('Stufenbreite '+(side==='left'?'links':'rechts'),'edge.'+side+'Width',[.5,1,1.5,2].map(n=>({id:n,label:C.mm(n),disabled:!S.edgeWidths(k,side).includes(n)})),k.edge[side+'Width'])}${select('Oberfläche '+(side==='left'?'links':'rechts'),'edge.'+side+'Surface',[{id:'polished',label:'Poliert'}],k.edge[side+'Surface'])}</div>`;
+ return out;
 }
-
-/** Rauheits-Map: koerniges bzw. gebuerstetes Finish. */
-function rauheitsMap(art) {
-  const key = 'r-' + art;
-  if (texturCache.has(key)) return texturCache.get(key);
-
-  const S = 512;
-  const c = leinwand(S);
-  const ctx = c.getContext('2d');
-  const bild = ctx.createImageData(S, S);
-  const d = bild.data;
-
-  for (let yy = 0; yy < S; yy++) {
-    for (let xx = 0; xx < S; xx++) {
-      const i = (yy * S + xx) * 4;
-      let v;
-      if (art === 'feinkorn') {
-        v = 200 + Math.random() * 55;
-      } else if (art === 'grobkorn') {
-        // groebere Struktur: Rauschen auf einem gefilterten Raster
-        const grob = Math.sin(xx * 0.7) * Math.cos(yy * 0.9);
-        v = 175 + grob * 25 + Math.random() * 55;
-      } else {
-        // Buerste: feine Riefen laengs der Ringkontur (u-Richtung)
-        v = 190 + Math.sin((art === 'quer' ? xx : yy) * 2.3) * 12 + Math.random() * 45;
-      }
-      d[i] = d[i + 1] = d[i + 2] = Math.max(0, Math.min(255, v));
-      d[i + 3] = 255;
-    }
-  }
-  ctx.putImageData(bild, 0, 0);
-
-  const tex = new THREE.CanvasTexture(c);
-  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-  // Laengsmattierung laeuft um den Ring, die Koernungen bleiben gleichmaessig
-  tex.repeat.set(art === 'buerste' ? 1 : 8, art === 'buerste' ? 10 : 3);
-  tex.colorSpace = THREE.NoColorSpace;
-  anisoAnwenden(tex);
-  texturCache.set(key, tex);
-  return tex;
+function engraving(k,individual=false){
+ if(state.pair&&state.rings.length===2&&!individual&&state.rings.every(r=>r.engraving.type!=='individual'))return state.rings.map((r,i)=>`<section data-engraving-ring="${i}"><h3 class="wc-label">Gravur Ring ${i+1}</h3>${engraving(r,true).replaceAll('data-path="engraving.','data-path="@'+i+'.engraving.').replace('id="wcEngravingText"','id="wcEngravingText'+i+'"')}</section>`).join('');
+ const e=k.engraving;
+ let out=choices('Innengravur','engraving.type',C.ENGRAVINGS,e.type);
+ if(e.type==='none')return out;
+ if(e.type==='individual')return out+individualMarkup;
+ const fonts=e.type==='diamond'?{palscri:{label:'Skript 4L'},KozukaGothicPr6NEL:{label:'SL 513'}}:C.FONTS;
+ out+=choices('Schrift','engraving.font',fonts,e.font,{cls:'wc-compact'});
+ out+=`<label class="wc-field"><span>Ihr Gravurtext <output>${e.text.length} / 40</output></span><input id="wcEngravingText" type="text" maxlength="40" data-path="engraving.text" value="${esc(e.text)}" placeholder="z. B. Für immer · 12.09.2027" autocomplete="off"></label><div class="wc-symbols">${Object.entries(C.SYMBOLS).map(([id,symbol])=>`<button type="button" data-symbol="${id}" aria-label="Symbol ${id} einfügen">${symbol}</button>`).join('')}</div><div class="wc-engraving-preview" style="font-family:${esc(C.engravingFont(e))}">${esc(e.text||'Für immer verbunden')}</div><p class="wc-note">Bis 40 Zeichen einschließlich Leerzeichen und Symbolen. In der Ansicht „Innen“ sehen Sie die Gravur im Ring.</p>`;
+ return out;
 }
-
-/** Normal-Map fuer Hammerschlag: ueberlagerte runde Diedel. */
-function hammerMap() {
-  if (texturCache.has('n-hammer')) return texturCache.get('n-hammer');
-
-  const S = 512;
-  const hoehe = new Float32Array(S * S);
-  const dellen = 90;
-  for (let k = 0; k < dellen; k++) {
-    const cx = Math.random() * S, cy = Math.random() * S;
-    const rad = 22 + Math.random() * 26;
-    const tiefe = 0.45 + Math.random() * 0.55;
-    for (let yy = Math.max(0, cy - rad) | 0; yy < Math.min(S, cy + rad); yy++) {
-      for (let xx = Math.max(0, cx - rad) | 0; xx < Math.min(S, cx + rad); xx++) {
-        const dx = xx - cx, dy = yy - cy;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist > rad) continue;
-        const h = Math.cos((dist / rad) * (Math.PI / 2)) * tiefe;
-        const i = yy * S + xx;
-        if (h > hoehe[i]) hoehe[i] = h;
-      }
-    }
-  }
-
-  const c = leinwand(S);
-  const ctx = c.getContext('2d');
-  const bild = ctx.createImageData(S, S);
-  const d = bild.data;
-  const at = (x, y) => hoehe[((y + S) % S) * S + ((x + S) % S)];
-  for (let yy = 0; yy < S; yy++) {
-    for (let xx = 0; xx < S; xx++) {
-      const dx = (at(xx + 1, yy) - at(xx - 1, yy)) * 2.2;
-      const dy = (at(xx, yy + 1) - at(xx, yy - 1)) * 2.2;
-      const len = Math.sqrt(dx * dx + dy * dy + 1);
-      const i = (yy * S + xx) * 4;
-      d[i]     = ((-dx / len) * 0.5 + 0.5) * 255;
-      d[i + 1] = ((-dy / len) * 0.5 + 0.5) * 255;
-      d[i + 2] = ((1 / len) * 0.5 + 0.5) * 255;
-      d[i + 3] = 255;
-    }
-  }
-  ctx.putImageData(bild, 0, 0);
-
-  const tex = new THREE.CanvasTexture(c);
-  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-  // Grob kacheln: die Lathe-UVs stauchen v auf den Seitenflanken stark,
-  // bei feiner Kachelung zerfaellt die Struktur dort zu Streifen.
-  tex.repeat.set(6, 2);
-  tex.colorSpace = THREE.NoColorSpace;
-  anisoAnwenden(tex);
-  texturCache.set('n-hammer', tex);
-  return tex;
+function renderPrices(){const estimates=state.rings.map(S.estimate);$('#wcPrice').textContent=money(estimates.reduce((a,b)=>a+b.price,0));$('#wcRingTabs').innerHTML=state.rings.map((r,i)=>`<button type="button" data-ring="${i}" aria-pressed="${!state.pair&&state.active===i}">Ring ${i+1}<small>${money(estimates[i].price)}</small></button>`).join('')+(state.rings.length===2?`<button type="button" data-ring="pair" aria-pressed="${state.pair}">Ringpaar<small>Gemeinsam bearbeiten</small></button>`:'');}
+function summaryData(k){const d=S.effectiveDivision(k),s=k.stone;return [
+ ['Profil',k.profile+' · '+profileDescription(k.profile)],['Maße',C.mm(k.width)+' breit · '+C.mm(k.height)+' hoch · Größe '+k.size],['Aufteilung',C.divisionLabel(d)],
+ ...d.rates.map((_,i)=>['Segment '+(i+1),C.METALS[k.metals[i].color].label+' '+k.metals[i].grade+' · '+C.FINISHES[k.metals[i].finish]]),
+ ['Steinbesatz',C.PRESETS[s.preset]+(s.preset!=='none'?' · '+S.estimate(k).stones+' Steine · '+C.CUTS[s.cut]+' · '+C.QUALITIES[s.quality]+' · '+S.stoneSize(k).carat+' ct je Stein':'')],
+ ...(s.preset==='combined'?[['Nebensteine',S.count(k,true)+' · '+S.stoneSize(k,true).carat+' ct · '+C.QUALITIES[s.secondaryQuality]]]:[]),
+ ...(s.preset.startsWith('memoire')?[['Kranzfassung',s.bothSides?'Beidseitig':'Einseitig']]:[]),
+ ...(s.preset==='free'?s.free.map((g,i)=>['Stein '+(i+1),g.angle+'° · Position '+C.mm(g.position+k.width/2)+' · '+C.QUALITIES[g.quality]+' · '+(S.OPTIONS.sizes.find(x=>x.id===g.size)?.carat||0)+' ct']):[]),
+ ...(s.preset!=='none'&&s.preset!=='free'?[['Anordnung',(s.rows>1?s.rows+' Reihen · ':'')+(spreadLabels[s.spreading]||'Zusammenhängend')+' · '+(C.ORIENTATIONS[s.orientation]||'Mitte')]]:[]),
+ ...(d.type==='wave'?[['Wellenanzahl',k.cycles]]:[]),
+ ...(k.separations.some(Boolean)?[['Trennfugen',k.separations.map((enabled,i)=>enabled?'Grenze '+(i+1):'').filter(Boolean).join(', ')+' · '+C.mm(k.separation.width)]]:[]),
+ ['Designfugen',k.groove.quantity?k.groove.quantity+' · '+C.GROOVES[k.groove.form].label+' · '+C.mm(k.groove.width)+' · Positionen '+k.groove.positions.map(x=>C.mm(x+k.width/2)).join(', '):'Keine'],['Stufen',C.EDGE_TYPES[k.edge.type]+(k.edge.type!=='none'?' · links '+C.mm(k.edge.leftWidth)+' · rechts '+C.mm(k.edge.rightWidth):'')],
+ ['Gravur',C.ENGRAVINGS[k.engraving.type]+(k.engraving.text?' · '+k.engraving.text:'')+(k.engraving.type==='individual'&&k.engraving.art?' · Eigenes Motiv hinterlegt':'')],['Richtwert',money(S.estimate(k).price)]
+ ];}
+function renderSummary(){$('#wcSummaryContent').innerHTML=state.rings.map((k,i)=>`<article><h3>Ring ${i+1}</h3><dl>${summaryData(k).map(([name,value])=>`<dt>${esc(name)}</dt><dd>${esc(value)}</dd>`).join('')}</dl></article>`).join('');}
+const summaryText=()=>state.rings.map((r,i)=>'Ring '+(i+1)+'\n'+summaryData(r).map(([k,v])=>k+': '+v).join('\n')).join('\n\n')+'\n\nEntwurf: '+location.origin+location.pathname+'#d='+S.encode(state);
+function toast(text){$('#wcToast').textContent=text;$('#wcToast').hidden=false;setTimeout(()=>$('#wcToast').hidden=true,3500);}
+async function copy(text){try{await navigator.clipboard.writeText(text);toast('In die Zwischenablage kopiert.');}catch{dialog('<h2>Zum Kopieren</h2><textarea readonly>'+esc(text)+'</textarea>');$('#wcDialog textarea').select();}}
+function dialog(html){$('#wcDialogContent').innerHTML=html;$('#wcDialog').showModal();}
+function saveDialog(){
+ const code='DAM3-'+S.encode(state),link=location.origin+location.pathname+'#d='+S.encode(state);let saved=[];try{saved=JSON.parse(localStorage.getItem('damla-designs-v3')||'[]');}catch{}
+ dialog(`<h2>Speichern & laden</h2><p>Ihr Link enthält die komplette Konfiguration und funktioniert auch auf einem anderen Gerät.</p><button type="button" id="wcShareLink">Link kopieren</button><button type="button" id="wcDownload">Entwurf herunterladen</button><label class="wc-field"><span>Entwurf in diesem Browser merken</span><input id="wcSaveName" maxlength="60" placeholder="z. B. Unsere Trauringe"></label><button type="button" id="wcStore">Merken</button>${saved.length?`<label class="wc-field"><span>Gemerkte Entwürfe</span><select id="wcSaved"><option value="">Auswählen …</option>${saved.map((s,i)=>`<option value="${i}">${esc(s.name)}</option>`).join('')}</select></label>`:''}<label class="wc-field"><span>Konfigurationslink oder Damla-Code laden</span><textarea id="wcLoadCode" placeholder="Link oder DAM3-Code einfügen"></textarea></label><button type="button" id="wcLoad">Laden</button><label class="wc-field"><span>Entwurfsdatei laden</span><input id="wcLoadFile" type="file" accept="application/json,.json"></label><p id="wcLoadError" role="alert"></p>`);
+ $('#wcShareLink').onclick=()=>copy(link);
+ $('#wcDownload').onclick=()=>download(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),'damla-trauring-entwurf.json');
+ $('#wcStore').onclick=()=>{try{saved.unshift({name:$('#wcSaveName').value.trim()||'Trauringe '+new Date().toLocaleDateString('de-DE'),state:C.clone(state)});localStorage.setItem('damla-designs-v3',JSON.stringify(saved.slice(0,20)));toast('Entwurf in diesem Browser gespeichert.');}catch{toast('Lokales Speichern nicht möglich. Bitte den Link kopieren.');}};
+ if($('#wcSaved'))$('#wcSaved').onchange=e=>{if(e.target.value!=='')loadState(saved[Number(e.target.value)].state);};
+ $('#wcLoad').onclick=()=>{try{loadState(S.decode($('#wcLoadCode').value.trim()));}catch{$('#wcLoadError').textContent='Dieser Link oder Code ist nicht gültig.';}};
+ $('#wcLoadFile').onchange=async e=>{try{const file=e.target.files[0];if(file.size>1000000)throw Error();loadState(JSON.parse(await file.text()));}catch{$('#wcLoadError').textContent='Diese Entwurfsdatei konnte nicht geladen werden.';}};
 }
-
-function metallMaterial(farbe, oberflaeche) {
-  const o = OBERFLAECHEN[oberflaeche];
-  // Poliertes Gold ist nie mathematisch glatt: eine Grundrauheit und ein
-  // duenner Clearcoat geben den weichen, tiefen Glanz statt Chromspiegel.
-  const mat = new THREE.MeshPhysicalMaterial({
-    color: farbe,
-    metalness: 1.0,
-    roughness: Math.max(0.14, o.rauheit),
-    envMapIntensity: 1.05,
-    clearcoat: 0,
-    clearcoatRoughness: 0.08,
-  });
-  if (o.textur === 'hammer') {
-    mat.normalMap = hammerMap();
-    mat.normalScale = new THREE.Vector2(0.55, 0.55);
-  } else if (o.textur) {
-    mat.roughnessMap = rauheitsMap(o.textur);
-  }
-  return mat;
-}
-
-/* Ein Brillant ist nicht weiss, sondern fast farblos: was man sieht, sind
-   Spiegelungen. Deshalb hoher Brechungsindex und kraeftige Environment-
-   Intensitaet — mit gedaempfter Reflexion wirken die Steine wie Milchglas. */
-const BRILLANT_MATERIAL = new THREE.MeshPhysicalMaterial({
-  color: 0xf2f6fb,
-  metalness: 0.0,
-  roughness: 0.0,
-  ior: 2.42,
-  specularIntensity: 1.0,
-  clearcoat: 1.0,
-  clearcoatRoughness: 0.0,
-  envMapIntensity: 6.0,
-  flatShading: true,
+function loadState(value){remember();state=S.normalizeState(value);state.active=Math.min(state.active,state.rings.length-1);segment=0;$('#wcDialog').close();persist();render();viewer?.update(state,true);toast('Entwurf geladen.');}
+function download(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
+function setupArt(){mountIndividual($('.wc-individual'),{engraving:current().engraving,ringCount:state.rings.length,onApply:(value,target)=>{remember();const indices=target==='all'?state.rings.map((_,i)=>i):[target==='current'?state.active:Number(target)];for(const i of indices){if(state.rings[i]){Object.assign(state.rings[i].engraving,{...value,type:'individual'});state.rings[i]=S.normalizeRing(state.rings[i]);}}persist();viewer?.update(state);renderSummary();toast('Individualgravur übernommen.');}});}
+$('.wc').addEventListener('click',e=>{
+ const b=e.target.closest('button');if(!b)return;
+ if(b.dataset.step!==undefined){step=Number(b.dataset.step);notice='';render();}
+ else if(b.dataset.ring!==undefined){state.pair=b.dataset.ring==='pair';if(!state.pair)state.active=Number(b.dataset.ring);segment=0;render();}
+ else if(b.dataset.segment!==undefined){segment=Number(b.dataset.segment);render();}
+ else if(b.dataset.path){apply(b.dataset.path,b.dataset.value);}
+ else if(b.dataset.view){viewer?.view(b.dataset.view);if(b.dataset.view==='rotate'){b.setAttribute('aria-pressed',String(viewer.rotating));b.setAttribute('aria-label',viewer.rotating?'Drehung pausieren':'Drehung starten');b.textContent=viewer.rotating?'Ⅱ':'▷';}}
+ else if(b.dataset.symbol){const region=b.closest('[data-engraving-ring]'),index=region?Number(region.dataset.engravingRing):state.active,field=(region||$('#wcControls')).querySelector('input[type=text]'),text=state.rings[index].engraving.text,start=field?.selectionStart??text.length,end=field?.selectionEnd??start;apply('@'+index+'.engraving.text',(text.slice(0,start)+C.SYMBOLS[b.dataset.symbol]+text.slice(end)).slice(0,40));}
+ else if(b.dataset.deleteStone!==undefined){const stones=C.clone(current().stone.free);stones.splice(Number(b.dataset.deleteStone),1);apply('stone.free',stones);}
+ else if(b.id==='wcAddStone'){const list=C.clone(current().stone.free);list.push({angle:(list.length*20)%360,position:0,size:'brilliant-100-0',quality:'tw/vsi'});apply('stone.free',list);}
+ else if(b.id==='wcClearStones')apply('stone.free',[]);
 });
-
-/* ══════════════════════════════════════════════════════════════
-   5) SZENE
-   ══════════════════════════════════════════════════════════════ */
-
-const buehne = document.getElementById('kfBuehne');
-const hinweisWebgl = document.getElementById('kfWebglHinweis');
-
-let renderer, scene, camera, controls, ringGruppe;
-let laeuft = false;
-let bereit = false;   // erstes gerendertes Bild da -> Ladezustand aus
-let drehen = !matchMedia('(prefers-reduced-motion: reduce)').matches;
-let sichtbar = true;
-let needsRender = true, lastFrame = 0;
-
-function webglVerfuegbar() {
-  try {
-    const c = document.createElement('canvas');
-    return !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl')));
-  } catch (e) {
-    return false;
-  }
-}
-
-async function szeneAufbauen() {
-  // preserveDrawingBuffer haelt das Bild nach dem Zeichnen im Puffer —
-  // ohne das liefert toDataURL() fuer den Export ein leeres Bild.
-  renderer = new THREE.WebGLRenderer({
-    antialias: true, alpha: true, preserveDrawingBuffer: true,
-  });
-  renderer.setPixelRatio(Math.min(Math.max(window.devicePixelRatio, 1.5), 2));
-  renderer.setSize(buehne.clientWidth, buehne.clientHeight);
-  renderer.toneMapping = THREE.NeutralToneMapping;
-  renderer.toneMappingExposure = 0.96;
-  renderer.outputColorSpace = THREE.SRGBColorSpace;
-  buehne.appendChild(renderer.domElement);
-
-  maxAniso = renderer.capabilities.getMaxAnisotropy();
-
-  scene = new THREE.Scene();
-
-  // Studio-Environment ohne externe HDR-Datei
-  try { studio = await createWeddingStudio(renderer); buehne.dataset.studio = 'blender'; }
-  catch (error) { console.warn('Studio-Reflexionen: Ersatzbeleuchtung aktiv',error); studio = createStudio(renderer); buehne.dataset.studio = 'fallback'; }
-  scene.environment = studio.metal;
-
-  camera = new THREE.PerspectiveCamera(32, buehne.clientWidth / buehne.clientHeight, 1, 400);
-  // Dreiviertelblick: frontal sieht man nur den Kreis, hier auch das Profil
-  camera.position.set(5, 24, 82);
-
-  // Dreipunktlicht: Fuehrung von links oben, weiche Aufhellung von rechts,
-  // Kante von hinten. Mit nur zwei Lichtern blieb die abgewandte Seite tot.
-  const key = new THREE.DirectionalLight(0xfff6e8, 0.3);
-  key.position.set(-18, 26, 34);
-  scene.add(key);
-  const fill = new THREE.DirectionalLight(0xfffaf2, 0.15);
-  fill.position.set(26, 8, 20);
-  scene.add(fill);
-  const rim = new THREE.DirectionalLight(0xffffff, 0.25);
-  rim.position.set(10, 14, -30);
-  scene.add(rim);
-
-  ringGruppe = new THREE.Group();
-  scene.add(ringGruppe);
-  schatten.eins = bodenSchatten();
-  schatten.zwei = bodenSchatten();
-  scene.add(schatten.eins, schatten.zwei);
-
-  controls = new OrbitControls(camera, renderer.domElement);
-  controls.target.set(0, 10, 0);
-  controls.enableDamping = true;
-  controls.dampingFactor = 0.08;
-  controls.enablePan = false;
-  controls.minDistance = 40;
-  controls.maxDistance = 130;
-  controls.minPolarAngle = Math.PI * 0.14;
-  controls.maxPolarAngle = Math.PI * 0.62;
-  controls.autoRotateSpeed = 0.7;
-  // OrbitControls suspends rotation during a drag itself; zoom keeps rotating.
-  renderer.domElement.setAttribute('aria-hidden', 'true');
-  new IntersectionObserver(([entry]) => { sichtbar = entry.isIntersecting; }).observe(buehne);
-  renderer.domElement.addEventListener('webglcontextlost', (e) => {
-    e.preventDefault(); laeuft = false; renderer.setAnimationLoop(null);
-    hinweisWebgl.hidden = false; hinweisWebgl.textContent = 'Die 3D-Ansicht wurde unterbrochen. Laden Sie die Seite neu. Ihre Auswahl bleibt im Link erhalten.';
-  });
-
-  new ResizeObserver(groesseAnpassen).observe(buehne);
-  laeuft = true;
-  renderer.setAnimationLoop(tick);
-}
-
-const schatten = { eins: null, zwei: null };
-
-/** Weicher Bodenschatten je Ring — spart eine zweite Rendering-Passage. */
-function bodenSchatten() {
-  const S = 256;
-  const c = leinwand(S);
-  const ctx = c.getContext('2d');
-  const g = ctx.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2);
-  g.addColorStop(0, 'rgba(60,52,40,0.30)');
-  g.addColorStop(0.45, 'rgba(60,52,40,0.12)');
-  g.addColorStop(1, 'rgba(60,52,40,0)');
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, S, S);
-
-  const tex = new THREE.CanvasTexture(c);
-  const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false });
-  // Einheitsgroesse 1 — wird je Ring auf dessen Durchmesser skaliert
-  const plane = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), mat);
-  plane.rotation.x = -Math.PI / 2;
-  plane.position.y = 0.02;   // die Ringe stehen auf y = 0
-  return plane;
-}
-
-/** Schatten unter einen Ring legen: so breit wie der Ring, flach in der Tiefe. */
-function schattenSetzen(mesh, x, z, radius) {
-  if (!mesh) return;
-  mesh.position.set(x, 0.02, z);
-  mesh.scale.set(radius * 3.1, radius * 1.5, 1);
-}
-
-function groesseAnpassen() {
-  needsRender = true;
-  if (!renderer || !buehne.clientWidth) return;
-  camera.aspect = buehne.clientWidth / buehne.clientHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(buehne.clientWidth, buehne.clientHeight);
-  kameraEinpassen(true);
-}
-
-/**
- * Haelt das Paar im Bild — auf einem schmalen Handy-Viewport reicht die
- * feste Kameradistanz sonst nicht und der zweite Ring wird angeschnitten.
- * Beim Umkonfigurieren nur nachfuehren, wenn es wirklich noetig ist,
- * damit ein selbst gewaehlter Zoom nicht bei jedem Klick zurueckspringt.
- */
-function kameraEinpassen(erzwingen) {
-  needsRender = true;
-  if (!camera || !controls) return;
-  const bounds=new THREE.Box3().setFromObject(ringGruppe);
-  const size=bounds.getSize(new THREE.Vector3());
-  const center=bounds.getCenter(new THREE.Vector3());
-  const breite=size.x, hoehe=size.y;
-
-  const fovY = THREE.MathUtils.degToRad(camera.fov);
-  const fovX = 2 * Math.atan(Math.tan(fovY / 2) * camera.aspect);
-  const noetig = Math.max(
-    breite / 2 / Math.tan(fovX / 2),
-    hoehe / 2 / Math.tan(fovY / 2)
-  ) * 1.26;
-
-  controls.target.copy(center);
-  controls.minDistance = noetig * 0.5;
-  controls.maxDistance = noetig * 2.4;
-
-  const jetzt = camera.position.distanceTo(controls.target);
-  if (erzwingen || jetzt > noetig * 1.35 || jetzt < noetig * 0.72) {
-    const richtung = camera.position.clone().sub(controls.target).normalize();
-    camera.position.copy(controls.target).add(richtung.multiplyScalar(noetig));
-  }
-  controls.update();
-}
-
-function tick(time) {
-  if (document.hidden || !sichtbar || time - lastFrame < 32) return;
-  const delta = Math.min((time - lastFrame) / 1000, .1);
-  lastFrame = time;
-  // Die Kamera kreist auch beim Zoomen weiter; nur die Pausentaste stoppt sie.
-  controls.autoRotate = drehen;
-  const changed = controls.update(delta);
-  if (!changed && !needsRender && bereit) return;
-  needsRender = false;
-  renderer.render(scene, camera);
-  if (!bereit) { bereit = true; buehne.classList.add('is-bereit'); }
-}
-
-/* ── Ansicht als Bild sichern ──────────────────────────────────
-   Die Ringe zweifach aufgeloest rendern, greifen, Groesse zurueck.
-   Kunden speichern sich ihren Entwurf, wir bekommen ihn per Nachricht. */
-function bildSpeichern() {
-  if (!renderer) return;
-  const b = buehne.clientWidth, h = buehne.clientHeight;
-  const pr = renderer.getPixelRatio();
-  renderer.setPixelRatio(Math.min(pr * 2, 4));
-  renderer.setSize(b, h, false);
-  renderer.render(scene, camera);
-
-  let url = '';
-  try {
-    url = renderer.domElement.toDataURL('image/png');
-  } finally {
-    renderer.setPixelRatio(pr);
-    renderer.setSize(b, h);
-    renderer.render(scene, camera);
-  }
-  if (!url) return;
-
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'trauringe-juwelier-damla.png';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-}
-
-/* ══════════════════════════════════════════════════════════════
-   6) ZUSTAND
-   ══════════════════════════════════════════════════════════════ */
-
-const standard = () => ({
-  legierung: 'gelbgold',
-  karat: '585',
-  letztesKarat: '585',   // ueberlebt einen Abstecher zu Platin
-  bicolor: false,
-  zweitmetall: 'weissgold',
-  teilung: 'mitte',
-  fuge: 'ohne',
-  schrift: 'klassisch',
-  profil: 'flach',
-  breite: 4.5,
-  staerke: 1.6,
-  oberflaeche: 'poliert',
-  besatz: 'ohne',
-  steinlage: 'mitte',
-  groesse: 54,
-  gravur: '',
-});
-
-const zustand = {
-  aktiv: 'eins',
-  gekoppelt: true,
-  eins: Object.assign(standard(), { breite: 3.5, besatz: 'drei', groesse: 54 }),
-  zwei: Object.assign(standard(), { breite: 5.5, besatz: 'ohne', groesse: 62 }),
-};
-
-/* Diese Felder bleiben beim Koppeln individuell — Groesse und Gravur
-   sind pro Person, alles andere macht ein Paar erst zum Paar. */
-const NICHT_KOPPELN = ['groesse', 'gravur', 'breite', 'besatz', 'steinlage', 'schrift'];
-
-/* ── Konfiguration in der Adresszeile ──────────────────────────
-   Damit ist ein Entwurf teilbar und wiederfindbar: der Link, den
-   der Besucher uns schickt, oeffnet exakt dieses Paar. */
-
-function inBase64Url(text) {
-  const bytes = new TextEncoder().encode(text);
-  let roh = '';
-  bytes.forEach((b) => { roh += String.fromCharCode(b); });
-  return btoa(roh).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-}
-
-function ausBase64Url(code) {
-  const roh = atob(code.replace(/-/g, '+').replace(/_/g, '/'));
-  const bytes = Uint8Array.from(roh, (c) => c.charCodeAt(0));
-  return new TextDecoder().decode(bytes);
-}
-
-/** Nur bekannte Werte uebernehmen — ein manipulierter Link darf
-    hoechstens beim Standard landen, nie in einem kaputten Zustand. */
-function pruefen(k) {
-  const s = standard();
-  if (!k || typeof k !== 'object') return s;
-  if (Object.hasOwn(LEGIERUNGEN, k.legierung)) s.legierung = k.legierung;
-  if (Object.hasOwn(LEGIERUNGEN[s.legierung].karate, k.karat)) s.karat = k.karat;
-  s.letztesKarat = LEGIERUNGEN.gelbgold.karate[k.letztesKarat] ? k.letztesKarat : s.karat;
-  if (Object.hasOwn(PROFILE, k.profil)) s.profil = k.profil;
-  if (Object.hasOwn(OBERFLAECHEN, k.oberflaeche)) s.oberflaeche = k.oberflaeche;
-  if (Object.hasOwn(BESATZ, k.besatz)) s.besatz = k.besatz;
-  if (Object.hasOwn(STEINLAGE, k.steinlage)) s.steinlage = k.steinlage;
-  s.bicolor = !!k.bicolor;
-  if (Object.hasOwn(LEGIERUNGEN, k.zweitmetall)) s.zweitmetall = k.zweitmetall;
-  if (Object.hasOwn(TEILUNGEN, k.teilung)) s.teilung = k.teilung;
-  if (Object.hasOwn(FUGEN, k.fuge)) s.fuge = k.fuge;
-  if (Object.hasOwn(SCHRIFTEN, k.schrift)) s.schrift = k.schrift;
-  s.breite = Math.min(8, Math.max(2.5, Number(k.breite) || s.breite));
-  s.staerke = Math.min(2.4, Math.max(1.2, Number(k.staerke) || s.staerke));
-  s.groesse = Math.min(70, Math.max(44, parseInt(k.groesse, 10) || s.groesse));
-  s.gravur = typeof k.gravur === 'string' ? k.gravur.slice(0, 24) : '';
-  return s;
-}
-
-function ausAdresse() {
-  const code = (location.hash || '').replace(/^#k=/, '');
-  if (!code || code === location.hash) return false;
-  try {
-    const d = JSON.parse(ausBase64Url(code));
-    zustand.eins = pruefen(d.a || {});
-    zustand.zwei = pruefen(d.b || {});
-    zustand.gekoppelt = !!d.g;
-    return true;
-  } catch (e) {
-    return false;
-  }
-}
-
-/* Merkt sich, was wir selbst geschrieben haben — damit der Lauscher unten
-   den eigenen Schreibvorgang nicht als fremden Link missversteht. */
-let eigenerHash = '';
-
-/* Gedrosselt: an einem Schieberegler feuert `input` dutzende Male, und
-   Browser deckeln die Zahl der History-Schreibvorgaenge. */
-let adressTimer = 0;
-function inAdresse() {
-  clearTimeout(adressTimer);
-  adressTimer = setTimeout(() => {
-    const code = inBase64Url(JSON.stringify({
-      a: zustand.eins, b: zustand.zwei, g: zustand.gekoppelt,
-    }));
-    eigenerHash = '#k=' + code;
-    // replaceState statt hash, damit der Zurueck-Knopf nicht zumuellt
-    history.replaceState(null, '', location.pathname + location.search + eigenerHash);
-  }, 350);
-}
-
-/* Ein Link, der erst nach dem Laden in die Adresszeile kommt — eingefuegt
-   oder ueber den Zurueck-Knopf — soll genauso greifen wie beim Aufruf.
-   Der eigene replaceState loest kein hashchange aus; der Vergleich faengt
-   trotzdem den Fall ab, dass jemand exakt den aktuellen Stand einfuegt. */
-window.addEventListener('hashchange', () => {
-  if (location.hash === eigenerHash) return;
-  if (ausAdresse()) zeichnen();
-});
-
-/* ══════════════════════════════════════════════════════════════
-   RING BAUEN
-   ══════════════════════════════════════════════════════════════ */
-
-const ringe = { eins: null, zwei: null };
-const ringSignaturen = { eins: '', zwei: '' };
-
-/* Geometrien und Materialien des alten Standes freigeben. Die prozeduralen
-   Maps liegen im Cache und werden bewusst behalten — sie sind teuer und
-   fuer alle Ringe gleich. Ebenso das gemeinsame Brillant-Material. */
-function altEntsorgen(gruppe) {
-  const disposed=new Set();
-  gruppe.traverse(o=>{
-    if(!o.isMesh)return;
-    if(!o.userData.sharedGeometry)o.geometry.dispose();
-    const materials=Array.isArray(o.material)?o.material:[o.material];
-    for(const material of materials){
-      if(disposed.has(material)||material===BRILLANT_MATERIAL||material.userData.sharedJewelry)continue;
-      disposed.add(material);
-      for(const key of ['map','normalMap','roughnessMap','bumpMap'])if(material[key]&&!texturGecacht(material[key]))material[key].dispose();
-      material.dispose();
-    }
-  });
-  gruppe.clear();
-}
-
-function texturGecacht(tex) {
-  for (const t of texturCache.values()) if (t === tex) return true;
-  return false;
-}
-
-function rillenAnwenden(geo, k, ri) {
-  const positions=FUGEN[k.fuge].positions;
-  if(!positions.length)return;
-  const p=geo.attributes.position,n=geo.attributes.normal;
-  for(let i=0;i<p.count;i++){
-    const x=p.getX(i),y=p.getY(i),z=p.getZ(i),r=Math.hypot(x,z);
-    if(r<ri+k.staerke*.45)continue;
-    let depth=0,slope=0;
-    for(const position of positions){
-      const distance=y-position*k.breite/2;
-      if(Math.abs(distance)<.19){
-        const phase=distance/.19*Math.PI;
-        depth+=.06*(1+Math.cos(phase));
-        slope+=-.06*Math.PI/.19*Math.sin(phase);
-      }
-    }
-    const u=x/r,v=z/r,radial=n.getX(i)*u+n.getZ(i)*v,tangent=-n.getX(i)*v+n.getZ(i)*u;
-    const normal=new THREE.Vector3(u*radial-v*tangent*r/(r-depth),n.getY(i)+slope*radial,v*radial+u*tangent*r/(r-depth)).normalize();
-    p.setXYZ(i,u*(r-depth),y,v*(r-depth));n.setXYZ(i,normal.x,normal.y,normal.z);
-  }
-  p.needsUpdate=n.needsUpdate=true;
-}
-
-function ringBauen(seite) {
-  const k = zustand[seite];
-  const signatur = JSON.stringify(k);
-  if (ringe[seite] && ringSignaturen[seite] === signatur) return ringe[seite];
-  ringSignaturen[seite] = signatur;
-  const profil = PROFILE[k.profil];
-  const leg = LEGIERUNGEN[k.legierung];
-  const karat = leg.karate[k.karat] || Object.values(leg.karate)[0];
-  const ri = k.groesse / (2 * Math.PI);
-  const T = k.staerke;
-  const W = k.breite;
-
-  let gruppe = ringe[seite];
-  if (!gruppe) {
-    gruppe = new THREE.Group();
-    ringGruppe.add(gruppe);
-    ringe[seite] = gruppe;
-  } else {
-    altEntsorgen(gruppe);
-  }
-
-  // A continuous Blender mesh with polished comfort interior and finish-specific exterior.
-  const geometry=ringGeometrie(ri,T,W,profil);
-  rillenAnwenden(geometry,k,ri);
-  assignRingMaterials(geometry,k,TEILUNGEN[k.teilung].bands);
-  const partner=LEGIERUNGEN[k.zweitmetall];
-  const partnerKarat=partner.karate[k.karat]||Object.values(partner.karate)[0];
-  const source=jewelry.get('Wedding_'+k.profil);
-  const profileLength=source.userData.profile_perimeter_mm||12.4;
-  const dimensions={circumference:2*Math.PI*(ri+T),width:Math.max(3,profileLength+(W-4.5)*2+(T-1.7)*2)};
-  const materials=[
-    weddingMetal(karat.farbe,k.oberflaeche,dimensions,maxAniso),
-    weddingMetal(karat.farbe,'poliert',dimensions,maxAniso),
-    weddingMetal(partnerKarat.farbe,k.oberflaeche,dimensions,maxAniso),
-    weddingMetal(partnerKarat.farbe,'poliert',dimensions,maxAniso),
-  ];
-  materials[1].envMapIntensity=materials[3].envMapIntensity=1;
-  const koerper=new THREE.Mesh(geometry,materials);
-  gruppe.add(koerper);
-
-  // Brillanten in der Aussenflaeche — Zahl und Lage kommen aus steinPlan
-  const plan = steinPlan(k);
-  if (plan.punkte.length) {
-    const hoch = new THREE.Vector3(0, 1, 0);
-
-    plan.punkte.forEach((pkt) => {
-      const stein = new THREE.Group();
-      const gem = diamondMesh(jewelry.get('Diamond_round'), studio.diamond);
-      gem.userData.sharedGeometry = true;
-      gem.scale.setScalar(plan.rStein);
-      stein.add(gem);
-      // A narrow burnished rim around each flush setting catches the light.
-      const rim = new THREE.Mesh(new THREE.TorusGeometry(plan.rStein * 1.025, plan.rStein * .065, 8, 32), metallMaterial(karat.farbe, 'poliert'));
-      rim.rotation.x = Math.PI / 2;
-      rim.position.y = -plan.rStein * .015;
-      stein.add(rim);
-
-      // Die Steinachse (lokales +Y) auf die Flaechennormale drehen. Am Rand
-      // einer bombierten Schiene zeigt die nicht radial nach aussen — ohne
-      // die Kippung stuende der Stein schief in der Flaeche.
-      const norm = new THREE.Vector3(
-        pkt.nR * Math.cos(pkt.phi), pkt.nY, pkt.nR * Math.sin(pkt.phi)
-      ).normalize();
-      stein.quaternion.setFromUnitVectors(hoch, norm);
-
-      // Rundiste unter der Oberflaeche, nur die flache Krone schaut heraus.
-      // Weniger tief und die Steine durchbrechen die Silhouette des Rings.
-      const tief = plan.rStein * 0.035;
-      stein.position.set(
-        Math.cos(pkt.phi) * pkt.rA - norm.x * tief,
-        pkt.y - norm.y * tief,
-        Math.sin(pkt.phi) * pkt.rA - norm.z * tief
-      );
-      gruppe.add(stein);
-    });
-  }
-
-  // Innengravur
-  if (k.gravur.trim()) {
-    gruppe.add(gravurMesh(ri, W, k.gravur.trim(), k.schrift, geometry, karat.farbe));
-  }
-
-  // Ring aufstellen: Lochachse zeigt zum Betrachter
-  gruppe.rotation.set(Math.PI / 2, 0, 0);
-  gruppe.rotateOnWorldAxis(new THREE.Vector3(0,1,0),seite === 'eins' ? -1.18 : .95);
-  gruppe.rotateOnWorldAxis(new THREE.Vector3(0,0,1),seite === 'eins' ? -.04 : -.19);
-  return gruppe;
-}
-
-/** Innengravur als halbtransparente Textur auf der Innenwand. */
-function gravurMesh(ri, W, text, schrift, ringGeometry, color) {
-  const S = 2048, H = 256;
-  const c = document.createElement('canvas');
-  c.width = S; c.height = H;
-  const ctx = c.getContext('2d');
-  ctx.clearRect(0, 0, S, H);
-  ctx.save();
-  ctx.translate(S, 0);
-  ctx.scale(-1, 1);              // Innenseite wird gespiegelt betrachtet
-  ctx.fillStyle = 'rgba(190,180,157,0.95)';
-  ctx.font = '92px ' + SCHRIFTEN[schrift].font;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(text.slice(0, 24), S / 2, H / 2);
-  ctx.restore();
-
-  const tex = new THREE.CanvasTexture(c);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  const innerRows=new Map(),positions=ringGeometry.attributes.position;
-  for(let i=0;i<positions.count;i++){
-    const y=positions.getY(i);if(Math.abs(y)>W*.42)continue;
-    const key=y.toFixed(5),radius=Math.hypot(positions.getX(i),positions.getZ(i));
-    if(!innerRows.has(key)||radius<innerRows.get(key))innerRows.set(key,radius);
-  }
-  const curve=[...innerRows].sort((a,b)=>Number(a[0])-Number(b[0])).map(([y,r])=>new THREE.Vector2(r-.018,Number(y)));
-  const geo = new THREE.LatheGeometry(curve,256);
-  const mat = new THREE.MeshPhysicalMaterial({
-    color,metalness:1,roughness:.33,map:tex,bumpMap:tex,bumpScale:-.04,transparent:true,side:THREE.BackSide,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-1,
-  });
-  return new THREE.Mesh(geo, mat);
-}
-
-function paarNeuBauen() {
-  needsRender = true;
-  if (!laeuft) return;
-  ringBauen('eins');
-  ringBauen('zwei');
-  const rEins = zustand.eins.groesse / (2 * Math.PI) + zustand.eins.staerke;
-  const rZwei = zustand.zwei.groesse / (2 * Math.PI) + zustand.zwei.staerke;
-  // Editorial product pose, with each actual mesh resting on the studio floor.
-  for(const [side,sign,z] of [['zwei',-1,-1],['eins',1,1.6]]) {
-    const group=ringe[side];group.position.set(0,0,0);group.updateMatrixWorld(true);
-    const bounds=new THREE.Box3().setFromObject(group,true);
-    const x=sign*((bounds.max.x-bounds.min.x)/2+.55);
-    group.position.set(x,-bounds.min.y,z);
-    const radius=side==='eins'?rEins:rZwei;
-    schattenSetzen(schatten[side],x,z,radius);
-  }
-  kameraEinpassen(false);
-}
-
-/* ══════════════════════════════════════════════════════════════
-   PREIS
-   ══════════════════════════════════════════════════════════════ */
-
-function ringPreis(seite) {
-  const k = zustand[seite];
-  const profil = PROFILE[k.profil];
-  const leg = LEGIERUNGEN[k.legierung];
-  const karat = leg.karate[k.karat] || Object.values(leg.karate)[0];
-
-  const ri = k.groesse / (2 * Math.PI);
-  const ra = ri + k.staerke;
-  // Volumen des umschriebenen Rings, mit dem Fuellgrad des Profils
-  const mm3 = Math.PI * (ra * ra - ri * ri) * k.breite * profil.volumen;
-  const gramm = (mm3 / 1000) * karat.dichte;
-
-  const material = gramm * (PREISE.grammpreis[k.karat] || PREISE.grammpreis['585']);
-  const oberflaeche = OBERFLAECHEN[k.oberflaeche].aufpreis;
-  const bicolor = k.bicolor ? PREISE.bicolor : 0;
-  // Dieselbe Quelle wie die 3D-Darstellung: die angezeigte Steinzahl und
-  // die berechnete koennen dadurch nicht auseinanderlaufen.
-  const steinzahl = steinPlan(k).punkte.length;
-  const steine = steinzahl * PREISE.stein;
-  const gravur = k.gravur.trim() ? PREISE.gravur : 0;
-
-  const summe = PREISE.grundpreis + material + oberflaeche + bicolor + steine + gravur + FUGEN[k.fuge].positions.length * 25;
-  return {
-    gramm,
-    steinzahl,
-    posten: { material, grundpreis: PREISE.grundpreis, oberflaeche, bicolor, steine, gravur },
-    summe: Math.round(summe / PREISE.rundung) * PREISE.rundung,
-  };
-}
-
-const euro = (n) =>
-  n.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
-
-/* ══════════════════════════════════════════════════════════════
-   UI
-   ══════════════════════════════════════════════════════════════ */
-
-const $ = (sel) => document.querySelector(sel);
-const $$ = (sel) => Array.from(document.querySelectorAll(sel));
-
-/**
- * Baut eine Gruppe Auswahlknoepfe.
- * `schmuck(wert)` darf HTML vor das Label setzen — Farbpunkt der Legierung
- * oder Querschnitt-Piktogramm des Profils.
- */
-function knopfGruppe(container, eintraege, aktuell, beiWahl, schmuck) {
-  const focusedValue = container.contains(document.activeElement) ? document.activeElement.dataset.value : null;
-  container.innerHTML = '';
-  eintraege.forEach(([wert, label]) => {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.dataset.value = wert;
-    b.className = 'kf-chip' + (wert === aktuell ? ' is-on' : '');
-    b.setAttribute('aria-pressed', String(wert === aktuell));
-    b.innerHTML = (schmuck ? schmuck(wert) : '') + '<span>' + label + '</span>';
-    b.addEventListener('click', () => beiWahl(wert));
-    container.appendChild(b);
-    if (wert === focusedValue) b.focus({preventScroll:true});
-  });
-}
-
-/**
- * Querschnittzeichnung zum aktuellen Ring. 3,5 mm und 6 mm Breite sind als
- * Zahl schwer zu greifen — als Zeichnung sofort. Der Massstab ist fest, die
- * Zeichnung waechst also mit den Maßen; Breite und Staerke stehen zueinander
- * im richtigen Verhaeltnis.
- *
- * NICHT in Originalgroesse: CSS-Pixel entsprechen keinem physischen Millimeter,
- * ein echter 3,5-mm-Schnitt waere nur ein Strich. Die Bildunterschrift sagt das.
- */
-const MM = 26;   // px je Millimeter in der Zeichnung
-
-function querschnittZeichnen(k) {
-  const flaeche = $('#kfQuerschnitt');
-  if (!flaeche) return;
-
-  const profil = PROFILE[k.profil];
-  const bx = k.breite * MM;
-  const by = k.staerke * MM;
-  const rand = 30;                       // Platz fuer Masslinien
-  const w = 8 * MM + rand * 2;           // feste Buehne: max. Breite 8 mm
-  const h = 2.4 * MM + rand * 2;
-  const x0 = (w - bx) / 2;
-  const y0 = (h - by) / 2;
-
-  const pfad = querschnittPfad(profil, bx, by);
-  const zahl = (n) => n.toFixed(1).replace('.', ',');
-
-  flaeche.innerHTML =
-    '<svg viewBox="0 0 ' + w + ' ' + h + '" role="img" aria-label="Querschnitt: ' +
-      profil.label + ', ' + zahl(k.breite) + ' Millimeter breit, ' +
-      zahl(k.staerke) + ' Millimeter stark">' +
-      '<g transform="translate(' + x0.toFixed(2) + ' ' + y0.toFixed(2) + ')">' +
-        '<path class="qs-koerper" d="' + pfad + '"/>' +
-      '</g>' +
-      // Massline Breite, unter dem Profil
-      '<g class="qs-mass">' +
-        '<line x1="' + x0 + '" y1="' + (y0 + by + 13) + '" x2="' + (x0 + bx) +
-          '" y2="' + (y0 + by + 13) + '"/>' +
-        '<line x1="' + x0 + '" y1="' + (y0 + by + 8) + '" x2="' + x0 +
-          '" y2="' + (y0 + by + 18) + '"/>' +
-        '<line x1="' + (x0 + bx) + '" y1="' + (y0 + by + 8) + '" x2="' + (x0 + bx) +
-          '" y2="' + (y0 + by + 18) + '"/>' +
-        '<text x="' + (w / 2) + '" y="' + (y0 + by + 28) + '" text-anchor="middle">' +
-          zahl(k.breite) + ' mm</text>' +
-      '</g>' +
-      // Massline Staerke, rechts daneben
-      '<g class="qs-mass">' +
-        '<line x1="' + (x0 + bx + 13) + '" y1="' + y0 + '" x2="' + (x0 + bx + 13) +
-          '" y2="' + (y0 + by) + '"/>' +
-        '<line x1="' + (x0 + bx + 8) + '" y1="' + y0 + '" x2="' + (x0 + bx + 18) +
-          '" y2="' + y0 + '"/>' +
-        '<line x1="' + (x0 + bx + 8) + '" y1="' + (y0 + by) + '" x2="' + (x0 + bx + 18) +
-          '" y2="' + (y0 + by) + '"/>' +
-        '<text x="' + (x0 + bx + 23) + '" y="' + (y0 + by / 2 + 4) + '">' +
-          zahl(k.staerke) + '</text>' +
-      '</g>' +
-    '</svg>';
-}
-
-/** Farbpunkt in der Legierungsfarbe — zeigt den Ton vor dem Klick. */
-function metallPunkt(legierung, karat) {
-  const leg = LEGIERUNGEN[legierung];
-  const k = leg.karate[karat] || Object.values(leg.karate)[0];
-  const hex = '#' + k.farbe.toString(16).padStart(6, '0');
-  return '<i class="kf-punkt" style="background:' + hex + '" aria-hidden="true"></i>';
-}
-
-function setzen(feld, wert) {
-  const seiten = zustand.gekoppelt && !NICHT_KOPPELN.includes(feld)
-    ? ['eins', 'zwei']
-    : [zustand.aktiv];
-  seiten.forEach((s) => {
-    const k = zustand[s];
-    if (feld === 'karat') k.letztesKarat = wert;   // Wunsch merken
-    k[feld] = wert;
-
-    // Karat auf die Legierung abgleichen: Platin kennt nur 950, und wer
-    // von dort zurueckwechselt, soll seinen Feingehalt wiederbekommen
-    // statt stillschweigend beim billigsten zu landen.
-    const leg = LEGIERUNGEN[k.legierung];
-    if (!leg.karate[k.karat]) {
-      k.karat = leg.karate[k.letztesKarat] ? k.letztesKarat
-              : leg.karate['585'] ? '585'
-              : Object.keys(leg.karate)[0];
-    }
-  });
-  zeichnen();
-}
-
-function zeichnen() {
-  const k = zustand[zustand.aktiv];
-  const leg = LEGIERUNGEN[k.legierung];
-
-  // Ringwahl
-  $$('.kf-tab').forEach((t) => {
-    const an = t.dataset.seite === zustand.aktiv;
-    t.classList.toggle('is-on', an);
-    t.setAttribute('aria-selected', String(an));
-    t.tabIndex = an ? 0 : -1;
-  });
-  $('#kfKoppeln').checked = zustand.gekoppelt;
-
-  // Legierung + Karat
-  knopfGruppe(
-    $('#kfLegierung'),
-    Object.entries(LEGIERUNGEN).map(([w, v]) => [w, v.label]),
-    k.legierung,
-    (w) => setzen('legierung', w),
-    (w) => metallPunkt(w, k.karat)
-  );
-  knopfGruppe(
-    $('#kfKarat'),
-    Object.entries(leg.karate).map(([w, v]) => [w, v.label]),
-    k.karat,
-    (w) => setzen('karat', w),
-    (w) => metallPunkt(k.legierung, w)
-  );
-  $('#kfBicolor').checked = k.bicolor;
-  $('#kfBicolorLabel').textContent =
-    'Zweites Edelmetall hinzufügen';
-  $('#kfMehrfarbig').hidden = !k.bicolor;
-  knopfGruppe($('#kfZweitmetall'), Object.entries(LEGIERUNGEN).map(([w,v]) => [w,v.label]), k.zweitmetall, w => setzen('zweitmetall',w), w => metallPunkt(w,k.karat));
-  knopfGruppe($('#kfTeilung'), Object.entries(TEILUNGEN).map(([w,v]) => [w,v.label]), k.teilung, w => setzen('teilung',w));
-  knopfGruppe($('#kfFuge'), Object.entries(FUGEN).map(([w,v]) => [w,v.label]), k.fuge, w => setzen('fuge',w));
-  knopfGruppe($('#kfSchrift'), Object.entries(SCHRIFTEN).map(([w,v]) => [w,v.label]), k.schrift, w => setzen('schrift',w));
-  $('#kfGravurVorschau').textContent = k.gravur || 'Ihre Geschichte. Für immer.';
-  $('#kfGravurVorschau').style.fontFamily = SCHRIFTEN[k.schrift].font;
-  $('#kfLiveDetails').textContent = 'Ring ' + (zustand.aktiv === 'eins' ? '1' : '2') + ' · ' + leg.label + ' ' + k.karat + ' · ' + k.breite.toFixed(1).replace('.', ',') + ' mm · ' + OBERFLAECHEN[k.oberflaeche].label;
-
-  // Profil
-  knopfGruppe(
-    $('#kfProfil'),
-    Object.entries(PROFILE).map(([w, v]) => [w, v.label]),
-    k.profil,
-    (w) => setzen('profil', w),
-    (w) => profilPiktogramm(PROFILE[w])
-  );
-  $('#kfProfilHinweis').textContent = PROFILE[k.profil].hinweis;
-
-  // Masse
-  $('#kfBreite').value = k.breite;
-  $('#kfBreiteWert').textContent = k.breite.toFixed(1).replace('.', ',') + ' mm';
-  $('#kfStaerke').value = k.staerke;
-  $('#kfStaerkeWert').textContent = k.staerke.toFixed(1).replace('.', ',') + ' mm';
-  querschnittZeichnen(k);
-
-  // Oberflaeche
-  knopfGruppe(
-    $('#kfOberflaeche'),
-    Object.entries(OBERFLAECHEN).map(([w, v]) => [w, v.label]),
-    k.oberflaeche,
-    (w) => setzen('oberflaeche', w),
-    (w) => '<span class="kf-finish-photo" data-finish="' + w + '" aria-hidden="true"></span>'
-  );
-
-  // Besatz
-  knopfGruppe(
-    $('#kfBesatz'),
-    Object.entries(BESATZ).map(([w, v]) => [w, v.label]),
-    k.besatz,
-    (w) => setzen('besatz', w)
-  );
-
-  // Steinlage — nur zeigen, wenn es ueberhaupt Steine gibt. Zwei Reihen
-  // stehen nur bei den Memoire-Besaetzen zur Wahl.
-  const hatSteine = !!(BESATZ[k.besatz].anzahl || BESATZ[k.besatz].anteil);
-  $('#kfLageFeld').hidden = !hatSteine;
-  if (hatSteine) {
-    const moeglich = Object.entries(STEINLAGE)
-      .filter(([, v]) => !v.nurMemoire || BESATZ[k.besatz].memoire);
-    knopfGruppe(
-      $('#kfLage'),
-      moeglich.map(([w, v]) => [w, v.label]),
-      erlaubteLage(k),
-      (w) => setzen('steinlage', w)
-    );
-    const zahl = ringPreis(zustand.aktiv).steinzahl;
-    $('#kfLageHinweis').textContent =
-      zahl + (zahl === 1 ? ' Brillant' : ' Brillanten')
-      + ' · ' + STEINLAGE[erlaubteLage(k)].hinweis;
-  }
-
-  // Groesse + Gravur
-  $('#kfGroesse').value = k.groesse;
-  $('#kfGroesseWert').textContent = 'Größe ' + k.groesse;
-  $('#kfGravur').value = k.gravur;
-
-  paarNeuBauen();
-  preisZeichnen();
-  inAdresse();
-}
-
-function preisZeichnen() {
-  const pEins = ringPreis('eins');
-  const pZwei = ringPreis('zwei');
-  $('#kfPreisEins').textContent = euro(pEins.summe);
-  $('#kfPreisZwei').textContent = euro(pZwei.summe);
-  const paar = euro(pEins.summe + pZwei.summe);
-  $('#kfPreisPaar').textContent = paar;
-  // Dieselbe Zahl in der klebenden Leiste auf schmalen Schirmen
-  const leiste = $('#kfPreisLeiste');
-  if (leiste) leiste.textContent = paar;
-  $('#kfGewichtEins').textContent = pEins.gramm.toFixed(1).replace('.', ',') + ' g';
-  $('#kfGewichtZwei').textContent = pZwei.gramm.toFixed(1).replace('.', ',') + ' g';
-  $('#kfZusammenfassung').textContent = zusammenfassung();
-}
-
-/** Besatz im Klartext: Etikett, echte Steinzahl und Lage. */
-function steinText(seite) {
-  const k = zustand[seite];
-  const b = BESATZ[k.besatz];
-  if (!b.anzahl && !b.anteil) return b.label;
-  const zahl = steinPlan(k).punkte.length;
-  return b.label + ' (' + zahl + ' Steine, '
-       + STEINLAGE[erlaubteLage(k)].hinweis + ')';
-}
-
-function ringText(seite) {
-  const k = zustand[seite];
-  const leg = LEGIERUNGEN[k.legierung];
-  const karat = leg.karate[k.karat] || Object.values(leg.karate)[0];
-  const teile = [
-    leg.label + ' ' + karat.label.split(' / ')[0],
-    k.bicolor ? TEILUNGEN[k.teilung].label + ' mit ' + LEGIERUNGEN[k.zweitmetall].label : null,
-    FUGEN[k.fuge].label,
-    PROFILE[k.profil].label,
-    k.breite.toFixed(1).replace('.', ',') + ' mm breit',
-    k.staerke.toFixed(1).replace('.', ',') + ' mm stark',
-    OBERFLAECHEN[k.oberflaeche].label,
-    steinText(seite),
-    'Größe ' + k.groesse,
-    k.gravur.trim() ? 'Gravur (' + SCHRIFTEN[k.schrift].label + '): „' + k.gravur.trim() + '“' : null,
-  ].filter(Boolean);
-  return teile.join(' · ');
-}
-
-function zusammenfassung(mitLink) {
-  const pEins = ringPreis('eins').summe;
-  const pZwei = ringPreis('zwei').summe;
-  const text =
-    'Trauring-Konfiguration Juwelier Damla\n\n' +
-    'Ring 1: ' + ringText('eins') + '\n' +
-    'Ring 2: ' + ringText('zwei') + '\n\n' +
-    'Richtwert Paarpreis: ' + euro(pEins + pZwei) +
-    ' (' + euro(pEins) + ' + ' + euro(pZwei) + ') — unverbindlich';
-  return mitLink ? text + '\n\nZur Ansicht: ' + location.href : text;
-}
-
-/* ── Bedienung ────────────────────────────────────────────── */
-
-function uiVerdrahten() {
-  const fields = $$('.kf-panel .kf-feld');
-  const stepButtons = $$('#kfSteps button');
-  let step = 0;
-  const showStep = (next, focus = false) => {
-    step = Math.max(0, Math.min(fields.length - 1, next));
-    fields.forEach((field, index) => { field.hidden = index !== step; });
-    stepButtons.forEach((button, index) => {
-      if (index === step) button.setAttribute('aria-current','step');
-      else button.removeAttribute('aria-current');
-    });
-    $('#kfStepNumber').textContent = 'Schritt ' + (step + 1) + ' von ' + fields.length;
-    $('#kfPrev').disabled = step === 0;
-    $('#kfNext').textContent = step === fields.length - 1 ? 'Zusammenfassung ansehen' : 'Weiter →';
-    if (focus && matchMedia('(max-width: 900px)').matches) stepButtons[step].scrollIntoView({block:'nearest',inline:'nearest'});
-    if (focus) { fields[step].tabIndex = -1; fields[step].focus({preventScroll:true}); }
-  };
-  stepButtons.forEach((button,index) => button.addEventListener('click', () => showStep(index,true)));
-  $('#kfPrev').addEventListener('click', () => showStep(step - 1,true));
-  $('#kfNext').addEventListener('click', () => {
-    if (step < fields.length - 1) showStep(step + 1,true);
-    else { $('#kfZusammenfassung').scrollIntoView({behavior:'smooth',block:'center'}); $('#kfKopieren').focus({preventScroll:true}); }
-  });
-  $('#kfReset').addEventListener('click', () => showStep(0));
-  showStep(0);
-
-  document.querySelectorAll('[data-kf-view]').forEach(button => {
-    button.disabled = !laeuft;
-    button.addEventListener('click', () => {
-      needsRender = true;
-      const mode = button.dataset.kfView;
-      if (mode === 'rotate') {
-        drehen = !drehen; button.setAttribute('aria-pressed', String(drehen));
-        button.textContent = drehen ? 'Drehung pausieren' : 'Drehung starten';
-      } else if (mode === 'in' || mode === 'out') {
-        const dir = camera.position.clone().sub(controls.target);
-        camera.position.copy(controls.target).add(dir.setLength(THREE.MathUtils.clamp(dir.length() * (mode === 'in' ? .8 : 1.25), controls.minDistance, controls.maxDistance)));
-      } else {
-        const dir = mode === 'front' ? new THREE.Vector3(0, .05, 1) : mode === 'side' ? new THREE.Vector3(1, .3, .4) : new THREE.Vector3(.06, .18, 1);
-        const distance = camera.position.distanceTo(controls.target);
-        camera.position.copy(controls.target).add(dir.normalize().multiplyScalar(distance));
-        kameraEinpassen(true);
-      }
-      controls.update();
-    });
-    if (button.dataset.kfView === 'rotate') {
-      button.setAttribute('aria-pressed', String(drehen));
-      button.textContent = drehen ? 'Drehung pausieren' : 'Drehung starten';
-    }
-  });
-  $$('.kf-tab').forEach((tab, index, tabs) => {
-    tab.addEventListener('keydown', e => {
-      if (!['ArrowLeft','ArrowRight','Home','End'].includes(e.key)) return;
-      e.preventDefault();
-      const next = e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1 : (index + (e.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
-      tabs[next].click(); tabs[next].focus();
-    });
-  });
-  $$('.kf-tab').forEach((t) => {
-    t.addEventListener('click', () => { zustand.aktiv = t.dataset.seite; zeichnen(); });
-  });
-
-  $('#kfKoppeln').addEventListener('change', (e) => {
-    zustand.gekoppelt = e.target.checked;
-    if (zustand.gekoppelt) {
-      // aktive Seite gibt den gemeinsamen Nenner vor
-      const quelle = zustand[zustand.aktiv];
-      const ziel = zustand[zustand.aktiv === 'eins' ? 'zwei' : 'eins'];
-      Object.keys(quelle).forEach((f) => {
-        if (!NICHT_KOPPELN.includes(f)) ziel[f] = quelle[f];
-      });
-    }
-    zeichnen();
-  });
-
-  $('#kfBicolor').addEventListener('change', (e) => setzen('bicolor', e.target.checked));
-  $('#kfBreite').addEventListener('input', (e) => setzen('breite', parseFloat(e.target.value)));
-  $('#kfStaerke').addEventListener('input', (e) => setzen('staerke', parseFloat(e.target.value)));
-  $('#kfGroesse').addEventListener('input', (e) => setzen('groesse', parseInt(e.target.value, 10)));
-  $('#kfGravur').addEventListener('input', (e) => setzen('gravur', e.target.value.slice(0, 24)));
-
-  const bildKnopf = $('#kfBild');
-  if (bildKnopf) {
-    // Ohne 3D gibt es kein Bild zu sichern — dann den Knopf gar nicht anbieten.
-    if (!laeuft) bildKnopf.hidden = true;
-    else bildKnopf.addEventListener('click', bildSpeichern);
-  }
-
-  $('#kfKopieren').addEventListener('click', async () => {
-    const btn = $('#kfKopieren');
-    try {
-      await navigator.clipboard.writeText(zusammenfassung(true));
-      btn.textContent = 'Kopiert ✓';
-    } catch (e) {
-      btn.textContent = 'Bitte manuell markieren';
-    }
-    setTimeout(() => { btn.textContent = 'Konfiguration kopieren'; }, 2400);
-  });
-
-  $('#kfWhatsapp').addEventListener('click', () => {
-    const url = 'https://wa.me/496115807830?text=' + encodeURIComponent(zusammenfassung(true));
-    window.open(url, '_blank', 'noopener');
-  });
-
-  $('#kfMail').addEventListener('click', () => {
-    const betreff = 'Trauring-Anfrage über den Konfigurator';
-    window.location.href =
-      'mailto:?subject=' + encodeURIComponent(betreff) +
-      '&body=' + encodeURIComponent(zusammenfassung(true));
-  });
-
-  $('#kfReset').addEventListener('click', () => {
-    zustand.eins = Object.assign(standard(), { breite: 3.5, besatz: 'drei', groesse: 54 });
-    zustand.zwei = Object.assign(standard(), { breite: 5.5, besatz: 'ohne', groesse: 62 });
-    zustand.gekoppelt = true;
-    zustand.aktiv = 'eins';
-    zeichnen();
-  });
-
-  // Ringgroessen-Skala beschriften
-  const liste = $('#kfGroessenListe');
-  RINGGROESSEN.filter((g) => g % 4 === 0).forEach((g) => {
-    const o = document.createElement('option');
-    o.value = String(g);
-    liste.appendChild(o);
-  });
-}
-
-/* ── Start ────────────────────────────────────────────────── */
-
-ausAdresse();          // geteilten Link uebernehmen, falls vorhanden
-
-if (!webglVerfuegbar()) {
-  hinweisWebgl.hidden = false;
-  buehne.hidden = true;
-  uiVerdrahten();
-  // Preis, Zusammenfassung und Anfrage funktionieren auch ohne 3D
-  zeichnen();
-} else {
-  try {
-    jewelry = await loadJewelry();
-    for(const [key,profile] of Object.entries(PROFILE)){
-      const curves=sampleRingProfile(jewelry.get('Wedding_'+key));
-      profile.aussen=curves.outside;profile.innen=curves.inside;
-    }
-    await szeneAufbauen();
-  } catch (error) {
-    console.error('3D-Ansicht konnte nicht geladen werden', error);
-    laeuft = false;
-    renderer?.setAnimationLoop(null);
-    buehne.hidden = true;
-    hinweisWebgl.hidden = false;
-    hinweisWebgl.textContent = 'Die 3D-Ansicht konnte nicht geladen werden. Laden Sie die Seite erneut. Sie können Ihre Ringe trotzdem konfigurieren und die Zusammenfassung verwenden.';
-  }
-  uiVerdrahten();
-  zeichnen();
-}
+$('#wcControls').addEventListener('change',e=>{const input=e.target;if(!input.dataset.path)return;const deferred=['range','text'].includes(input.type);apply(input.dataset.path,input.type==='checkbox'?input.checked:input.type==='range'?Number(input.value)-Number(input.dataset.offset||0):input.value,!deferred);if(input.type==='range')render();});
+$('#wcControls').addEventListener('focusin',e=>{if(e.target.type==='text')remember();});
+$('#wcControls').addEventListener('pointerdown',e=>{if(e.target.type==='range')remember();});
+$('#wcControls').addEventListener('input',e=>{const input=e.target;if(!input.dataset.path||!['range','text'].includes(input.type))return;if(input.type==='range')input.closest('label').querySelector('output').textContent=Number(input.value).toLocaleString('de-DE')+(input.max==='359'?' °':' mm');apply(input.dataset.path,input.type==='range'?Number(input.value)-Number(input.dataset.offset||0):input.value,false);if(input.type==='text'){input.closest('label').querySelector('output').textContent=input.value.length+' / 40';const preview=(input.closest('[data-engraving-ring]')||$('#wcControls')).querySelector('.wc-engraving-preview');if(preview)preview.textContent=input.value||'Für immer verbunden';}});
+$('#wcPrev').onclick=()=>{step=Math.max(0,step-1);render();};$('#wcNext').onclick=()=>{if(step===5)$('#wcSummary').scrollIntoView({behavior:'smooth'});else{step++;render();}};
+$('#wcUndo').onclick=()=>{if(undo.length){state=S.normalizeState(JSON.parse(undo.pop()));persist();render();viewer?.update(state,true);}};
+$('#wcNew').onclick=()=>{remember();state=S.normalizeState(C.initialState());step=0;segment=0;persist();render();viewer?.update(state,true);toast('Neue Konfiguration gestartet. Mit Rückgängig wiederherstellen.');};
+$('#wcRingCount').onclick=()=>{remember();if(state.rings.length===2){state.rings.splice(1,1);state.active=0;state.pair=false;}else{state.rings.push(S.normalizeRing({...C.clone(state.rings[0]),size:54}));state.active=1;}persist();render();viewer?.update(state,true);};
+$('#wcSave').onclick=saveDialog;$('#wcDetails').onclick=()=>$('#wcSummary').scrollIntoView({behavior:'smooth'});$('#wcCopy').onclick=()=>copy(summaryText());$('#wcImage').onclick=()=>viewer?.download();
+$('#wcPrint').onclick=()=>{const url=viewer?.snapshot();$('.wc-print-image')?.remove();if(url){const image=document.createElement('img');image.className='wc-print-image';image.src=url;$('#wcSummary').prepend(image);}window.print();};
+$('#wcWhatsapp').onclick=()=>window.open('https://wa.me/?text='+encodeURIComponent(summaryText()),'_blank','noopener');$('#wcMail').onclick=()=>{location.href='mailto:?subject='+encodeURIComponent('Meine Trauring-Konfiguration bei Damla')+'&body='+encodeURIComponent(summaryText());};
+$('#wcFullscreen').onclick=()=>{if(document.fullscreenElement)document.exitFullscreen();else $('.wc-studio').requestFullscreen?.().catch(()=>toast('Vollbild ist in diesem Browser nicht verfügbar.'));};
+window.addEventListener('hashchange',()=>{try{if(/^#[dk]=/.test(location.hash))loadState(S.decode(location.href));}catch{toast('Der Konfigurationslink ist nicht gültig.');}});
+render();
+try{viewer=new WeddingViewer($('#kfBuehne'));await viewer.init();viewer.update(state,true);render();}catch(error){console.error('3D-Ansicht:',error);$('#kfWebglHinweis').hidden=false;$('.wc-loading').hidden=true;}
+// Expose immutable diagnostics for browser QA and support, never renderer internals.
+window.damlaConfigurator={getState:()=>C.clone(state),getCatalog:()=>({profiles:Object.keys(S.PROFILES).length,metals:Object.keys(C.METALS).length,finishes:Object.keys(C.FINISHES).length,divisions:S.OPTIONS.divisions.length,presets:Object.keys(C.PRESETS).length}),setState:loadState};

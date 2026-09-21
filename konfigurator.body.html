@@ -1,202 +1,30 @@
-  <!-- ═══════════════════════════════════
-       KOPF
-  ═══════════════════════════════════ -->
-  <header class="atelier-head wrap">
-    <p class="sub-crumb"><a href="index.html">Startseite</a> · <a href="trauringe.html">Trauringe</a> · Konfigurator</p>
-    <div class="atelier-title"><div><span class="eyebrow">Ihr Ringatelier</span><h1>Zwei Ringe. Ganz Sie.</h1></div>
-      <nav class="atelier-modes" aria-label="Konfigurator wählen"><a href="trauring-konfigurator.html" aria-current="page">Trauringe</a><a href="verlobungsring-konfigurator.html">Verlobungsring</a></nav></div>
-    <p>Gestalten Sie Ihr Paar. Entdecken Sie Profile, Oberflächen und feine Details aus jedem Blickwinkel.</p>
-  </header>
-
-  <!-- ═══════════════════════════════════
-       KONFIGURATOR
-  ═══════════════════════════════════ -->
-  <section class="kf atelier wedding-workspace" aria-labelledby="kfTitel">
-    <h2 id="kfTitel" class="visually-hidden">Trauring-Konfigurator</h2>
-
-    <div class="wrap">
-      <nav class="kf-steps" id="kfSteps" aria-label="Konfigurationsschritte">
-        <button type="button">01 <span>Edelmetall</span></button><button type="button">02 <span>Profil</span></button><button type="button">03 <span>Maße</span></button><button type="button">04 <span>Oberfläche</span></button><button type="button">05 <span>Steinbesatz</span></button><button type="button">06 <span>Gravur & Größe</span></button>
-      </nav>
-      <div class="kf-grid">
-
-        <!-- ── Ansicht ─────────────────────────────── -->
-        <div class="kf-view">
-          <!-- Nur dieser Block klebt auf schmalen Schirmen — die
-               ausfuehrliche Preistafel darunter soll mitscrollen. -->
-          <div class="kf-view__oben">
-          <div class="kf-studio-heading"><span>DAMLA <small>RINGATELIER</small></span><span class="kf-live-badge">360° · LIVE 3D</span></div>
-          <div class="kf-stage" id="kfBuehne" role="img"
-               aria-label="Dreidimensionale Ansicht des konfigurierten Ringpaars">
-            <p class="kf-laedt" aria-hidden="true">Ringe werden aufgebaut …</p>
-          </div>
-          <p id="kfLiveDetails" class="kf-live-details" aria-live="polite"></p>
-          <div class="atelier-views" aria-label="3D-Ansicht steuern">
-            <button type="button" data-kf-view="hero">Perspektive</button><button type="button" data-kf-view="front">Vorderseite</button><button type="button" data-kf-view="side">Profil</button>
-            <button type="button" data-kf-view="in" aria-label="Vergrößern">+</button><button type="button" data-kf-view="out" aria-label="Verkleinern">−</button><button type="button" data-kf-view="rotate" aria-pressed="true">Drehung pausieren</button>
-          </div>
-          <p class="kf-fallback" id="kfWebglHinweis" hidden>
-            Ihr Browser zeigt keine 3D-Grafik an. Die Konfiguration und der
-            Preis-Richtwert funktionieren trotzdem – die Zusammenfassung unten
-            können Sie uns direkt schicken.
-          </p>
-
-          <p class="kf-preisleiste">
-            <span>Paar &middot; Richtwert</span>
-            <strong id="kfPreisLeiste"></strong>
-          </p>
-
-          </div>
-
-          <p class="kf-hint" aria-hidden="true">Ziehen zum Drehen · Scrollen zum Zoomen</p>
-
-          <div class="kf-preis">
-            <div class="kf-preis__zeile">
-              <span>Ring 1<em id="kfGewichtEins"></em></span>
-              <strong id="kfPreisEins"></strong>
-            </div>
-            <div class="kf-preis__zeile">
-              <span>Ring 2<em id="kfGewichtZwei"></em></span>
-              <strong id="kfPreisZwei"></strong>
-            </div>
-            <div class="kf-preis__paar">
-              <span>Paar – Richtwert</span>
-              <strong id="kfPreisPaar"></strong>
-            </div>
-            <p class="kf-preis__fuss">
-              Unverbindlicher Richtwert auf Basis von Material, Gewicht und Ausführung.
-              Der verbindliche Preis entsteht im Gespräch bei uns im Geschäft –
-              Tagespreis des Goldes und Ihre Wünsche im Detail entscheiden mit.
-            </p>
-          </div>
-        </div>
-
-        <!-- ── Bedienfeld ──────────────────────────── -->
-        <div class="kf-panel">
-          <p id="kfStepNumber" class="kf-step-number"></p>
-
-          <div class="kf-tabs" role="tablist" aria-label="Welchen Ring bearbeiten">
-            <button type="button" class="kf-tab is-on" data-seite="eins" role="tab" aria-selected="true">Ring 1</button>
-            <button type="button" class="kf-tab" data-seite="zwei" role="tab" aria-selected="false">Ring 2</button>
-          </div>
-
-          <label class="kf-switch">
-            <input type="checkbox" id="kfKoppeln" checked>
-            <span class="kf-switch__track" aria-hidden="true"><span></span></span>
-            <span class="kf-switch__text">
-              Beide Ringe im gleichen Stil
-              <small>Größe, Breite, Steine und Gravur bleiben getrennt</small>
-            </span>
-          </label>
-
-          <fieldset class="kf-feld">
-            <legend><i>1</i> Legierung</legend>
-            <div class="kf-chips" id="kfLegierung"></div>
-            <div class="kf-chips kf-chips--klein" id="kfKarat"></div>
-            <label class="kf-check">
-              <input type="checkbox" id="kfBicolor">
-              <span id="kfBicolorLabel">Bicolor</span>
-            </label>
-            <div id="kfMehrfarbig" hidden><p class="atelier-label">Zweites Edelmetall</p><div class="kf-chips" id="kfZweitmetall"></div><p class="atelier-label">Aufteilung</p><div class="kf-chips" id="kfTeilung"></div></div>
-          </fieldset>
-
-          <fieldset class="kf-feld">
-            <legend><i>2</i> Profil</legend>
-            <div class="kf-chips kf-chips--profil" id="kfProfil"></div>
-            <p class="kf-notiz" id="kfProfilHinweis"></p>
-          </fieldset>
-
-          <fieldset class="kf-feld">
-            <legend><i>3</i> Maße</legend>
-            <div class="kf-regler">
-              <label for="kfBreite">Breite <output id="kfBreiteWert"></output></label>
-              <input type="range" id="kfBreite" min="2.5" max="8" step="0.5" value="3.5">
-            </div>
-            <div class="kf-regler">
-              <label for="kfStaerke">Stärke <output id="kfStaerkeWert"></output></label>
-              <input type="range" id="kfStaerke" min="1.2" max="2.4" step="0.1" value="1.6">
-            </div>
-
-            <figure class="kf-querschnitt">
-              <div id="kfQuerschnitt"></div>
-              <figcaption>Querschnitt · maßstäblich vergrößert</figcaption>
-            </figure>
-          </fieldset>
-
-          <fieldset class="kf-feld">
-            <legend><i>4</i> Oberfläche</legend>
-            <div class="kf-chips" id="kfOberflaeche"></div><p class="kf-notiz">Die Motivbilder zeigen die Oberflächen beispielhaft in Gelbgold. Ihre Auswahl sehen Sie direkt am 3D-Ring.</p><p class="atelier-label">Dekorfugen</p><div class="kf-chips" id="kfFuge"></div>
-          </fieldset>
-
-          <fieldset class="kf-feld">
-            <legend><i>5</i> Steinbesatz</legend>
-            <div class="kf-chips" id="kfBesatz"></div>
-
-          <div class="kf-unterfeld" id="kfLageFeld" hidden>
-            <span class="kf-unterfeld__titel">Steinlage</span>
-            <div class="kf-chips" id="kfLage"></div>
-            <p class="kf-notiz" id="kfLageHinweis"></p>
-          </div>
-          </fieldset>
-
-          <fieldset class="kf-feld">
-            <legend><i>6</i> Größe &amp; Gravur</legend>
-            <div class="kf-regler">
-              <label for="kfGroesse">Ringgröße <output id="kfGroesseWert"></output></label>
-              <input type="range" id="kfGroesse" min="44" max="70" step="1" value="54" list="kfGroessenListe">
-              <datalist id="kfGroessenListe"></datalist>
-              <p class="kf-notiz">Die Größe ist der Innenumfang in Millimetern.</p>
-
-              <details class="kf-hilfe">
-                <summary>Größe selbst herausfinden</summary>
-                <p>
-                  Nehmen Sie einen Ring, der am richtigen Finger gut sitzt, und messen Sie
-                  seinen <strong>Innendurchmesser</strong> in Millimetern. Mal 3,14 ergibt
-                  die Größe: 17,2 mm werden zu Größe 54.
-                </p>
-                <p>
-                  Alternativ einen Papierstreifen um den Finger legen, die Überlappung
-                  markieren und die Länge messen – das ist die Größe direkt.
-                </p>
-                <p>
-                  Messen Sie abends, nicht morgens: Finger sind über den Tag etwas kräftiger.
-                  Am sichersten ist es trotzdem bei uns – wir messen kostenlos und in einer
-                  Minute, und Größen lassen sich später ändern.
-                </p>
-              </details>
-            </div>
-            <div class="kf-regler">
-              <label for="kfGravur">Innengravur</label>
-              <input type="text" id="kfGravur" maxlength="24" placeholder="z. B. 12.09.2027 · A &amp; M" autocomplete="off">
-              <div class="kf-chips" id="kfSchrift"></div><p id="kfGravurVorschau" class="kf-engraving-preview"></p><p class="kf-notiz">Bis 24 Zeichen. Erscheint in der Vorschau auf der Ringinnenseite.</p>
-            </div>
-          </fieldset>
-
-<div class="kf-step-actions"><button type="button" id="kfPrev">← Zurück</button><button type="button" id="kfNext">Weiter →</button></div>
-          <button type="button" class="kf-reset" id="kfReset">Zurücksetzen</button>
-        </div>
+<header class="atelier-head wrap wc-head">
+  <p class="sub-crumb"><a href="index.html">Startseite</a> · <a href="trauringe.html">Trauringe</a> · Konfigurator</p>
+  <div class="atelier-title"><div><span class="eyebrow">DAMLA RINGATELIER</span><h1>Ihre Ringe. Bis ins Detail.</h1></div><nav class="atelier-modes" aria-label="Konfigurator wählen"><a href="trauring-konfigurator.html" aria-current="page">Trauringe</a><a href="verlobungsring-konfigurator.html">Verlobungsring</a></nav></div>
+</header>
+<section class="wc wrap" aria-label="Trauring-Konfigurator">
+  <nav class="wc-steps" id="wcSteps" aria-label="Konfigurationsschritte"></nav>
+  <div class="wc-grid">
+    <div class="wc-preview">
+      <div class="wc-studio">
+        <div class="wc-studio-head"><span>Ihre persönliche Kreation</span><button type="button" id="wcFullscreen" aria-label="3D-Ansicht im Vollbild">⛶</button></div>
+        <div class="wc-stage" id="kfBuehne" role="img" aria-label="Dreidimensionale Ansicht der konfigurierten Ringe"><p class="wc-loading">Ihr Ringatelier wird vorbereitet …</p></div>
+        <p id="kfWebglHinweis" class="wc-note" hidden>Die 3D-Ansicht ist in diesem Browser nicht verfügbar. Ihre Konfiguration lässt sich weiterhin bearbeiten und speichern.</p>
+        <div class="wc-views" aria-label="3D-Ansicht"><button data-view="hero">Perspektive</button><button data-view="front">Vorne</button><button data-view="side">Profil</button><button data-view="inside">Innen</button><button data-view="in" aria-label="Vergrößern">+</button><button data-view="out" aria-label="Verkleinern">−</button><button data-view="rotate" aria-pressed="true" aria-label="Drehung pausieren">Ⅱ</button></div>
+        <p class="wc-gesture">Ziehen zum Drehen · Scrollen zum Zoomen</p>
+        <div id="wcRingTabs" class="wc-ring-tabs" aria-label="Ring auswählen"></div>
       </div>
-
-      <!-- ── Zusammenfassung & Anfrage ─────────────── -->
-      <div class="kf-abschluss">
-        <div class="kf-abschluss__text">
-          <span class="eyebrow">Ihre Konfiguration</span>
-          <h2 class="kf-abschluss__titel">Nehmen Sie das mit zu uns</h2>
-          <p>
-            Schicken Sie uns Ihre Zusammenstellung vorab oder bringen Sie sie einfach mit.
-            Wir legen Ihnen die Profile in echt auf den Tisch – anfassen entscheidet
-            am Ende doch mehr als jeder Bildschirm.
-          </p>
-          <pre class="kf-summary" id="kfZusammenfassung" aria-live="polite"></pre>
-        </div>
-
-        <div class="kf-aktionen">
-          <button type="button" class="btn-solid" id="kfWhatsapp">Per WhatsApp senden</button>
-          <button type="button" class="btn-ghost" id="kfMail">Per E-Mail senden</button>
-          <button type="button" class="btn-ghost btn--schlicht" id="kfKopieren">Konfiguration kopieren</button>
-          <button type="button" class="btn-ghost btn--schlicht" id="kfBild">Ansicht als Bild sichern</button>
-          <a href="tel:+496115807830" class="kf-anruf">oder anrufen: 0611 5807830</a>
-        </div>
-      </div>
+      <div class="wc-tools"><button id="wcUndo" type="button">↶ Rückgängig</button><button id="wcNew" type="button">Neu beginnen</button><button id="wcRingCount" type="button">Ring hinzufügen / entfernen</button><button id="wcSave" type="button">Speichern / Laden</button><button id="wcPrint" type="button">PDF / Drucken</button></div>
+      <div class="wc-estimate"><div><span>Gesamt · unverbindlicher Richtwert</span><strong id="wcPrice"></strong></div><button id="wcDetails" type="button">Details ansehen ↓</button><p>Material und Fertigung bestimmen den endgültigen Preis. Wir prüfen Ihre Zusammenstellung persönlich im Geschäft.</p></div>
     </div>
-  </section>
+    <div class="wc-panel">
+      <div class="wc-panel-heading"><p id="wcStepCount"></p><h2 id="wcStepTitle"></h2><p id="wcEditing"></p></div>
+      <div id="wcNotice" role="status" class="wc-notice" hidden></div>
+      <div id="wcControls"></div>
+      <div class="wc-next"><button id="wcPrev" type="button">← Zurück</button><button id="wcNext" type="button">Weiter →</button></div>
+    </div>
+  </div>
+  <section class="wc-summary" id="wcSummary"><div><span class="eyebrow">IHRE KONFIGURATION</span><h2>Alles auf einen Blick.</h2><div id="wcSummaryContent"></div><p class="wc-note">Die Vorschau zeigt Ihren Entwurf. Herstellbarkeit, Steinqualität und Preis bestätigen wir bei Ihrer Beratung.</p></div><div class="wc-contact"><a class="btn-solid" href="index.html#kontakt">Beratung bei Damla</a><button class="btn-ghost" id="wcCopy" type="button">Konfiguration kopieren</button><button class="btn-ghost" id="wcImage" type="button">3D-Ansicht speichern</button><button class="btn-ghost" id="wcWhatsapp" type="button">WhatsApp vorbereiten</button><button class="btn-ghost" id="wcMail" type="button">E-Mail vorbereiten</button><a href="tel:+496115807830">0611 5807830</a></div></section>
+  <dialog id="wcDialog" class="wc-dialog"><form method="dialog"><button class="wc-dialog-close" aria-label="Schließen">×</button></form><div id="wcDialogContent"></div></dialog>
+  <p id="wcToast" class="wc-toast" role="status" hidden></p>
+</section>

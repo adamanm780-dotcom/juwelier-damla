@@ -79,7 +79,7 @@ export function createStudio(renderer) {
 
 // This environment is authored and rendered in Blender, in linear HDR.
 export async function createWeddingStudio(renderer) {
-  const hdr=await new RGBELoader().loadAsync(new URL('./models/wedding-studio.hdr?v=20260921',import.meta.url).href);
+  const hdr=await new RGBELoader().loadAsync(new URL('./models/wedding-studio.hdr?v=20260921-catalog3',import.meta.url).href);
   hdr.mapping=THREE.EquirectangularReflectionMapping;
   const pmrem=new THREE.PMREMGenerator(renderer);
   const filtered=pmrem.fromEquirectangular(hdr);
