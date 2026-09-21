@@ -360,7 +360,7 @@ CSS = """
 """
 
 src = sub1(r'\n  </style>', CSS + '\n  </style>', src, 0, 'Style-Ende')
-src = src.replace('</head>', '<link rel="stylesheet" href="contact.css?v=20260906-layout">\n</head>')
+src = src.replace('</head>', '<link rel="stylesheet" href="contact.css?v=20260921-logo">\n</head>')
 
 
 # ══════════════════════════════════════════════════════════
