@@ -147,3 +147,4 @@
  .wedding-workspace .kf-feld{scroll-margin-top:420px}
 }
 @media(max-width:900px) and (max-height:560px){.wedding-workspace .kf-view{position:relative;top:auto}.wedding-workspace .kf-feld{scroll-margin-top:110px}}
+@media(max-width:900px){.wedding-workspace .kf-view{display:block}.wedding-workspace .kf-view__oben{display:block}}
