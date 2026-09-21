@@ -2814,7 +2814,7 @@
       .kf-switch__track span { transition: none; }
     }
   </style>
-  <link rel="stylesheet" href="atelier.css?v=20260906-layout">
+  <link rel="stylesheet" href="atelier.css?v=20260921-atelier">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Trauring-Konfigurator – Eheringe selbst zusammenstellen | Juwelier Damla Wiesbaden">
 <meta property="og:description" content="Eheringe und Trauringe online konfigurieren: Legierung, Profil, Breite, Oberfläche, Steinbesatz und Gravur live in 3D — mit Preis-Richtwert. Beratung bei Juwelier Damla, Wellritzstraße 3 in Wiesbaden.">
@@ -2906,10 +2906,13 @@
   <!-- ═══════════════════════════════════
        KONFIGURATOR
   ═══════════════════════════════════ -->
-  <section class="kf atelier" aria-labelledby="kfTitel">
+  <section class="kf atelier wedding-workspace" aria-labelledby="kfTitel">
     <h2 id="kfTitel" class="visually-hidden">Trauring-Konfigurator</h2>
 
     <div class="wrap">
+      <nav class="kf-steps" id="kfSteps" aria-label="Konfigurationsschritte">
+        <button type="button">01 <span>Edelmetall</span></button><button type="button">02 <span>Profil</span></button><button type="button">03 <span>Maße</span></button><button type="button">04 <span>Oberfläche</span></button><button type="button">05 <span>Steinbesatz</span></button><button type="button">06 <span>Gravur & Größe</span></button>
+      </nav>
       <div class="kf-grid">
 
         <!-- ── Ansicht ─────────────────────────────── -->
@@ -2917,10 +2920,12 @@
           <!-- Nur dieser Block klebt auf schmalen Schirmen — die
                ausfuehrliche Preistafel darunter soll mitscrollen. -->
           <div class="kf-view__oben">
+          <div class="kf-studio-heading"><span>DAMLA <small>RINGATELIER</small></span><span class="kf-live-badge">360° · LIVE 3D</span></div>
           <div class="kf-stage" id="kfBuehne" role="img"
                aria-label="Dreidimensionale Ansicht des konfigurierten Ringpaars">
             <p class="kf-laedt" aria-hidden="true">Ringe werden aufgebaut …</p>
           </div>
+          <p id="kfLiveDetails" class="kf-live-details" aria-live="polite"></p>
           <div class="atelier-views" aria-label="3D-Ansicht steuern">
             <button type="button" data-kf-view="hero">Perspektive</button><button type="button" data-kf-view="front">Vorderseite</button><button type="button" data-kf-view="side">Profil</button>
             <button type="button" data-kf-view="in" aria-label="Vergrößern">+</button><button type="button" data-kf-view="out" aria-label="Verkleinern">−</button><button type="button" data-kf-view="rotate" aria-pressed="true">Drehung pausieren</button>
@@ -2963,6 +2968,7 @@
 
         <!-- ── Bedienfeld ──────────────────────────── -->
         <div class="kf-panel">
+          <p id="kfStepNumber" class="kf-step-number"></p>
 
           <div class="kf-tabs" role="tablist" aria-label="Welchen Ring bearbeiten">
             <button type="button" class="kf-tab is-on" data-seite="eins" role="tab" aria-selected="true">Ring 1</button>
@@ -2986,6 +2992,7 @@
               <input type="checkbox" id="kfBicolor">
               <span id="kfBicolorLabel">Bicolor</span>
             </label>
+            <div id="kfMehrfarbig" hidden><p class="atelier-label">Zweites Edelmetall</p><div class="kf-chips" id="kfZweitmetall"></div><p class="atelier-label">Aufteilung</p><div class="kf-chips" id="kfTeilung"></div></div>
           </fieldset>
 
           <fieldset class="kf-feld">
@@ -3013,7 +3020,7 @@
 
           <fieldset class="kf-feld">
             <legend><i>4</i> Oberfläche</legend>
-            <div class="kf-chips" id="kfOberflaeche"></div>
+            <div class="kf-chips" id="kfOberflaeche"></div><p class="kf-notiz">Die Motivbilder zeigen die Oberflächen beispielhaft in Gelbgold. Ihre Auswahl sehen Sie direkt am 3D-Ring.</p><p class="atelier-label">Dekorfugen</p><div class="kf-chips" id="kfFuge"></div>
           </fieldset>
 
           <fieldset class="kf-feld">
@@ -3056,10 +3063,11 @@
             <div class="kf-regler">
               <label for="kfGravur">Innengravur</label>
               <input type="text" id="kfGravur" maxlength="24" placeholder="z. B. 12.09.2027 · A &amp; M" autocomplete="off">
-              <p class="kf-notiz">Bis 24 Zeichen. Erscheint in der Vorschau auf der Ringinnenseite.</p>
+              <div class="kf-chips" id="kfSchrift"></div><p id="kfGravurVorschau" class="kf-engraving-preview"></p><p class="kf-notiz">Bis 24 Zeichen. Erscheint in der Vorschau auf der Ringinnenseite.</p>
             </div>
           </fieldset>
 
+<div class="kf-step-actions"><button type="button" id="kfPrev">← Zurück</button><button type="button" id="kfNext">Weiter →</button></div>
           <button type="button" class="kf-reset" id="kfReset">Zurücksetzen</button>
         </div>
       </div>
@@ -3518,7 +3526,7 @@
     }
   }
   </script>
-  <script type="module" src="assets/konfigurator.js?v=20260906-layout"></script>
+  <script type="module" src="assets/konfigurator.js?v=20260921-atelier"></script>
 
 <script src="assets/site-design.js?v=20260906-layout" defer></script>
 </body>

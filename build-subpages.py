@@ -1231,7 +1231,7 @@ TR_HEAD = '  <style>\n%s  </style>' % TR_CSS
 KF_BODY = io.open(os.path.join(DIR, 'konfigurator.body.html'), encoding='utf-8').read()
 KF_CSS = io.open(os.path.join(DIR, 'konfigurator.css'), encoding='utf-8').read()
 
-KF_HEAD = '  <style>\n%s  </style>\n  <link rel="stylesheet" href="atelier.css?v=20260906-layout">' % KF_CSS
+KF_HEAD = '  <style>\n%s  </style>\n  <link rel="stylesheet" href="atelier.css?v=20260921-atelier">' % KF_CSS
 
 # three.js liegt lokal unter assets/vendor — kein CDN, damit die Seite
 # ohne Verbindung zu Dritten auskommt (DSGVO).
@@ -1244,7 +1244,7 @@ KF_BODY_ENDE = """
     }
   }
   </script>
-  <script type="module" src="assets/konfigurator.js?v=20260906-layout"></script>
+  <script type="module" src="assets/konfigurator.js?v=20260921-atelier"></script>
 """
 
 PAGES = [

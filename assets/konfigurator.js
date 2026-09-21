@@ -118,6 +118,7 @@ const OBERFLAECHEN = {
   seidenmatt:  { label: 'Seidenmatt',     rauheit: 0.34, textur: 'feinkorn', aufpreis: 25 },
   eismatt:     { label: 'Eismatt',        rauheit: 0.58, textur: 'grobkorn', aufpreis: 30 },
   laengsmatt:  { label: 'Längsmattiert',  rauheit: 0.28, textur: 'buerste',  aufpreis: 30 },
+  quermatt:    { label: 'Quermattiert', rauheit: 0.3, textur: 'quer', aufpreis: 30 },
   hammer:      { label: 'Hammerschlag',   rauheit: 0.22, textur: 'hammer',   aufpreis: 55 },
 };
 
@@ -155,6 +156,10 @@ const STEINLAGE = {
    haengt. Sie sind Richtwerte und muessen vom Haus gepflegt werden;
    die Seite weist den Preis ausdruecklich als unverbindlich aus.
    ══════════════════════════════════════════════════════════════ */
+const TEILUNGEN = {mitte: {label:'Mittelband', bands:[[-.3,.3]]}, halb:{label:'Zweifarbig 1:1',bands:[[0,.995]]}, rand:{label:'Zwei Außenbänder',bands:[[-.995,-.6],[.6,.995]]}};
+const FUGEN = {ohne:{label:'Ohne Fuge',positions:[]}, mitte:{label:'Mittige Fuge',positions:[0]}, doppelt:{label:'Zwei Fugen',positions:[-.5,.5]}};
+const SCHRIFTEN = {klassisch:{label:'Klassisch',font:'Georgia, serif'}, modern:{label:'Modern',font:'Arial, sans-serif'}, handschrift:{label:'Schreibschrift',font:'cursive'}};
+
 const PREISE = {
   /* Euro je Gramm, inkl. Fertigung des Rohrings */
   grammpreis: { '333': 32, '585': 52, '750': 68, '950': 78 },
@@ -239,11 +244,10 @@ function ringGeometrie(ri, T, W, profil) {
 }
 
 /** Duenne Aussenhaut fuer das Bicolor-Mittelband. */
-function bandGeometrie(ri, T, W, profil) {
+function bandGeometrie(ri, T, W, profil, start = -0.30, end = 0.30) {
   const pts = [];
-  const spanne = 0.30;
-  for (let i = 0; i <= 24; i++) {
-    const t = -spanne + (2 * spanne * i) / 24;
+  for (let i = 0; i <= 128; i++) {
+    const t = start + (end - start) * i / 128;
     pts.push(new THREE.Vector2(ri + profil.aussen(t, T) + 0.02, (t * W) / 2));
   }
   return new THREE.LatheGeometry(pts, 192);
@@ -427,7 +431,7 @@ function rauheitsMap(art) {
         v = 175 + grob * 25 + Math.random() * 55;
       } else {
         // Buerste: feine Riefen laengs der Ringkontur (u-Richtung)
-        v = 190 + Math.sin(yy * 2.3) * 12 + Math.random() * 45;
+        v = 190 + Math.sin((art === 'quer' ? xx : yy) * 2.3) * 12 + Math.random() * 45;
       }
       d[i] = d[i + 1] = d[i + 2] = Math.max(0, Math.min(255, v));
       d[i + 3] = 255;
@@ -546,6 +550,7 @@ let laeuft = false;
 let bereit = false;   // erstes gerendertes Bild da -> Ladezustand aus
 let drehen = !matchMedia('(prefers-reduced-motion: reduce)').matches;
 let sichtbar = true;
+let needsRender = true, lastFrame = 0;
 
 function webglVerfuegbar() {
   try {
@@ -579,7 +584,7 @@ function szeneAufbauen() {
 
   camera = new THREE.PerspectiveCamera(32, buehne.clientWidth / buehne.clientHeight, 1, 400);
   // Dreiviertelblick: frontal sieht man nur den Kreis, hier auch das Profil
-  camera.position.set(30, 21, 70);
+  camera.position.set(48, 32, 62);
 
   // Dreipunktlicht: Fuehrung von links oben, weiche Aufhellung von rechts,
   // Kante von hinten. Mit nur zwei Lichtern blieb die abgewandte Seite tot.
@@ -653,6 +658,7 @@ function schattenSetzen(mesh, x, z, radius) {
 }
 
 function groesseAnpassen() {
+  needsRender = true;
   if (!renderer || !buehne.clientWidth) return;
   camera.aspect = buehne.clientWidth / buehne.clientHeight;
   camera.updateProjectionMatrix();
@@ -667,6 +673,7 @@ function groesseAnpassen() {
  * damit ein selbst gewaehlter Zoom nicht bei jedem Klick zurueckspringt.
  */
 function kameraEinpassen(erzwingen) {
+  needsRender = true;
   if (!camera || !controls) return;
   const rEins = zustand.eins.groesse / (2 * Math.PI) + zustand.eins.staerke;
   const rZwei = zustand.zwei.groesse / (2 * Math.PI) + zustand.zwei.staerke;
@@ -692,11 +699,15 @@ function kameraEinpassen(erzwingen) {
   controls.update();
 }
 
-function tick() {
-  if (document.hidden || !sichtbar) return;
+function tick(time) {
+  if (document.hidden || !sichtbar || time - lastFrame < 32) return;
+  const delta = Math.min((time - lastFrame) / 1000, .1);
+  lastFrame = time;
   // Die Kamera kreist auch beim Zoomen weiter; nur die Pausentaste stoppt sie.
   controls.autoRotate = drehen;
-  controls.update();
+  const changed = controls.update(delta);
+  if (!changed && !needsRender && bereit) return;
+  needsRender = false;
   renderer.render(scene, camera);
   if (!bereit) { bereit = true; buehne.classList.add('is-bereit'); }
 }
@@ -739,6 +750,10 @@ const standard = () => ({
   karat: '585',
   letztesKarat: '585',   // ueberlebt einen Abstecher zu Platin
   bicolor: false,
+  zweitmetall: 'weissgold',
+  teilung: 'mitte',
+  fuge: 'ohne',
+  schrift: 'klassisch',
   profil: 'bombiert',
   breite: 4.5,
   staerke: 1.6,
@@ -758,7 +773,7 @@ const zustand = {
 
 /* Diese Felder bleiben beim Koppeln individuell — Groesse und Gravur
    sind pro Person, alles andere macht ein Paar erst zum Paar. */
-const NICHT_KOPPELN = ['groesse', 'gravur', 'breite', 'besatz', 'steinlage'];
+const NICHT_KOPPELN = ['groesse', 'gravur', 'breite', 'besatz', 'steinlage', 'schrift'];
 
 /* ── Konfiguration in der Adresszeile ──────────────────────────
    Damit ist ein Entwurf teilbar und wiederfindbar: der Link, den
@@ -781,14 +796,19 @@ function ausBase64Url(code) {
     hoechstens beim Standard landen, nie in einem kaputten Zustand. */
 function pruefen(k) {
   const s = standard();
-  if (LEGIERUNGEN[k.legierung]) s.legierung = k.legierung;
-  if (LEGIERUNGEN[s.legierung].karate[k.karat]) s.karat = k.karat;
+  if (!k || typeof k !== 'object') return s;
+  if (Object.hasOwn(LEGIERUNGEN, k.legierung)) s.legierung = k.legierung;
+  if (Object.hasOwn(LEGIERUNGEN[s.legierung].karate, k.karat)) s.karat = k.karat;
   s.letztesKarat = LEGIERUNGEN.gelbgold.karate[k.letztesKarat] ? k.letztesKarat : s.karat;
-  if (PROFILE[k.profil]) s.profil = k.profil;
-  if (OBERFLAECHEN[k.oberflaeche]) s.oberflaeche = k.oberflaeche;
-  if (BESATZ[k.besatz]) s.besatz = k.besatz;
-  if (STEINLAGE[k.steinlage]) s.steinlage = k.steinlage;
+  if (Object.hasOwn(PROFILE, k.profil)) s.profil = k.profil;
+  if (Object.hasOwn(OBERFLAECHEN, k.oberflaeche)) s.oberflaeche = k.oberflaeche;
+  if (Object.hasOwn(BESATZ, k.besatz)) s.besatz = k.besatz;
+  if (Object.hasOwn(STEINLAGE, k.steinlage)) s.steinlage = k.steinlage;
   s.bicolor = !!k.bicolor;
+  if (Object.hasOwn(LEGIERUNGEN, k.zweitmetall)) s.zweitmetall = k.zweitmetall;
+  if (Object.hasOwn(TEILUNGEN, k.teilung)) s.teilung = k.teilung;
+  if (Object.hasOwn(FUGEN, k.fuge)) s.fuge = k.fuge;
+  if (Object.hasOwn(SCHRIFTEN, k.schrift)) s.schrift = k.schrift;
   s.breite = Math.min(8, Math.max(2.5, Number(k.breite) || s.breite));
   s.staerke = Math.min(2.4, Math.max(1.2, Number(k.staerke) || s.staerke));
   s.groesse = Math.min(70, Math.max(44, parseInt(k.groesse, 10) || s.groesse));
@@ -865,6 +885,26 @@ function texturGecacht(tex) {
   return false;
 }
 
+function rillenAnwenden(geo, k, ri) {
+  const positions = FUGEN[k.fuge].positions;
+  if (!positions.length) return;
+  const vertices = geo.attributes.position;
+  for (let i = 0; i < vertices.count; i++) {
+    const x = vertices.getX(i), y = vertices.getY(i), z = vertices.getZ(i);
+    const radius = Math.hypot(x,z);
+    if (radius < ri + k.staerke * .45) continue;
+    let depth = 0;
+    for (const position of positions) {
+      const distance = Math.abs(y - position * k.breite / 2);
+      depth += Math.max(0, 1 - distance / .16) * .12;
+    }
+    const factor = (radius - depth) / radius;
+    vertices.setXYZ(i, x * factor, y, z * factor);
+  }
+  vertices.needsUpdate = true;
+  geo.computeVertexNormals();
+}
+
 function ringBauen(seite) {
   const k = zustand[seite];
   const signatur = JSON.stringify(k);
@@ -891,18 +931,20 @@ function ringBauen(seite) {
     ringGeometrie(ri, T, W, profil),
     metallMaterial(karat.farbe, k.oberflaeche)
   );
+  rillenAnwenden(koerper.geometry, k, ri);
   gruppe.add(koerper);
 
-  // Bicolor-Mittelband
+  // Material zones follow the selected cross-section and share its grooves.
   if (k.bicolor) {
-    const partner = LEGIERUNGEN[BICOLOR_PARTNER[k.legierung]];
+    const partner = LEGIERUNGEN[k.zweitmetall];
     const pKarat = partner.karate[k.karat] || Object.values(partner.karate)[0];
-    const band = new THREE.Mesh(
-      bandGeometrie(ri, T, W, profil),
-      metallMaterial(pKarat.farbe, k.oberflaeche)
-    );
-    band.material.side = THREE.DoubleSide;
-    gruppe.add(band);
+    for (const [start, end] of TEILUNGEN[k.teilung].bands) {
+      const geo = bandGeometrie(ri, T, W, profil, start, end);
+      rillenAnwenden(geo, k, ri);
+      const band = new THREE.Mesh(geo, metallMaterial(pKarat.farbe, k.oberflaeche));
+      band.material.side = THREE.DoubleSide;
+      gruppe.add(band);
+    }
   }
 
   // Brillanten in der Aussenflaeche — Zahl und Lage kommen aus steinPlan
@@ -944,16 +986,16 @@ function ringBauen(seite) {
 
   // Innengravur
   if (k.gravur.trim()) {
-    gruppe.add(gravurMesh(ri, W, k.gravur.trim()));
+    gruppe.add(gravurMesh(ri, W, k.gravur.trim(), k.schrift));
   }
 
   // Ring aufstellen: Lochachse zeigt zum Betrachter
-  gruppe.rotation.x = Math.PI / 2;
+  gruppe.rotation.set(Math.PI / 2, seite === 'eins' ? -.12 : .12, seite === 'eins' ? -.12 : .12);
   return gruppe;
 }
 
 /** Innengravur als halbtransparente Textur auf der Innenwand. */
-function gravurMesh(ri, W, text) {
+function gravurMesh(ri, W, text, schrift) {
   const S = 2048, H = 256;
   const c = document.createElement('canvas');
   c.width = S; c.height = H;
@@ -963,7 +1005,7 @@ function gravurMesh(ri, W, text) {
   ctx.translate(S, 0);
   ctx.scale(-1, 1);              // Innenseite wird gespiegelt betrachtet
   ctx.fillStyle = 'rgba(40,34,26,0.62)';
-  ctx.font = '600 92px Raleway, system-ui, sans-serif';
+  ctx.font = '92px ' + SCHRIFTEN[schrift].font;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText(text.slice(0, 24), S / 2, H / 2);
@@ -979,6 +1021,7 @@ function gravurMesh(ri, W, text) {
 }
 
 function paarNeuBauen() {
+  needsRender = true;
   if (!laeuft) return;
   ringBauen('eins');
   ringBauen('zwei');
@@ -1017,7 +1060,7 @@ function ringPreis(seite) {
   const steine = steinzahl * PREISE.stein;
   const gravur = k.gravur.trim() ? PREISE.gravur : 0;
 
-  const summe = PREISE.grundpreis + material + oberflaeche + bicolor + steine + gravur;
+  const summe = PREISE.grundpreis + material + oberflaeche + bicolor + steine + gravur + FUGEN[k.fuge].positions.length * 25;
   return {
     gramm,
     steinzahl,
@@ -1176,7 +1219,15 @@ function zeichnen() {
   );
   $('#kfBicolor').checked = k.bicolor;
   $('#kfBicolorLabel').textContent =
-    'Bicolor — Mittelband in ' + LEGIERUNGEN[BICOLOR_PARTNER[k.legierung]].label;
+    'Zweites Edelmetall hinzufügen';
+  $('#kfMehrfarbig').hidden = !k.bicolor;
+  knopfGruppe($('#kfZweitmetall'), Object.entries(LEGIERUNGEN).map(([w,v]) => [w,v.label]), k.zweitmetall, w => setzen('zweitmetall',w), w => metallPunkt(w,k.karat));
+  knopfGruppe($('#kfTeilung'), Object.entries(TEILUNGEN).map(([w,v]) => [w,v.label]), k.teilung, w => setzen('teilung',w));
+  knopfGruppe($('#kfFuge'), Object.entries(FUGEN).map(([w,v]) => [w,v.label]), k.fuge, w => setzen('fuge',w));
+  knopfGruppe($('#kfSchrift'), Object.entries(SCHRIFTEN).map(([w,v]) => [w,v.label]), k.schrift, w => setzen('schrift',w));
+  $('#kfGravurVorschau').textContent = k.gravur || 'Ihre Geschichte. Für immer.';
+  $('#kfGravurVorschau').style.fontFamily = SCHRIFTEN[k.schrift].font;
+  $('#kfLiveDetails').textContent = 'Ring ' + (zustand.aktiv === 'eins' ? '1' : '2') + ' · ' + leg.label + ' ' + k.karat + ' · ' + k.breite.toFixed(1).replace('.', ',') + ' mm · ' + OBERFLAECHEN[k.oberflaeche].label;
 
   // Profil
   knopfGruppe(
@@ -1200,7 +1251,8 @@ function zeichnen() {
     $('#kfOberflaeche'),
     Object.entries(OBERFLAECHEN).map(([w, v]) => [w, v.label]),
     k.oberflaeche,
-    (w) => setzen('oberflaeche', w)
+    (w) => setzen('oberflaeche', w),
+    (w) => '<span class="kf-finish-photo" data-finish="' + w + '" aria-hidden="true"></span>'
   );
 
   // Besatz
@@ -1271,14 +1323,15 @@ function ringText(seite) {
   const karat = leg.karate[k.karat] || Object.values(leg.karate)[0];
   const teile = [
     leg.label + ' ' + karat.label.split(' / ')[0],
-    k.bicolor ? 'Bicolor mit ' + LEGIERUNGEN[BICOLOR_PARTNER[k.legierung]].label : null,
+    k.bicolor ? TEILUNGEN[k.teilung].label + ' mit ' + LEGIERUNGEN[k.zweitmetall].label : null,
+    FUGEN[k.fuge].label,
     PROFILE[k.profil].label,
     k.breite.toFixed(1).replace('.', ',') + ' mm breit',
     k.staerke.toFixed(1).replace('.', ',') + ' mm stark',
     OBERFLAECHEN[k.oberflaeche].label,
     steinText(seite),
     'Größe ' + k.groesse,
-    k.gravur.trim() ? 'Gravur: „' + k.gravur.trim() + '“' : null,
+    k.gravur.trim() ? 'Gravur (' + SCHRIFTEN[k.schrift].label + '): „' + k.gravur.trim() + '“' : null,
   ].filter(Boolean);
   return teile.join(' · ');
 }
@@ -1298,9 +1351,35 @@ function zusammenfassung(mitLink) {
 /* ── Bedienung ────────────────────────────────────────────── */
 
 function uiVerdrahten() {
+  const fields = $$('.kf-panel .kf-feld');
+  const stepButtons = $$('#kfSteps button');
+  let step = 0;
+  const showStep = (next, focus = false) => {
+    step = Math.max(0, Math.min(fields.length - 1, next));
+    fields.forEach((field, index) => { field.hidden = index !== step; });
+    stepButtons.forEach((button, index) => {
+      if (index === step) button.setAttribute('aria-current','step');
+      else button.removeAttribute('aria-current');
+    });
+    $('#kfStepNumber').textContent = 'Schritt ' + (step + 1) + ' von ' + fields.length;
+    $('#kfPrev').disabled = step === 0;
+    $('#kfNext').textContent = step === fields.length - 1 ? 'Zusammenfassung ansehen' : 'Weiter →';
+    if (focus && matchMedia('(max-width: 900px)').matches) stepButtons[step].scrollIntoView({block:'nearest',inline:'nearest'});
+    if (focus) { fields[step].tabIndex = -1; fields[step].focus({preventScroll:true}); }
+  };
+  stepButtons.forEach((button,index) => button.addEventListener('click', () => showStep(index,true)));
+  $('#kfPrev').addEventListener('click', () => showStep(step - 1,true));
+  $('#kfNext').addEventListener('click', () => {
+    if (step < fields.length - 1) showStep(step + 1,true);
+    else { $('#kfZusammenfassung').scrollIntoView({behavior:'smooth',block:'center'}); $('#kfKopieren').focus({preventScroll:true}); }
+  });
+  $('#kfReset').addEventListener('click', () => showStep(0));
+  showStep(0);
+
   document.querySelectorAll('[data-kf-view]').forEach(button => {
     button.disabled = !laeuft;
     button.addEventListener('click', () => {
+      needsRender = true;
       const mode = button.dataset.kfView;
       if (mode === 'rotate') {
         drehen = !drehen; button.setAttribute('aria-pressed', String(drehen));
