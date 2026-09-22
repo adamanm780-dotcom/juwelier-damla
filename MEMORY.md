@@ -21,3 +21,8 @@ Build-Reihenfolge: `python build-index.py`, `python build-subpages.py`, `python 
 `assets/katalog/` ist bestehende, unabhängige Arbeit; nicht beiläufig hinzufügen, verändern oder veröffentlichen. Für die private Sites-Vorschau existiert `.openai/hosting.json`; keine neue Site anlegen.
 
 Die ältere projektübergreifende Memory liegt in `C:\Users\Adria\.claude\projects\C--Users-Adria\memory\project_juwelier_damla.md`. Dort ist als Instagram-Profil `https://www.instagram.com/juwelierdamla_wi/` hinterlegt; vor neuer Bildrecherche diese Quelle berücksichtigen.
+
+## Ergänzung vom 22. September 2026
+
+- Das neu generierte, sauber transparente goldene JD-Logo in Hero und Kontaktbereich verwenden (`assets/logo-gold-clean.png`). Kein weißes Hero-Logo und keine hellen Freistellungsränder.
+- In den drei Kollektionenkarten stehen die Trauringe groß in der Mitte, Schmuck links und Verlobungsringe rechts.

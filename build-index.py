@@ -164,7 +164,7 @@ CSS = """
     }
 
     /* Dunkelt die Clips ab. Zwei Lagen: ein gleichmaessiger Schleier ueber
-       das ganze Bild und ein weicher Schatten in der Mitte, damit das weisse
+       das ganze Bild und ein weicher Schatten in der Mitte, damit das goldene
        Logo auch vor der hell beleuchteten Auslage steht. */
     .hero__shade {
       position: absolute;
@@ -191,7 +191,7 @@ CSS = """
       height: auto;
       transform: translate(-50%, -50%);
       pointer-events: none;
-      filter: drop-shadow(0 6px 22px rgba(0,0,0,0.5));
+      filter: none;
       opacity: 0;
       animation: fadeIn 1.6s ease 0.35s forwards;
     }
@@ -360,7 +360,7 @@ CSS = """
 """
 
 src = sub1(r'\n  </style>', CSS + '\n  </style>', src, 0, 'Style-Ende')
-src = src.replace('</head>', '<link rel="stylesheet" href="contact.css?v=20260921-logo">\n</head>')
+src = src.replace('</head>', '<link rel="stylesheet" href="contact.css?v=20260922-goldlogo">\n</head>')
 
 
 # ══════════════════════════════════════════════════════════
@@ -432,8 +432,8 @@ NEW_SECTIONS = """  <!-- ══════════════════�
              muted playsinline preload="auto" aria-hidden="true"></video>
       <div class="hero__shade" aria-hidden="true"></div>
       <div class="hero__veil" aria-hidden="true"></div>
-      <img src="assets/logo-mark.webp" alt="Juwelier Damla"
-           class="hero__mark" width="900" height="917" fetchpriority="high">
+      <img src="assets/logo-gold-clean.png" alt="Juwelier Damla"
+           class="hero__mark" width="1254" height="1254" fetchpriority="high">
       <div class="hero__cue" id="heroCue" aria-hidden="true">
         <span>Scrollen</span>
         <i></i>

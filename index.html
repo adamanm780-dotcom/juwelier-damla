@@ -572,8 +572,8 @@
     }
     .collections-header .gold-bar { margin: 0 auto; }
 
-    /* Drei Karten, die mittlere gross: Verlobungsringe stehen im
-       Mittelpunkt, Schmuck und Trauringe flankieren sie. */
+    /* Drei Karten, die mittlere gross: Trauringe stehen im
+       Mittelpunkt, Schmuck und Verlobungsringe flankieren sie. */
     .collections-grid {
       display: grid;
       grid-template-columns: 0.82fr 1.34fr 0.82fr;
@@ -583,7 +583,7 @@
       margin: 0 auto;
     }
     .collection-card a { display: block; color: inherit; }
-    .collection-card--gross img { aspect-ratio: 4 / 5.8; }
+    .collections-grid .collection-card--gross img { aspect-ratio: 4 / 5.8; }
     .collection-card--gross figcaption strong { font-size: 1.5rem; }
 
     .collection-card {
@@ -1292,8 +1292,8 @@
 
       .contact-grid { grid-template-columns: 1fr; gap: 48px; }
       .collections-grid { grid-template-columns: 1fr 1fr; max-width: 780px; }
-      .collection-card--gross { grid-column: span 2; }
-      .collection-card--gross img { aspect-ratio: 16 / 10; }
+      .collection-card--gross { grid-column: span 2; grid-row: 1; }
+      .collections-grid .collection-card--gross img { aspect-ratio: 16 / 10; }
       .services-grid .service-card { flex-basis: calc(50% - 1px); }
       .gallery-card--wide img { aspect-ratio: 16 / 10; }
       .reviews-grid { grid-template-columns: 1fr 1fr; }
@@ -1332,9 +1332,9 @@
       /* Untereinander werden die Bogen sonst sehr hoch — drei Karten
          a 520 px sind ein halber Bildschirm zu viel Scrollweg. */
       .collections-grid { grid-template-columns: 1fr; gap: 16px; }
-      .collection-card--gross { grid-column: auto; }
+      .collection-card--gross { grid-column: auto; grid-row: auto; }
       .collection-card img { aspect-ratio: 4 / 4.5; }
-      .collection-card--gross img { aspect-ratio: 4 / 5; }
+      .collections-grid .collection-card--gross img { aspect-ratio: 4 / 5; }
       .collection-card--gross figcaption strong { font-size: 1.35rem; }
       .collections-header { margin-bottom: 40px; }
 
@@ -1588,7 +1588,7 @@
     }
 
     /* Dunkelt die Clips ab. Zwei Lagen: ein gleichmaessiger Schleier ueber
-       das ganze Bild und ein weicher Schatten in der Mitte, damit das weisse
+       das ganze Bild und ein weicher Schatten in der Mitte, damit das goldene
        Logo auch vor der hell beleuchteten Auslage steht. */
     .hero__shade {
       position: absolute;
@@ -1615,7 +1615,7 @@
       height: auto;
       transform: translate(-50%, -50%);
       pointer-events: none;
-      filter: drop-shadow(0 6px 22px rgba(0,0,0,0.5));
+      filter: none;
       opacity: 0;
       animation: fadeIn 1.6s ease 0.35s forwards;
     }
@@ -1783,7 +1783,7 @@
     }
 
   </style>
-<link rel="stylesheet" href="contact.css?v=20260921-logo">
+<link rel="stylesheet" href="contact.css?v=20260922-goldlogo">
 </head>
 
 <body>
@@ -1876,8 +1876,8 @@
              muted playsinline preload="auto" aria-hidden="true"></video>
       <div class="hero__shade" aria-hidden="true"></div>
       <div class="hero__veil" aria-hidden="true"></div>
-      <img src="assets/logo-mark.webp" alt="Juwelier Damla"
-           class="hero__mark" width="900" height="917" fetchpriority="high">
+      <img src="assets/logo-gold-clean.png" alt="Juwelier Damla"
+           class="hero__mark" width="1254" height="1254" fetchpriority="high">
       <div class="hero__cue" id="heroCue" aria-hidden="true">
         <span>Scrollen</span>
         <i></i>
@@ -2000,22 +2000,22 @@
         </figure>
 
         <figure class="collection-card collection-card--gross reveal-img d1">
-          <a href="verlobungsringe.html">
-            <img src="assets/kollektion-verlobung.webp" alt="Zwei Verlobungsringe mit Solitär-Brillanten in Gelb- und Weißgold auf Marmor" width="900" height="1305" loading="lazy">
+          <a href="trauringe.html">
+            <img src="assets/kollektion-trauringe.webp" alt="Zwei schlichte goldene Trauringe auf hellem Marmor" width="800" height="1000" loading="lazy">
             <figcaption>
-              <strong>Verlobungsringe</strong>
-              <span>Für die Frage, die alles ändert</span>
+              <strong>Trauringe</strong>
+              <span>Für das wichtigste Versprechen</span>
             </figcaption>
           </a>
           <span class="jd-glanz" aria-hidden="true"></span>
         </figure>
 
         <figure class="collection-card reveal-img d2">
-          <a href="trauringe.html">
-            <img src="assets/kollektion-trauringe.webp" alt="Zwei schlichte goldene Trauringe auf hellem Marmor" width="800" height="1000" loading="lazy">
+          <a href="verlobungsringe.html">
+            <img src="assets/kollektion-verlobung.webp" alt="Zwei Verlobungsringe mit Solitär-Brillanten in Gelb- und Weißgold auf Marmor" width="900" height="1305" loading="lazy">
             <figcaption>
-              <strong>Trauringe</strong>
-              <span>Für das wichtigste Versprechen</span>
+              <strong>Verlobungsringe</strong>
+              <span>Für die Frage, die alles ändert</span>
             </figcaption>
           </a>
           <span class="jd-glanz" aria-hidden="true"></span>
@@ -2224,7 +2224,7 @@
     </div>
     <div class="contact-atelier__card">
       <aside class="contact-atelier__aside">
-        <img class="contact-atelier__logo" src="assets/logo-cut.webp" alt="Juwelier Damla" width="566" height="593" loading="lazy">
+        <img class="contact-atelier__logo" src="assets/logo-gold-clean.png" alt="Juwelier Damla" width="1254" height="1254" loading="lazy">
         <h3>Schönes beginnt<br>mit einem Gespräch.</h3>
         <p>Wir nehmen uns Zeit für Sie.<br>Persönlich in der Wellritzstraße 3.</p>
         <a class="contact-atelier__phone" href="tel:+496115807830"><span>Direkt mit uns sprechen</span>0611 5807830 <svg class="arrow-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg></a>
