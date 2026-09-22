@@ -24,5 +24,5 @@ Die ältere projektübergreifende Memory liegt in `C:\Users\Adria\.claude\projec
 
 ## Ergänzung vom 22. September 2026
 
-- Das neu generierte, sauber transparente goldene JD-Logo in Hero und Kontaktbereich verwenden (`assets/logo-gold-clean.png`). Kein weißes Hero-Logo und keine hellen Freistellungsränder.
+- Korrektur: Nur das echte Original-Logo verwenden. Das generierte `assets/logo-gold-clean.png` wurde abgelehnt, weil es das JD verändert. In Hero und Kontaktbereich die unveränderte Kontur von `assets/logo-mark.webp` per CSS-Alpha-Maske gold färben. Buchstaben, Schriftzug, Kreisbögen und Proportionen exakt erhalten; nicht generativ neu zeichnen. Keine hellen Freistellungsränder.
 - In den drei Kollektionenkarten stehen die Trauringe groß in der Mitte, Schmuck links und Verlobungsringe rechts.

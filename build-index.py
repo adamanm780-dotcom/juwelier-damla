@@ -181,6 +181,16 @@ CSS = """
           rgba(18,14,11,0.36) 100%);
     }
 
+    /* Originalkontur: nur die Farbe aendern, das JD niemals neu zeichnen. */
+    .damla-original-logo {
+      display: block;
+      aspect-ratio: 900 / 917;
+      background-color: #c9a45a;
+      -webkit-mask: url('assets/logo-mark.webp') center / contain no-repeat;
+      mask: url('assets/logo-mark.webp') center / contain no-repeat;
+      mask-mode: alpha;
+    }
+
     /* das freigestellte Logo steht mittig vor dem Video */
     .hero__mark {
       position: absolute;
@@ -360,7 +370,7 @@ CSS = """
 """
 
 src = sub1(r'\n  </style>', CSS + '\n  </style>', src, 0, 'Style-Ende')
-src = src.replace('</head>', '<link rel="stylesheet" href="contact.css?v=20260922-goldlogo">\n</head>')
+src = src.replace('</head>', '<link rel="stylesheet" href="contact.css?v=20260922-original-logo">\n</head>')
 
 
 # ══════════════════════════════════════════════════════════
@@ -432,8 +442,7 @@ NEW_SECTIONS = """  <!-- ══════════════════�
              muted playsinline preload="auto" aria-hidden="true"></video>
       <div class="hero__shade" aria-hidden="true"></div>
       <div class="hero__veil" aria-hidden="true"></div>
-      <img src="assets/logo-gold-clean.png" alt="Juwelier Damla"
-           class="hero__mark" width="1254" height="1254" fetchpriority="high">
+      <span class="hero__mark damla-original-logo" role="img" aria-label="Juwelier Damla"></span>
       <div class="hero__cue" id="heroCue" aria-hidden="true">
         <span>Scrollen</span>
         <i></i>
