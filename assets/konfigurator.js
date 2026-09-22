@@ -1,7 +1,7 @@
 import {individualMarkup,mountIndividual} from './wedding-engraving.js?v=3';
 import * as C from './wedding-catalog.js?v=3';
 import * as S from './wedding-state.js?v=3';
-import {WeddingViewer} from './wedding-viewer.js?v=20260922-quality4';
+import {WeddingViewer} from './wedding-viewer.js?v=20260922-profilefit5';
 const $=s=>document.querySelector(s), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=n=>n.toLocaleString('de-DE',{style:'currency',currency:'EUR',maximumFractionDigits:0});
 let state=S.normalizeState(C.initialState()),step=0,segment=0,divisionCount=1,undo=[],notice='',viewer,saveTimer;
@@ -52,7 +52,7 @@ function render(){
  if(step===5&&k.engraving.type==='individual')setupArt();
  renderPrices();renderSummary();
 }
-function profiles(k){return choices('Ringprofil','profile',Object.keys(S.PROFILES),k.profile,{cls:'wc-profile-grid',visual:profileIcon})+`<p class="wc-note">${profileDescription(k.profile)}. Der Querschnitt zeigt die Außenform und die Rundung auf der Innenseite.</p>`;}
+function profiles(k){return choices('Ringprofil','profile',Object.keys(S.PROFILES),k.profile,{cls:'wc-profile-grid',visual:profileIcon})+`<p class="wc-note">${profileDescription(k.profile)}. ${k.profile==='PB08'?'Bei diesem runden Profil sind Breite und Höhe gleich. Die Ringgröße (Innenumfang) bleibt unverändert.':'Der Querschnitt zeigt die Außenform und die Rundung auf der Innenseite.'}</p>`;}
 const profileDescription=id=>({PB01:'Außen flach, innen leicht gerundet',PB02:'Außen leicht gewölbt, innen stark gerundet',PB03:'Außen gewölbt, innen komfortabel gerundet',PB04:'Innen und außen sanft gerundet',PB05:'Oval mit weichen Übergängen',PB06:'Leichte Außenwölbung, kräftige Innenrundung',PB07:'Schmale ovale Kontur',PB08:'Runder Querschnitt',PB09:'Gewölbte Form mit schrägen Seiten',PB10:'Konkave Außenfläche',PB11:'Kräftig gewölbte Außenfläche',PB12:'Innen und außen flach, gerundete Kanten',PB13:'Flache Außenfläche mit schrägen Seiten'}[id]||id);
 function dimensions(k){
  return select('Ringbreite','width',S.widths(k).map(v=>({id:v,label:C.mm(v)})),k.width)+select('Ringhöhe','height',S.heights(k).map(v=>({id:v,label:C.mm(v)})),k.height)+select('Ringgröße · Innenumfang','size',Array.from({length:61},(_,i)=>({id:45+i*.5,label:(45+i*.5).toLocaleString('de-DE')+' · Ø '+((45+i*.5)/Math.PI).toLocaleString('de-DE',{maximumFractionDigits:2})+' mm'})),k.size)+`<div class="wc-section-diagram">${viewer?.sectionDiagram(k)||profileIcon(k.profile)}<p>${esc(k.profile)} · ${C.mm(k.width)} breit · ${C.mm(k.height)} hoch</p></div><p class="wc-note">Die wählbaren Höhen richten sich nach Profil und Breite. Ihre genaue Ringgröße messen wir gerne bei Damla.</p>`;

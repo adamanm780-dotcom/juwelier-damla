@@ -1,0 +1,28 @@
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import * as THREE from 'three';
+const originalFetch=globalThis.fetch;
+globalThis.fetch=async url=>({ok:true,json:async()=>JSON.parse(await readFile(new URL(url),'utf8'))});
+const {WeddingViewer}=await import('../assets/wedding-viewer.js');
+globalThis.fetch=originalFetch;
+const viewer=Object.create(WeddingViewer.prototype);
+viewer.camera=new THREE.PerspectiveCamera(32,1.45,.1,600);
+viewer.camera.position.set(5,24,82);
+viewer.controls={target:new THREE.Vector3(),update(){viewer.camera.lookAt(this.target);viewer.camera.updateMatrixWorld(true);}};
+viewer.group=new THREE.Group();
+const fixture=new THREE.Mesh(new THREE.BoxGeometry(35,24,7));viewer.group.add(fixture);viewer.rings=[fixture];
+const projected=()=>{viewer.group.updateMatrixWorld(true);const p=fixture.geometry.attributes.position,b=new THREE.Box2();for(let i=0;i<p.count;i++){const v=new THREE.Vector3().fromBufferAttribute(p,i).applyMatrix4(fixture.matrixWorld).project(viewer.camera);b.expandByPoint(new THREE.Vector2(v.x,v.y));}return {width:b.max.x-b.min.x,height:b.max.y-b.min.y,center:b.getCenter(new THREE.Vector2())};};
+const close=(a,b,label)=>assert(Math.abs(a-b)<1e-7,label+': '+a+' != '+b);
+viewer.fit(true);
+// A user zoom must survive geometry changes and movement of the scene center.
+let offset=viewer.camera.position.clone().sub(viewer.controls.target).multiplyScalar(.74);
+viewer.camera.position.copy(viewer.controls.target).add(offset);viewer.controls.update();
+const before=projected();
+fixture.scale.setScalar(1.25);fixture.position.set(3,4,-2);viewer.fit(false);
+const after=projected();close(after.width,before.width,'screen width after geometry grows');close(after.height,before.height,'screen height after geometry grows');close(after.center.x,before.center.x,'horizontal framing');close(after.center.y,before.center.y,'vertical framing');
+fixture.scale.setScalar(1);fixture.position.set(0,0,0);viewer.fit(false);
+const restored=projected();close(restored.width,before.width,'return to previous geometry');
+viewer.fit(true);assert(projected().width<before.width,'explicit reset returns to full view');
+const C=await import('../assets/wedding-catalog.js?v=3');const S=await import('../assets/wedding-state.js?v=3');
+const ring=S.normalizeRing(C.defaults());const oldSize=ring.size;ring.profile='PB08';const round=S.normalizeRing(ring);assert.equal(round.size,oldSize,'profile change retains finger size');assert.equal(round.height,round.width,'PB08 remains round');
+console.log('FRAMING_OK: stable screen extent and relative zoom, moving target, return switch, explicit reset, PB08 dimensions');

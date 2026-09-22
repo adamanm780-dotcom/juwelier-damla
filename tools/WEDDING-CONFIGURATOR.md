@@ -28,3 +28,5 @@ Separate original Blender HDR environments for metal and gemstones give warm, gr
 Each ring now rotates gently around its own center, keeping the pair separate and both front stones visible. Zoom does not stop automatic motion. Contact shadows follow each ring. Blender sources and portable generation scripts are included in tools; the basket manifest records manifold, face-area and crown-clearance checks.
 
 Revision validation: 39 mobile interaction/render checks, eight desktop gemstone configurations, all 13 profile wall-clearance edge cases and seven side-seat combinations passed. No browser, shader or resource errors. A local 0.18 mm seat-wall reserve prevents cuts through curved inner edges; basket seating follows the actual outer profile.
+
+Profile framing preserves the user-selected relative zoom as geometry bounds change, moving camera and target together. Bounds use actual mesh vertices. PB08 keeps its circular section (height equals width) and the selected inner circumference; the profile note explains this dimensional constraint. Regression: node --experimental-loader ./tools/node-loader.mjs tools/check-wedding-framing.mjs.
