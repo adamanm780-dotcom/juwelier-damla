@@ -79,13 +79,16 @@ export function createStudio(renderer) {
 
 // This environment is authored and rendered in Blender, in linear HDR.
 export async function createWeddingStudio(renderer) {
-  const hdr=await new RGBELoader().loadAsync(new URL('./models/wedding-studio.hdr?v=20260921-catalog3',import.meta.url).href);
-  hdr.mapping=THREE.EquirectangularReflectionMapping;
-  const pmrem=new THREE.PMREMGenerator(renderer);
-  const filtered=pmrem.fromEquirectangular(hdr);
+  const loader=new RGBELoader();
+  const [metalHDR,diamondHDR]=await Promise.all([
+    loader.loadAsync(new URL('./models/wedding-studio.hdr?v=20260922-quality4',import.meta.url).href),
+    loader.loadAsync(new URL('./models/wedding-diamond-studio.hdr?v=20260922-quality4',import.meta.url).href)
+  ]);
+  metalHDR.mapping=diamondHDR.mapping=THREE.EquirectangularReflectionMapping;
+  const pmrem=new THREE.PMREMGenerator(renderer),filtered=pmrem.fromEquirectangular(metalHDR);
   const cube=new THREE.WebGLCubeRenderTarget(512,{type:THREE.HalfFloatType,generateMipmaps:true,minFilter:THREE.LinearMipmapLinearFilter});
-  cube.fromEquirectangularTexture(renderer,hdr);
-  pmrem.dispose();hdr.dispose();
+  cube.fromEquirectangularTexture(renderer,diamondHDR);
+  pmrem.dispose();metalHDR.dispose();diamondHDR.dispose();
   return {metal:filtered.texture,diamond:cube.texture,dispose(){filtered.dispose();cube.dispose();}};
 }
 
@@ -111,19 +114,22 @@ function facetPlanes(geo) {
 
 // Convex-facet ray tracing: refraction, total internal reflection and subtle dispersion.
 // All intersections use the actual Blender cut; no glitter sprites or painted facets.
-export function diamondMesh(geometry, environment) {
+export function diamondMesh(geometry, environment, optical={}) {
   const facets=facetPlanes(geometry);
   let variants=diamondMaterialCache.get(geometry);
   if(!variants){variants=new Map();diamondMaterialCache.set(geometry,variants);}
-  const material=variants.get(environment)||new THREE.ShaderMaterial({
+  let environmentVariants=variants.get(environment);if(!environmentVariants){environmentVariants=new Map();variants.set(environment,environmentVariants);}
+  const color=new THREE.Color(optical.color??0xffffff),density=optical.absorption??1.15;
+  const opticalKey=JSON.stringify(optical);
+  const material=environmentVariants.get(opticalKey)||new THREE.ShaderMaterial({
     uniforms:{env:{value:environment},facets:{value:facets.planes},facetCount:{value:facets.count},
-      eye:{value:new THREE.Vector3()},orientation:{value:new THREE.Matrix3()}},
+      eye:{value:new THREE.Vector3()},orientation:{value:new THREE.Matrix3()},ior:{value:optical.ior??2.417},dispersion:{value:optical.dispersion??.014},escapeWeight:{value:optical.escapeWeight??.65},environmentIntensity:{value:optical.environmentIntensity??1},absorption:{value:new THREE.Vector3(-Math.log(Math.max(.035,color.r))*density,-Math.log(Math.max(.035,color.g))*density,-Math.log(Math.max(.035,color.b))*density)}},
     vertexShader:`varying vec3 localPosition; varying vec3 localNormal;
       void main(){localPosition=position;localNormal=normal;
         gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,
     fragmentShader:`precision highp float;
       uniform samplerCube env; uniform vec4 facets[96]; uniform int facetCount;
-      uniform vec3 eye; uniform mat3 orientation;
+      uniform vec3 eye; uniform mat3 orientation; uniform vec3 absorption; uniform float ior; uniform float dispersion; uniform float escapeWeight; uniform float environmentIntensity;
       varying vec3 localPosition; varying vec3 localNormal;
       vec3 sampleStudio(vec3 d){return textureCube(env,normalize(orientation*d)).rgb;}
       float fresnel(float cosine,float ior){float r=(ior-1.0)/(ior+1.0);r*=r;return r+(1.0-r)*pow(1.0-clamp(cosine,0.0,1.0),5.0);}
@@ -132,7 +138,7 @@ export function diamondMesh(geometry, environment) {
         vec3 light=sampleStudio(reflect(incident,normal))*entry;
         vec3 direction=refract(incident,normal,1.0/ior);
         vec3 origin=localPosition+direction*.0005;
-        float energy=1.0-entry;
+        vec3 energy=vec3(1.0-entry);
         for(int bounce=0;bounce<5;bounce++){
           float distance=1.e8;vec3 hitNormal=normal;
           for(int i=0;i<96;i++){
@@ -142,24 +148,24 @@ export function diamondMesh(geometry, environment) {
               if(t>.00001&&t<distance){distance=t;hitNormal=facets[i].xyz;}}
           }
           if(distance>1.e7)break;
-          origin+=direction*distance;
+          origin+=direction*distance;energy*=exp(-absorption*distance);
           vec3 exitDirection=refract(direction,-hitNormal,ior);
           float reflection=fresnel(dot(direction,hitNormal),ior);
           if(dot(exitDirection,exitDirection)>.01){light+=sampleStudio(exitDirection)*energy*(1.0-reflection);energy*=reflection;}
           direction=reflect(direction,hitNormal);origin+=direction*.0005;
         }
-        light+=sampleStudio(direction)*energy*.65;
+        light+=sampleStudio(direction)*energy*escapeWeight;
         return light;
       }
       void main(){vec3 incident=normalize(localPosition-eye);vec3 n=normalize(localNormal);
-        vec3 red=traceGem(incident,n,2.407);vec3 green=traceGem(incident,n,2.417);vec3 blue=traceGem(incident,n,2.435);
-        gl_FragColor=vec4(red.r,green.g,blue.b,1.0);
+        vec3 red=traceGem(incident,n,ior-dispersion*.7);vec3 green=traceGem(incident,n,ior);vec3 blue=traceGem(incident,n,ior+dispersion*1.3);
+        gl_FragColor=vec4(vec3(red.r,green.g,blue.b)*environmentIntensity,1.0);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
       }`,
   });
   material.userData.sharedJewelry=true;
-  variants.set(environment,material);
+  environmentVariants.set(opticalKey,material);
   const mesh=new THREE.Mesh(geometry,material);
   mesh.onBeforeRender=(_renderer,_scene,camera)=>{
     mesh.worldToLocal(material.uniforms.eye.value.setFromMatrixPosition(camera.matrixWorld));

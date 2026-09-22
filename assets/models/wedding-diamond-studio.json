@@ -1,0 +1,24 @@
+{
+  "name": "Damla original gemstone studio v4",
+  "generator": "Blender 5.1.1 / Cycles",
+  "source": "tools/build-wedding-studios-v4.py",
+  "editable_scene": "tools/wedding-diamond-studio.blend",
+  "environment": "assets/models/wedding-diamond-studio.hdr",
+  "preview": "assets/models/wedding-diamond-studio-preview.jpg",
+  "resolution": [
+    2048,
+    1024
+  ],
+  "color_space": "scene-linear RGB; Rec.709/sRGB primaries; Radiance RGBE",
+  "display_transform_baked": false,
+  "samples": 24,
+  "revision": 4,
+  "base_linear_rgb": [
+    0.1,
+    0.11,
+    0.125
+  ],
+  "design": "Dedicated gem-only cubemap: dark neutral field, broad soft white keys, two elongated edge reflections, charcoal cards.",
+  "copyright": "Original Blender emissive geometry; no third-party HDR imagery.",
+  "file_bytes": 2150042
+}

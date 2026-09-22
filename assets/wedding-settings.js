@@ -45,7 +45,7 @@ export function closedTensionGeometry(view,k,diameter){
  // Join the duplicated UV seam of the section without blending cap normals.
  const normals=geo.attributes.normal;
  for(let j=0;j<=segments;j++){const a=j*(N+1),b=a+N,v=new THREE.Vector3().fromBufferAttribute(normals,a).add(new THREE.Vector3().fromBufferAttribute(normals,b)).normalize();normals.setXYZ(a,v.x,v.y,v.z);normals.setXYZ(b,v.x,v.y,v.z);}
- geo.userData={...geo.userData,tensionCut:{center,halfAngle:half,closedCaps:true},profile_perimeter_mm:perimeter};geo.computeBoundingBox();geo.computeBoundingSphere();return geo;
+ geo.userData={...geo.userData,tensionCut:{center,halfAngle:half,closedCaps:true},profile_perimeter_mm:perimeter,sectionRows:N+1,radialRows:segments+1};geo.computeBoundingBox();geo.computeBoundingSphere();return geo;
 }
 
 /** Build machining rectangles in (angle, axial-position) for longitudinal,
@@ -83,4 +83,39 @@ export function stoneFrame(phi,normal){
  const width=tangent.clone().addScaledVector(normal,-tangent.dot(normal)).normalize();
  const cross=width.clone().cross(normal).normalize();
  return new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(width,normal,cross));
+}
+
+/** Small modeled seats beneath flush and bead-set gems. Coordinates follow the
+ * same stone plan as the optical meshes, including rotated square cuts. */
+export function stoneSeats(k,points){
+ return points.filter(p=>!p.preset.includes('channel')&&p.preset!=='top'&&p.preset!=='clamping-open'&&!(p.preset==='combined'&&['top','tension'].includes(k.stone.setting))).map(p=>({
+  ...p,hx:(p.size.width3d||p.size.width)*.5,hz:(p.size.height3d||p.size.height||p.size.width)*.5,
+  angle:(p.size.rotation||0)*Math.PI/180,radial:k.size/TAU+k.height*.52,depth:Math.min(k.height*.60,(p.size.width3d||p.size.width)*.36)
+ }));
+}
+export function seatDisplacement(k,seats,x,y,z,nx,ny,nz,innerAtY){
+ const radial=Math.hypot(x,z),phi=Math.atan2(z,x),facing=(nx*x+nz*z)/radial;let dr=0,dy=0;
+ for(const seat of seats){
+  if(seat.side?ny*seat.sideSign<.25:facing<.15)continue;
+  const along=wrap(phi-seat.phi)*(seat.side?seat.radial:radial),across=seat.side?radial-seat.radial:y-seat.y;
+  if(Math.abs(along)>seat.size.width*.64||Math.abs(across)>(seat.size.height||seat.size.width)*.64)continue;
+  const ca=Math.cos(seat.angle),sa=Math.sin(seat.angle),a=Math.abs((along*ca+across*sa)/seat.hx),b=Math.abs((-along*sa+across*ca)/seat.hz);
+  const u=seat.cut==='princess'?Math.max(a,b):seat.cut==='radiant'?Math.max(a,b,(a+b)/1.66):seat.cut==='cushion'?Math.pow(Math.pow(a,3.5)+Math.pow(b,3.5),1/3.5):Math.hypot(a,b);
+  if(u>1.11)continue;
+  const bevel=Math.min(1,Math.max(0,(1.11-u)/.24)),depth=seat.depth*bevel;
+  if(seat.side)dy=-seat.sideSign*Math.max(Math.abs(dy),depth);else dr=Math.max(dr,depth);
+ }
+ // Keep at least 0.18 mm of the actual local wall beneath each radial seat.
+ if(innerAtY)dr=Math.min(dr,Math.max(0,radial-innerAtY(y)-.18));
+ return{x:x*(radial-dr)/radial,y:y+dy,z:z*(radial-dr)/radial,depth:Math.max(dr,Math.abs(dy))};
+}
+
+/** Restore smooth normals across duplicated UV seams after local machining. */
+export function smoothRingSeams(geometry){
+ const n=geometry.attributes.normal,rows=geometry.parameters?.points?.length||geometry.userData.sectionRows,steps=geometry.parameters?.segments||geometry.userData.radialRows-1;
+ if(!rows||!steps)return;
+ const average=(a,b)=>{const x=n.getX(a)+n.getX(b),y=n.getY(a)+n.getY(b),z=n.getZ(a)+n.getZ(b),length=Math.hypot(x,y,z)||1;n.setXYZ(a,x/length,y/length,z/length);n.setXYZ(b,x/length,y/length,z/length);};
+ for(let i=0;i<=steps;i++)average(i*rows,i*rows+rows-1);
+ if(geometry.parameters?.segments)for(let j=0;j<rows;j++)average(j,steps*rows+j);
+ n.needsUpdate=true;
 }

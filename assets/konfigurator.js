@@ -1,7 +1,7 @@
 import {individualMarkup,mountIndividual} from './wedding-engraving.js?v=3';
 import * as C from './wedding-catalog.js?v=3';
 import * as S from './wedding-state.js?v=3';
-import {WeddingViewer} from './wedding-viewer.js?v=3';
+import {WeddingViewer} from './wedding-viewer.js?v=20260922-quality4';
 const $=s=>document.querySelector(s), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=n=>n.toLocaleString('de-DE',{style:'currency',currency:'EUR',maximumFractionDigits:0});
 let state=S.normalizeState(C.initialState()),step=0,segment=0,divisionCount=1,undo=[],notice='',viewer,saveTimer;
@@ -69,7 +69,7 @@ function metals(k){
  if(count>1)out+=`<div class="wc-segments" aria-label="Segment auswählen">${d.rates.map((r,i)=>`<button type="button" data-segment="${i}" aria-pressed="${i===segment}">${d.type==='horizontal'?(i===0?'Außen':'Innen'):`Segment ${i+1}`}</button>`).join('')}</div>`;
  out+=choices('Edelmetall',`metals.${d.rates.length===1?0:segment}.color`,C.METALS,m.color,{visual:id=>`<span class="wc-metal-dot" style="--metal:#${C.METALS[id].color.toString(16)}"></span>`});
  out+=choices('Feingehalt',`metals.${d.rates.length===1?0:segment}.grade`,S.grades(k,segment).map(n=>({id:n,label:String(n)+(S.isGold(m.color)?' / '+({333:'8',375:'9',585:'14',750:'18',900:'21,6',916:'22'}[n]||'')+' kt':'')})),m.grade,{cls:'wc-compact'});
- out+=choices('Oberfläche',`metals.${segment}.finish`,C.FINISHES,m.finish,{visual:id=>`<img class="wc-finish-thumb" data-finish="${id}" src="assets/configurator-finishes/${id}.jpg" alt="" loading="lazy" width="300" height="180">`});
+ out+=choices('Oberfläche',`metals.${segment}.finish`,C.FINISHES,m.finish,{visual:id=>`<img class="wc-finish-thumb" data-finish="${id}" src="assets/configurator-finishes/${id}.jpg?v=4" alt="" loading="lazy" width="300" height="180">`});
  return out;
 }
 function stoneQuantity(k,secondary=false){const path=secondary?'secondaryQuantity':k.stone.preset.startsWith('memoire')?'memoireQuantity':'quantity',max=S.maxQuantity(k,secondary);const values=[{id:'ringDependent33',label:'⅓ Ringumfang'},{id:'ringDependent50',label:'½ Ringumfang'},{id:'ringDependent100',label:'Ganzer Ringumfang'},...Array.from({length:max},(_,i)=>({id:i+1,label:(i+1)+' '+(i?'Steine':'Stein')})).filter(x=>!secondary||Number(x.id)%2===0)];return select(secondary?'Anzahl der Nebensteine':'Steinanzahl','stone.'+path,values,k.stone[path]);}
@@ -77,7 +77,7 @@ const spreadLabels={together:'Zusammenhängend','stoneDependent-25':'Abstand ¼ 
 function sizeSelect(k,secondary=false){const path=secondary?'secondarySize':'size';const cut=secondary?'brilliant':k.stone.cut,available=S.sizes(k,secondary).map(x=>x.id);return select(secondary?'Größe der Nebensteine':'Steingröße','stone.'+path,(S.STONE_DATA.size_catalogs[cut]||S.OPTIONS.sizes).map(s=>({id:s.id,label:s.carat.toLocaleString('de-DE',{maximumFractionDigits:3})+' ct · '+C.mm(s.width)+(s.height!==s.width?' × '+C.mm(s.height):'')+(s.rotation?' · '+s.rotation+'° gedreht':''),disabled:!available.includes(s.id)})),k.stone[path]);}
 function stones(k){
  const s=k.stone,available=S.availablePresets(k);
- let out=choices('Fassart','stone.preset',C.PRESETS,s.preset,{allowed:available});
+ let out=choices('Fassart','stone.preset',C.PRESETS,s.preset,{allowed:available,cls:'wc-setting-grid'});
  if(available.length<15)out+='<p class="wc-note">Weitere Fassarten werden mit passenden Profilen und Maßen wählbar. Breite, Höhe und Seitenform bestimmen den verfügbaren Platz.</p>';
  if(s.preset==='none')return out;
  if(s.preset==='free')return out+freeStones(k);

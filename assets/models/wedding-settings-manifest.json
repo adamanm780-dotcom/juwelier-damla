@@ -1,0 +1,278 @@
+{
+  "blender": "5.1.1",
+  "contract": "Blender Z -> browser Y; girdle0; half width1; oval half-height1.38; scale X/Z to gem dimensions, Y to half-width; top lift .94-.98 times half-width",
+  "models": {
+    "round4": {
+      "node": "Basket_round4",
+      "compatible_cut": "Diamond_round",
+      "vertices": 11448,
+      "faces": 11520,
+      "boundary_or_nonmanifold_edges": 0,
+      "zero_area_faces": 0,
+      "positive_volume": 0.25294520838912327,
+      "claw_z_max": 0.17965203523635864,
+      "base_z_min": -0.9630612134933472,
+      "contacts": [
+        {
+          "angle": 0.7853981633974483,
+          "girdle_radius": 0.9999999544207248,
+          "crown_contact_radius": 0.8556249946797105,
+          "tip_radius": 0.8406249946797105,
+          "tip_height": 0.106
+        },
+        {
+          "angle": 2.356194490192345,
+          "girdle_radius": 0.9999999544207248,
+          "crown_contact_radius": 0.8556249946797105,
+          "tip_radius": 0.8406249946797105,
+          "tip_height": 0.106
+        },
+        {
+          "angle": 3.9269908169872414,
+          "girdle_radius": 0.9999999544207248,
+          "crown_contact_radius": 0.8556249946797105,
+          "tip_radius": 0.8406249946797105,
+          "tip_height": 0.106
+        },
+        {
+          "angle": 5.497787143782138,
+          "girdle_radius": 0.9999999544207248,
+          "crown_contact_radius": 0.8556249946797105,
+          "tip_radius": 0.8406249946797105,
+          "tip_height": 0.106
+        }
+      ],
+      "table_height": 0.3199999928474426,
+      "parts": "Individually closed claws and embedded gallery rails; intentional internal overlap at joints"
+    },
+    "round6": {
+      "node": "Basket_round6",
+      "compatible_cut": "Diamond_round",
+      "vertices": 14612,
+      "faces": 14720,
+      "boundary_or_nonmanifold_edges": 0,
+      "zero_area_faces": 0,
+      "positive_volume": 0.3230061193905468,
+      "claw_z_max": 0.17965203523635864,
+      "base_z_min": -0.9630612134933472,
+      "contacts": [
+        {
+          "angle": 0.5235987755982988,
+          "girdle_radius": 0.9828896898358221,
+          "crown_contact_radius": 0.8778826303709141,
+          "tip_radius": 0.8628826303709141,
+          "tip_height": 0.106
+        },
+        {
+          "angle": 1.5707963267948966,
+          "girdle_radius": 0.9999999924034532,
+          "crown_contact_radius": 0.8556249946797105,
+          "tip_radius": 0.8406249946797105,
+          "tip_height": 0.106
+        },
+        {
+          "angle": 2.617993877991494,
+          "girdle_radius": 0.9828896900825919,
+          "crown_contact_radius": 0.8778826303709141,
+          "tip_radius": 0.8628826303709141,
+          "tip_height": 0.106
+        },
+        {
+          "angle": 3.665191429188092,
+          "girdle_radius": 0.9828896898358221,
+          "crown_contact_radius": 0.8778826303709141,
+          "tip_radius": 0.8628826303709141,
+          "tip_height": 0.106
+        },
+        {
+          "angle": 4.71238898038469,
+          "girdle_radius": 0.9999999924034532,
+          "crown_contact_radius": 0.8556249946797105,
+          "tip_radius": 0.8406249946797105,
+          "tip_height": 0.106
+        },
+        {
+          "angle": 5.759586531581288,
+          "girdle_radius": 0.9828896900825919,
+          "crown_contact_radius": 0.8778826303709141,
+          "tip_radius": 0.8628826303709141,
+          "tip_height": 0.106
+        }
+      ],
+      "table_height": 0.3199999928474426,
+      "parts": "Individually closed claws and embedded gallery rails; intentional internal overlap at joints"
+    },
+    "princess": {
+      "node": "Basket_princess",
+      "compatible_cut": "Diamond_princess",
+      "vertices": 11448,
+      "faces": 11520,
+      "boundary_or_nonmanifold_edges": 0,
+      "zero_area_faces": 0,
+      "positive_volume": 0.2955869362818215,
+      "claw_z_max": 0.18045452237129211,
+      "base_z_min": -0.9690709114074707,
+      "contacts": [
+        {
+          "angle": 0.7853981633974483,
+          "girdle_radius": 1.414213538819493,
+          "crown_contact_radius": 1.2202643072030168,
+          "tip_radius": 1.205264307203017,
+          "tip_height": 0.106
+        },
+        {
+          "angle": 2.356194490192345,
+          "girdle_radius": 1.414213538819493,
+          "crown_contact_radius": 1.2202643072030168,
+          "tip_radius": 1.205264307203017,
+          "tip_height": 0.106
+        },
+        {
+          "angle": 3.9269908169872414,
+          "girdle_radius": 1.414213538819493,
+          "crown_contact_radius": 1.2202643072030168,
+          "tip_radius": 1.205264307203017,
+          "tip_height": 0.106
+        },
+        {
+          "angle": 5.497787143782138,
+          "girdle_radius": 1.414213549237103,
+          "crown_contact_radius": 1.2202643072030168,
+          "tip_radius": 1.205264307203017,
+          "tip_height": 0.106
+        }
+      ],
+      "table_height": 0.30000001192092896,
+      "parts": "Individually closed claws and embedded gallery rails; intentional internal overlap at joints"
+    },
+    "cushion": {
+      "node": "Basket_cushion",
+      "compatible_cut": "Diamond_cushion",
+      "vertices": 11448,
+      "faces": 11520,
+      "boundary_or_nonmanifold_edges": 0,
+      "zero_area_faces": 0,
+      "positive_volume": 0.2718101651895034,
+      "claw_z_max": 0.1802765130996704,
+      "base_z_min": -0.9656705856323242,
+      "contacts": [
+        {
+          "angle": 0.7853981633974483,
+          "girdle_radius": 1.1601293478108747,
+          "crown_contact_radius": 0.985529895640163,
+          "tip_radius": 0.970529895640163,
+          "tip_height": 0.106
+        },
+        {
+          "angle": 2.356194490192345,
+          "girdle_radius": 1.1601293478108747,
+          "crown_contact_radius": 0.985529895640163,
+          "tip_radius": 0.970529895640163,
+          "tip_height": 0.106
+        },
+        {
+          "angle": 3.9269908169872414,
+          "girdle_radius": 1.1601293606388776,
+          "crown_contact_radius": 0.9855299245560742,
+          "tip_radius": 0.9705299245560742,
+          "tip_height": 0.106
+        },
+        {
+          "angle": 5.497787143782138,
+          "girdle_radius": 1.1601293478108747,
+          "crown_contact_radius": 0.985529895640163,
+          "tip_radius": 0.970529895640163,
+          "tip_height": 0.106
+        }
+      ],
+      "table_height": 0.30000001192092896,
+      "parts": "Individually closed claws and embedded gallery rails; intentional internal overlap at joints"
+    },
+    "radiant": {
+      "node": "Basket_radiant",
+      "compatible_cut": "Diamond_radiant",
+      "vertices": 11448,
+      "faces": 11520,
+      "boundary_or_nonmanifold_edges": 0,
+      "zero_area_faces": 0,
+      "positive_volume": 0.27479951641115863,
+      "claw_z_max": 0.17922288179397583,
+      "base_z_min": -0.9658616185188293,
+      "contacts": [
+        {
+          "angle": 0.7853981633974483,
+          "girdle_radius": 1.1737972435221191,
+          "crown_contact_radius": 1.0351424198339243,
+          "tip_radius": 1.0201424198339244,
+          "tip_height": 0.106
+        },
+        {
+          "angle": 2.356194490192345,
+          "girdle_radius": 1.1737972853641565,
+          "crown_contact_radius": 1.0351424479863958,
+          "tip_radius": 1.0201424479863959,
+          "tip_height": 0.106
+        },
+        {
+          "angle": 3.9269908169872414,
+          "girdle_radius": 1.1737972853641565,
+          "crown_contact_radius": 1.0351424479863958,
+          "tip_radius": 1.0201424479863959,
+          "tip_height": 0.106
+        },
+        {
+          "angle": 5.497787143782138,
+          "girdle_radius": 1.1737972435221191,
+          "crown_contact_radius": 1.0351424198339243,
+          "tip_radius": 1.0201424198339244,
+          "tip_height": 0.106
+        }
+      ],
+      "table_height": 0.30000001192092896,
+      "parts": "Individually closed claws and embedded gallery rails; intentional internal overlap at joints"
+    },
+    "oval": {
+      "node": "Basket_oval",
+      "compatible_cut": "Diamond_oval",
+      "vertices": 11448,
+      "faces": 11520,
+      "boundary_or_nonmanifold_edges": 0,
+      "zero_area_faces": 0,
+      "positive_volume": 0.27883119168429293,
+      "claw_z_max": 0.17895391583442688,
+      "base_z_min": -0.9651429653167725,
+      "contacts": [
+        {
+          "angle": 0.7853981633974483,
+          "girdle_radius": 1.1239676052379064,
+          "crown_contact_radius": 0.9922373622877187,
+          "tip_radius": 0.9772373622877187,
+          "tip_height": 0.106
+        },
+        {
+          "angle": 2.356194490192345,
+          "girdle_radius": 1.1239676111743242,
+          "crown_contact_radius": 0.9922373622877187,
+          "tip_radius": 0.9772373622877187,
+          "tip_height": 0.106
+        },
+        {
+          "angle": 3.9269908169872414,
+          "girdle_radius": 1.1239676052379064,
+          "crown_contact_radius": 0.9922373622877187,
+          "tip_radius": 0.9772373622877187,
+          "tip_height": 0.106
+        },
+        {
+          "angle": 5.497787143782138,
+          "girdle_radius": 1.1239676111743242,
+          "crown_contact_radius": 0.9922373622877187,
+          "tip_radius": 0.9772373622877187,
+          "tip_height": 0.106
+        }
+      ],
+      "table_height": 0.3199999928474426,
+      "parts": "Individually closed claws and embedded gallery rails; intentional internal overlap at joints"
+    }
+  }
+}

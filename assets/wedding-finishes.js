@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import {METALS} from './wedding-catalog.js?v=3';
 const cache=new Map();
 const random=(x,y)=>{const n=Math.sin(x*127.1+y*311.7)*43758.5453;return n-Math.floor(n);};
-export const roughness={polished:.065,'vertical-brushed':.28,'horizontal-matte':.29,'diagonal-matte':.3,'ice-matte':.43,'sandmatte-fine':.58,starbrush:.33,'hammered-matte':.39,'hammered-big':.13,'tree-bark':.32,'horizontal-diamond-coated':.22,'diagonal-diamond-coated':.24,'cross-matte':.37};
+export const roughness={polished:.095,'vertical-brushed':.28,'horizontal-matte':.29,'diagonal-matte':.3,'ice-matte':.43,'sandmatte-fine':.58,starbrush:.33,'hammered-matte':.39,'hammered-big':.13,'tree-bark':.32,'horizontal-diamond-coated':.22,'diagonal-diamond-coated':.24,'cross-matte':.37};
 export function surfaceMaps(finish){
  if(cache.has(finish))return cache.get(finish);
  const N=512,values=new Float32Array(N*N);
@@ -31,7 +31,7 @@ export function surfaceMaps(finish){
 }
 export function metalColor(m){const color=new THREE.Color(METALS[m.color].color);if(['yellow','red','honey','champagne'].includes(m.color))color.lerp(new THREE.Color(0xf5ede0),Math.max(0,(585-m.grade)/900));return color;}
 export function metalMaterial(m,finish,dimensions,aniso){
- const mat=new THREE.MeshPhysicalMaterial({color:metalColor(m),metalness:1,roughness:roughness[finish]??.15,envMapIntensity:1.1,clearcoat:0});
+ const mat=new THREE.MeshPhysicalMaterial({color:metalColor(m),metalness:1,roughness:roughness[finish]??.15,envMapIntensity:1.05,clearcoat:0});
  if(finish!=='polished'){
   const maps=surfaceMaps(finish),tile=finish.startsWith('hammered')?5:4;
   for(const [property,key] of [['normalMap','normal'],['roughnessMap','rough']]){const t=maps[key].clone();t.needsUpdate=true;t.repeat.set(dimensions.circumference/tile,dimensions.perimeter/tile);t.anisotropy=aniso;mat[property]=t;}

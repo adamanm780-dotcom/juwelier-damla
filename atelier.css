@@ -166,3 +166,5 @@
 @media(min-width:761px){.wc-studio{top:calc(var(--nav-h) + 12px)}}
 @media(max-width:760px){.wc-steps{top:var(--nav-h)}}
 @media(max-width:760px) and (min-height:600px){.wc-studio{top:calc(var(--nav-h) + 43px)}.wc-panel{scroll-margin-top:calc(var(--nav-h) + 350px)}}
+
+@media(max-width:760px){.wc-setting-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
