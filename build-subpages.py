@@ -502,7 +502,7 @@ SUB_CSS = """
 
     /* — Portrait-Variante der Editorial-Reihen — */
     .ed-media--portrait { max-width: 400px; }
-    .ed-media--portrait img { height: auto; aspect-ratio: auto; object-fit: contain; }
+    .ed-media--portrait img { aspect-ratio: 3 / 4; }
 
     @media (max-width: 900px) {
       .ed-row { grid-template-columns: 1fr; gap: 28px; }
@@ -624,25 +624,22 @@ vr_panels = '\n\n'.join("""          <article class="ring-panel">
 
 # — Echte Sortimentsaufnahmen statt erfundener Trageszenen —
 VR_WEAR = [
-    ("photos-20260928/verlobungsringe-sortiment.webp", 1122, 1402,
-     "Solitär-Ringe in einem hellen Schmucktableau",
-     "01", "Die Auswahl im Überblick",
-     "Erst im Vergleich fallen kleine Unterschiede auf. Schauen Sie auf die Form "
-     "des Steins, die Fassung und die Linie der Ringschiene.", True),
-    ("photos-20260928/schmuck-sortiment.webp", 1086, 1448,
-     "Ringe mit runden und rechteckigen Steinformen im dunklen Schmucktableau",
-     "02", "Details entdecken",
-     "Eine ruhige Fläche oder eine feine Steinreihe: "
-     "Auch die Ringschiene verändert den Charakter eines Rings.", False),
-    ("photos-20260928/ringe-sortiment.webp", 1122, 1402,
-     "Ringauswahl im silbergrauen Schmucktableau",
-     "03", "Persönlich vergleichen",
-     "Eine Aufnahme ist der Anfang. Wie ein Ring an Ihrer Hand wirkt und sich "
-     "anfühlt, entdecken Sie am besten bei einer Anprobe.", True),
+    ("vr-getragen-1.webp", "Verlobungsring mit Halo-Fassung an der Hand einer Frau",
+     "01", "So sieht er morgen aus",
+     "Ein Ring lebt am Finger, nicht in der Vitrine. Erst an der Hand zeigt sich, "
+     "ob Fassung, Höhe und Goldton wirklich zu Ihnen passen.", True),
+    ("vr-getragen-2.webp", "Ovaler Verlobungsring an einer Hand, die auf hellem Stoff ruht",
+     "02", "Aus jedem Winkel",
+     "Oval- und Tropfenschliff fangen das Licht anders als ein runder Brillant. "
+     "Bei uns drehen Sie den Ring in Ruhe, bis er sitzt.", False),
+    ("vr-getragen-3.webp", "Verlobungsring mit Radiantschliff und seitlichen Steinen an der Hand",
+     "03", "Für jeden Tag gemacht",
+     "Der schönste Ring ist der, den Sie nicht mehr abnehmen möchten. Wir achten "
+     "mit Ihnen darauf, dass er auch im Alltag angenehm zu tragen bleibt.", True),
 ]
 vr_wear = '\n\n'.join("""        <div class="ed-row%s reveal">
           <figure class="ed-media ed-media--portrait">
-            <img src="assets/%s" srcset="assets/%s-640.webp 640w, assets/%s %dw" sizes="(max-width: 900px) 90vw, 400px" alt="%s" width="%d" height="%d" loading="lazy" decoding="async">
+            <img src="assets/%s" alt="%s" loading="lazy">
           </figure>
           <div class="ed-text">
             <span class="ed-num">%s</span>
@@ -650,8 +647,8 @@ vr_wear = '\n\n'.join("""        <div class="ed-row%s reveal">
             <div class="gold-bar" role="presentation"></div>
             <p>%s</p>
           </div>
-        </div>""" % (' ed-row--flip' if flip else '', img, img[:-5], img, w, alt, w, h, num, title, txt)
-    for img, w, h, alt, num, title, txt, flip in VR_WEAR)
+        </div>""" % (' ed-row--flip' if flip else '', img, alt, num, title, txt)
+    for img, alt, num, title, txt, flip in VR_WEAR)
 
 vr_dots = '\n'.join('        <span class="ring-scroll__dot%s"></span>'
                     % (' is-active' if i == 0 else '') for i in range(len(VR_MODELLE)))
@@ -833,8 +830,8 @@ VR_MODELLE_SECTION = """  <section id="modelle" class="ring-scroll" aria-labelle
 VR_WEAR_SECTION = """  <section id="getragen" class="sub-alt" aria-labelledby="getragenTitle">
     <div class="wrap">
       <div class="sub-head">
-        <span class="eyebrow reveal">Aus unseren Fotografien</span>
-        <h2 class="section-title reveal d1" id="getragenTitle">Unsere Auswahl<br>aus der Nähe</h2>
+        <span class="eyebrow reveal">An der Hand</span>
+        <h2 class="section-title reveal d1" id="getragenTitle">Erst getragen<br>zeigt sich der Ring</h2>
         <div class="gold-bar reveal d2" role="presentation"></div>
       </div>
 
