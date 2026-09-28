@@ -502,7 +502,7 @@ SUB_CSS = """
 
     /* — Portrait-Variante der Editorial-Reihen — */
     .ed-media--portrait { max-width: 400px; }
-    .ed-media--portrait img { aspect-ratio: 3 / 4; }
+    .ed-media--portrait img { height: auto; aspect-ratio: auto; object-fit: contain; }
 
     @media (max-width: 900px) {
       .ed-row { grid-template-columns: 1fr; gap: 28px; }
@@ -591,54 +591,58 @@ vr_cards = '\n\n'.join("""        <article class="service-card reveal%s">
         </article>""" % ('' if i == 0 else ' d%d' % min(i, 3), icon, name, txt)
     for i, (name, icon, txt) in enumerate(VR_POINTS))
 
-# — Freigestellte Ring-Modelle (echte Transparenz via rembg, ohne Rahmen) —
+# — Foto-Derivate aus echten Damla-Aufnahmen, KI-retuschiert —
+# Editoriale Auswahl ohne Modell-, Material- oder Preiszuordnung.
 VR_MODELLE = [
-    ("vr-modell-1-cut.webp", 587, 397,
-     "Verlobungsring mit Tropfenschliff und seitlichen Diamanten, Gelbgold, freigestellt",
-     "Der Tropfen",
-     "Ein Diamant im Tropfenschliff, flankiert von zwei feinen Beisteinen. Klassisch "
-     "in der Linie, unverwechselbar in der Wirkung."),
-    ("vr-modell-2-cut.webp", 576, 482,
-     "Verlobungsring mit Smaragdschliff als Solitär in Gelbgold, freigestellt",
-     "Der Smaragdschliff",
-     "Ruhige, klare Facetten auf einer schlichten Schiene. Der Solitär für alle, "
-     "die es reduziert und zeitlos mögen."),
-    ("vr-modell-3-cut.webp", 618, 571,
-     "Verlobungsring mit Ovalschliff als Solitär in Gelbgold, freigestellt",
-     "Der Ovale",
-     "Der ovale Solitär streckt den Finger und fängt das Licht aus jedem Winkel – "
-     "ein wenig Glanz mehr als beim runden Brillanten."),
+    ("photos-20260928/schmuck-sortiment.webp", 1086, 1448,
+     "Ringauswahl in einem dunklen Schmucktableau",
+     "Klare Formen",
+     "Runde und rechteckige Steinformen, feine Schienen und unterschiedliche Größen. "
+     "Ein Blick auf die Details unserer fotografierten Auswahl."),
+    ("photos-20260928/verlobungsringe-sortiment.webp", 1122, 1402,
+     "Solitär-Ringe in vier Reihen eines hellen Schmucktableaus",
+     "Feine Unterschiede",
+     "Fassung, Steinform und Ringschiene prägen den Eindruck. "
+     "Nebeneinander werden die Unterschiede sichtbar."),
+    ("photos-20260928/ringe-sortiment.webp", 1122, 1402,
+     "Verschiedene Ringe in einem silbergrauen Schmucktableau",
+     "In Ruhe auswählen",
+     "Manchmal entscheidet ein kleines Detail. "
+     "Wir nehmen uns Zeit, gemeinsam mit Ihnen genauer hinzusehen."),
 ]
 vr_panels = '\n\n'.join("""          <article class="ring-panel">
             <div class="ring-panel__inner">
-              <img class="ring-panel__img" src="assets/%s" alt="%s" loading="lazy" width="%d" height="%d">
+              <img class="ring-panel__img" src="assets/%s" srcset="assets/%s-640.webp 640w, assets/%s %dw" sizes="(max-width: 900px) 86vw, 600px" alt="%s" loading="lazy" decoding="async" width="%d" height="%d">
               <div class="ring-panel__body">
                 <h3 class="ring-panel__name">%s</h3>
                 <div class="gold-bar" role="presentation"></div>
                 <p class="ring-panel__desc">%s</p>
               </div>
             </div>
-          </article>""" % (img, alt, w, h, cut, desc)
-    for img, w, h, alt, cut, desc in VR_MODELLE)
+          </article>""" % (img, img[:-5], img, w, alt, w, h, title, desc)
+    for img, w, h, alt, title, desc in VR_MODELLE)
 
-# — Editorial-Reihen „an der Hand" (flip = Bild rechts) —
+# — Echte Sortimentsaufnahmen statt erfundener Trageszenen —
 VR_WEAR = [
-    ("vr-getragen-1.webp", "Verlobungsring mit Halo-Fassung an der Hand einer Frau",
-     "01", "So sieht er morgen aus",
-     "Ein Ring lebt am Finger, nicht in der Vitrine. Erst an der Hand zeigt sich, "
-     "ob Fassung, Höhe und Goldton wirklich zu Ihnen passen.", True),
-    ("vr-getragen-2.webp", "Ovaler Verlobungsring an einer Hand, die auf hellem Stoff ruht",
-     "02", "Aus jedem Winkel",
-     "Oval- und Tropfenschliff fangen das Licht anders als ein runder Brillant. "
-     "Bei uns drehen Sie den Ring in Ruhe, bis er sitzt.", False),
-    ("vr-getragen-3.webp", "Verlobungsring mit Radiantschliff und seitlichen Steinen an der Hand",
-     "03", "Für jeden Tag gemacht",
-     "Der schönste Ring ist der, den Sie nicht mehr abnehmen möchten. Wir achten "
-     "mit Ihnen darauf, dass er auch im Alltag angenehm zu tragen bleibt.", True),
+    ("photos-20260928/verlobungsringe-sortiment.webp", 1122, 1402,
+     "Solitär-Ringe in einem hellen Schmucktableau",
+     "01", "Die Auswahl im Überblick",
+     "Erst im Vergleich fallen kleine Unterschiede auf. Schauen Sie auf die Form "
+     "des Steins, die Fassung und die Linie der Ringschiene.", True),
+    ("photos-20260928/schmuck-sortiment.webp", 1086, 1448,
+     "Ringe mit runden und rechteckigen Steinformen im dunklen Schmucktableau",
+     "02", "Details entdecken",
+     "Eine ruhige Fläche oder eine feine Steinreihe: "
+     "Auch die Ringschiene verändert den Charakter eines Rings.", False),
+    ("photos-20260928/ringe-sortiment.webp", 1122, 1402,
+     "Ringauswahl im silbergrauen Schmucktableau",
+     "03", "Persönlich vergleichen",
+     "Eine Aufnahme ist der Anfang. Wie ein Ring an Ihrer Hand wirkt und sich "
+     "anfühlt, entdecken Sie am besten bei einer Anprobe.", True),
 ]
 vr_wear = '\n\n'.join("""        <div class="ed-row%s reveal">
           <figure class="ed-media ed-media--portrait">
-            <img src="assets/%s" alt="%s" loading="lazy">
+            <img src="assets/%s" srcset="assets/%s-640.webp 640w, assets/%s %dw" sizes="(max-width: 900px) 90vw, 400px" alt="%s" width="%d" height="%d" loading="lazy" decoding="async">
           </figure>
           <div class="ed-text">
             <span class="ed-num">%s</span>
@@ -646,8 +650,8 @@ vr_wear = '\n\n'.join("""        <div class="ed-row%s reveal">
             <div class="gold-bar" role="presentation"></div>
             <p>%s</p>
           </div>
-        </div>""" % (' ed-row--flip' if flip else '', img, alt, num, title, txt)
-    for img, alt, num, title, txt, flip in VR_WEAR)
+        </div>""" % (' ed-row--flip' if flip else '', img, img[:-5], img, w, alt, w, h, num, title, txt)
+    for img, w, h, alt, num, title, txt, flip in VR_WEAR)
 
 vr_dots = '\n'.join('        <span class="ring-scroll__dot%s"></span>'
                     % (' is-active' if i == 0 else '') for i in range(len(VR_MODELLE)))
@@ -717,11 +721,11 @@ VR_MODELLE_SECTION = """  <section id="modelle" class="ring-scroll" aria-labelle
     <div class="ring-scroll__pin">
       <div class="ring-scroll__head">
         <span class="eyebrow">Unsere Verlobungsringe</span>
-        <h2 class="section-title" id="modelleTitle">Drei Schliffe, ein Versprechen</h2>
+        <h2 class="section-title" id="modelleTitle">Ein Blick in unsere Auswahl</h2>
         <div class="gold-bar" role="presentation"></div>
       </div>
 
-      <div class="ring-scroll__viewport" tabindex="0" role="group" aria-label="Ringmodelle – zum nächsten Modell scrollen oder wischen">
+      <div class="ring-scroll__viewport" tabindex="0" role="group" aria-label="Ringauswahl – zur nächsten Aufnahme scrollen oder wischen">
         <div class="ring-scroll__track">
 
 %s
@@ -829,8 +833,8 @@ VR_MODELLE_SECTION = """  <section id="modelle" class="ring-scroll" aria-labelle
 VR_WEAR_SECTION = """  <section id="getragen" class="sub-alt" aria-labelledby="getragenTitle">
     <div class="wrap">
       <div class="sub-head">
-        <span class="eyebrow reveal">An der Hand</span>
-        <h2 class="section-title reveal d1" id="getragenTitle">Erst getragen<br>zeigt sich der Ring</h2>
+        <span class="eyebrow reveal">Aus unseren Fotografien</span>
+        <h2 class="section-title reveal d1" id="getragenTitle">Unsere Auswahl<br>aus der Nähe</h2>
         <div class="gold-bar reveal d2" role="presentation"></div>
       </div>
 
@@ -1175,54 +1179,37 @@ VR_SKRIPT = """
 """
 
 # ══════════════════════════════════════════════════════════
-#  TRAURINGE — Modelle
-#  Die zehn Modelle sind den echten Ringen aus der Vitrine
-#  nachempfunden (Instagram-Story des Hauses). Die Bilder sind
-#  freigestellte Studioaufnahmen, kein Bestandsfoto — die Seite
-#  sagt das unter dem Raster ausdruecklich.
-#  Die Namen sind Vorschlaege und jederzeit austauschbar.
+#  TRAURINGE — Neun Ansichten aus echten Fotoquellen
+#  KI-freigestellte Foto-Derivate ohne Modellname, Maße, Preis oder Steinart.
 # ══════════════════════════════════════════════════════════
 TR_MODELLE = [
-    ('Wellritz', '6 mm · Bicolor',
-     'Gebürstetes Weißgoldband zwischen polierten Gelbgoldkanten.',
-     'Trauring in Gelbgold mit gebürstetem Weißgoldband in der Mitte'),
-    ('Carré', '6 mm · Bicolor',
-     'Flache Schiene mit eingelassenem, poliertem Weißgoldfeld.',
-     'Flacher Trauring in Gelbgold mit eingelassenem Weißgoldfeld'),
-    ('Saum', '5 mm · mit Brillanten',
-     'Mattierte Schiene, eine Brillantreihe läuft an einer Kante entlang.',
-     'Mattierter Trauring in Gelbgold mit Brillantreihe an einer Kante'),
-    ('Linie', '5 mm · Weißgold',
-     'Seidenmatte Fläche, eine feine Gelbgoldlinie und eine Rille daneben.',
-     'Trauring in Weißgold, seidenmatt, mit feiner Gelbgoldlinie'),
-    ('Klar', '6 mm · Gelbgold',
-     'Ganz ohne Zutat: hochglanzpoliert und sanft gewölbt.',
-     'Schlichter, polierter Trauring in Gelbgold'),
-    ('Kanal', '5,5 mm · mit Brillanten',
-     'Brillantreihe in einem Weißgoldkanal, beidseitig mattiertes Gold.',
-     'Trauring in Gelbgold mit Brillantreihe in einem Weißgoldkanal'),
-    ('Tafel', '6,5 mm · Bicolor',
-     'Flach und kantig, mit breitem gebürstetem Weißgoldfeld.',
-     'Flacher, kantiger Trauring mit breitem gebürstetem Weißgoldfeld'),
-    ('Pavé', '4,5 mm · mit Brillanten',
-     'Dichte Brillantreihe über die ganze Mitte der Schiene.',
-     'Polierter Trauring in Gelbgold mit dichter Pavé-Brillantreihe'),
-    ('Faden', '5 mm · Gelbgold',
-     'Sanft gewölbt und seidenmatt, mit einer feinen Weißgoldlinie.',
-     'Gewölbter, seidenmatter Trauring in Gelbgold mit feiner Weißgoldlinie'),
-    ('Zart', '3,5 mm · mit Brillanten',
-     'Schmale polierte Schiene, Brillanten an einer Kante.',
-     'Schmaler, polierter Trauring in Gelbgold mit Brillanten an einer Kante'),
+    ("Satinierte Fläche und eine feine Rille nahe der Kante.",
+     "Satinierter Ring mit feiner Rille"),
+    ("Satinierte Fläche mit einer Steinreihe an einem Rand.",
+     "Satinierter Ring mit randständiger Steinreihe"),
+    ("Schlichte, flache Form mit ruhiger satinierter Oberfläche.",
+     "Flacher, satinierter Ring ohne Steinbesatz"),
+    ("Breite satinierte Fläche mit klaren, glatten Kanten.",
+     "Breiter wirkender Ring mit satinierter Oberfläche"),
+    ("Sanft gerundete Form und durchgehender Hochglanz.",
+     "Gerundeter, hochglanzpolierter Ring ohne Steinbesatz"),
+    ("Eine feine Steinreihe zwischen zwei glatten Rändern.",
+     "Schmaler Ring mit Steinreihe zwischen glatten Rändern"),
+    ("Flache Form mit einer breiten, spiegelnden Fläche.",
+     "Flacher Ring mit breiter Hochglanzfläche"),
+    ("Hochglanzfläche mit einer Steinreihe entlang der Kante.",
+     "Hochglanzpolierter Ring mit randständiger Steinreihe"),
+    ("Schmale Form mit Steinreihe und einem glatten Streifen.",
+     "Schmaler Ring mit Steinreihe und glattem Streifen"),
 ]
 
 tr_karten = '\n\n'.join("""        <article class="tr-karte reveal%s">
-          <img class="tr-karte__bild" src="assets/trauringe/modell-%02d.webp"
-               alt="%s" width="403" height="736" loading="lazy" decoding="async">
-          <h3 class="tr-karte__name">%s</h3>
-          <span class="tr-karte__mass">%s</span>
+          <img class="tr-karte__bild" src="assets/photos-20260928/ring-%02d.webp"
+               alt="%s" width="1000" height="1000" loading="lazy" decoding="async">
+          <h3 class="tr-karte__name">Ansicht %02d</h3>
           <p class="tr-karte__text">%s</p>
-        </article>""" % (' d%d' % (i % 3) if i % 3 else '', i + 1, alt, name, mass, txt)
-    for i, (name, mass, txt, alt) in enumerate(TR_MODELLE))
+        </article>""" % (' d%d' % (i % 3) if i % 3 else '', i + 1, alt, i + 1, txt)
+    for i, (txt, alt) in enumerate(TR_MODELLE))
 
 TR_BODY_ROH = io.open(os.path.join(DIR, 'trauringe.body.html'), encoding='utf-8').read()
 TR_CSS = io.open(os.path.join(DIR, 'trauringe.css'), encoding='utf-8').read()
@@ -1256,10 +1243,10 @@ PAGES = [
          services=None, extrahead=KF_HEAD,
          extrabody=KF_BODY_ENDE.replace('assets/konfigurator.js', 'assets/engagement-configurator.js')),
     dict(slug='trauringe.html',
-         title='Trauringe – zehn Modelle aus unserer Vitrine | Juwelier Damla Wiesbaden',
-         desc='Trauringe bei Juwelier Damla in Wiesbaden: zehn Modelle in Gelb-, Weiß- und '
-              'Rotgold, bicolor, mattiert oder mit Brillanten. Dazu der Konfigurator zum '
-              'Selbstzusammenstellen. Wellritzstraße 3, ohne Termin.',
+         title='Trauringe – unsere Ringauswahl | Juwelier Damla Wiesbaden',
+         desc='Trauringe bei Juwelier Damla in Wiesbaden: neun fotografische Ansichten, '
+              'satinierte und polierte Oberflächen, schlichte Formen und feine Steinreihen. '
+              'Persönliche Beratung und Anprobe in der Wellritzstraße 3.',
          name='Trauringe', active='trauringe.html',
          body=TR_BODY_ROH % (tr_karten, VISIT % (
              'Anprobieren',
