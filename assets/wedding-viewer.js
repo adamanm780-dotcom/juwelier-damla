@@ -2,35 +2,44 @@ import {isTension,closedTensionGeometry,stoneChannels,channelDisplacement,stoneF
 import * as THREE from 'three';
 import {OrbitControls} from 'three/OrbitControls.js';
 import {GLTFLoader} from 'three/GLTFLoader.js';
-import {loadJewelry,weddingGeometry,createWeddingStudio,createStudio,diamondMesh} from './jewelry-studio.js?v=20260922-quality4';
+import {loadJewelry,weddingGeometry,createStudio,diamondMesh} from './jewelry-studio.js?v=20260922-quality4';
 import {sampleRingProfile} from './wedding-materials.js?v=20260921-blender2';
-import {metalMaterial,metalColor} from './wedding-finishes.js?v=20260922-quality4';
+import {metalMaterial,metalColor} from './wedding-finishes.js?v=20260928-real1';
+import {createRingStudio,applyCameraResponse} from './ring-studio.js?v=20260928-real1';
+import {enhanceMetal,syncRingOptics} from './ring-optics.js?v=20260928-real1';
+import {ContactShadows} from './contact-shadow.js?v=20260928-real1';
 import {METALS,GEM_COLORS,FONTS,engravingFont,clone} from './wedding-catalog.js?v=3';
 import {effectiveDivision,stoneSize,count,OPTIONS,STONE_DATA,PROFILES} from './wedding-state.js?v=3';
 const TAU=Math.PI*2,up=new THREE.Vector3(0,1,0);
+
 const fontStyle=engravingFont;
 const sample=(rows,y)=>{let low=0,high=rows.length-1;y=Math.max(rows[0][0],Math.min(rows[high][0],y));while(high-low>1){const mid=(high+low)>>1;if(rows[mid][0]>y)high=mid;else low=mid;}const a=rows[low],b=rows[high];return a[1]+(b[1]-a[1])*(y-a[0])/(b[0]-a[0]||1);};
 function contour(geometry){const p=geometry.attributes.position,points=new Map();for(let i=0;i<p.count;i++){const y=p.getY(i),r=Math.hypot(p.getX(i),p.getZ(i));points.set(y.toFixed(4)+':'+r.toFixed(4),[y,r]);}return [...points.values()].sort((a,b)=>Math.atan2(b[1]-9.85,b[0])-Math.atan2(a[1]-9.85,a[0]));}
 function dispose(group){const materials=new Set();group.traverse(o=>{if(!o.isMesh)return;if(!o.userData.sharedGeometry)o.geometry.dispose();for(const m of Array.isArray(o.material)?o.material:[o.material])if(m&&!m.userData.sharedJewelry&&!materials.has(m)){materials.add(m);for(const property of ['map','normalMap','roughnessMap','bumpMap'])m[property]?.dispose();m.dispose();}});group.clear();}
-function shadow(){
- const group=new THREE.Group();group.rotation.x=-Math.PI/2;
- const layer=(width,height,opacity,z)=>{const c=document.createElement('canvas');c.width=c.height=256;const ctx=c.getContext('2d'),g=ctx.createRadialGradient(128,128,0,128,128,128);g.addColorStop(0,`rgba(48,40,28,${opacity})`);g.addColorStop(.28,`rgba(48,40,28,${opacity*.68})`);g.addColorStop(.62,`rgba(48,40,28,${opacity*.20})`);g.addColorStop(1,'rgba(48,40,28,0)');ctx.fillStyle=g;ctx.fillRect(0,0,256,256);const mesh=new THREE.Mesh(new THREE.PlaneGeometry(width,height),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthWrite:false}));mesh.position.z=z;group.add(mesh);};
- layer(1,1,.17,0);layer(.35,.19,.40,.002);return group;
+
+/** LatheGeometry with an explicit, non-uniform list of angles (0..2π); same vertex layout,
+ * UVs and winding as THREE.LatheGeometry so seam smoothing and finish maps are unchanged. */
+function adaptiveLathe(points,phis){
+ const n=phis.length-1,rows=points.length,position=new Float32Array((n+1)*rows*3),uv=new Float32Array((n+1)*rows*2),index=[];
+ for(let i=0;i<=n;i++){const s=Math.sin(phis[i]),c=Math.cos(phis[i]);for(let j=0;j<rows;j++){const v=i*rows+j;position[v*3]=points[j].x*s;position[v*3+1]=points[j].y;position[v*3+2]=points[j].x*c;uv[v*2]=phis[i]/TAU;uv[v*2+1]=j/(rows-1);}}
+ for(let i=0;i<n;i++)for(let j=0;j<rows-1;j++){const a=j+i*rows,b=a+rows,c=b+1,d=a+1;index.push(a,b,d,c,d,b);}
+ const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(position,3));geo.setAttribute('uv',new THREE.BufferAttribute(uv,2));geo.setIndex(index);geo.computeVertexNormals();
+ geo.parameters={points,segments:n};return geo;
 }
-function lowestContact(ring){const mesh=ring.children[0],p=mesh.geometry.attributes.position,m=ring.matrixWorld.elements;let low=Infinity,best=new THREE.Vector3();for(let i=0;i<p.count;i++){const x=p.getX(i),y=p.getY(i),z=p.getZ(i),height=m[1]*x+m[5]*y+m[9]*z;if(height<low){low=height;best.set(m[0]*x+m[4]*y+m[8]*z,height,m[2]*x+m[6]*y+m[10]*z);}}return best;}
 
 export class WeddingViewer{
  constructor(stage){this.stage=stage;this.rings=[];this.signatures=[];this.rotating=!matchMedia('(prefers-reduced-motion: reduce)').matches;this.dirty=true;this.visible=true;this.ready=false;this.lastTime=0;this.motionPhase=0;this.motionQuaternion=new THREE.Quaternion();this.motionAxis=new THREE.Vector3(0,1,0);this.profiles=new Map();this.contours=new Map();}
  async init(){
-  this.renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true,powerPreference:'high-performance'});this.renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));this.renderer.setSize(this.stage.clientWidth,this.stage.clientHeight);this.renderer.outputColorSpace=THREE.SRGBColorSpace;this.renderer.toneMapping=THREE.NeutralToneMapping;this.renderer.toneMappingExposure=.98;this.aniso=this.renderer.capabilities.getMaxAnisotropy();this.stage.append(this.renderer.domElement);this.renderer.domElement.setAttribute('aria-hidden','true');
+  this.renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true,powerPreference:'high-performance'});this.renderer.setPixelRatio(Math.min(Math.max(window.devicePixelRatio||1,1.5),2));this.renderer.setSize(this.stage.clientWidth,this.stage.clientHeight);this.renderer.outputColorSpace=THREE.SRGBColorSpace;applyCameraResponse(this.renderer);this.aniso=this.renderer.capabilities.getMaxAnisotropy();this.stage.append(this.renderer.domElement);this.renderer.domElement.setAttribute('aria-hidden','true');
   this.scene=new THREE.Scene();
   const extra=async file=>{const gltf=await new GLTFLoader().loadAsync(new URL(file,import.meta.url).href),map=new Map();gltf.scene.updateMatrixWorld(true);gltf.scene.traverse(o=>{if(o.isMesh){const geo=o.geometry.clone().applyMatrix4(o.matrixWorld);geo.userData={...o.userData};map.set(o.name,geo);}});return map;};
-  const [base,profiles,gems,settings,studio]=await Promise.all([loadJewelry(),extra('models/wedding-profiles.glb?v=3'),extra('models/wedding-gems.glb?v=3'),extra('models/wedding-settings.glb?v=4'),createWeddingStudio(this.renderer).catch(()=>createStudio(this.renderer))]);
-  this.library=new Map([...base,...profiles,...gems,...settings]);this.studio=studio;this.scene.environment=studio.metal;this.stage.dataset.studio='blender';
+  const [base,profiles,gems,settings]=await Promise.all([loadJewelry(),extra('models/wedding-profiles.glb?v=3'),extra('models/wedding-gems.glb?v=3'),extra('models/wedding-settings.glb?v=4')]);
+  let studio;try{studio=createRingStudio(this.renderer);this.stage.dataset.studio='photo';}catch(error){console.warn('Studiolicht:',error);studio=createStudio(this.renderer);this.stage.dataset.studio='fallback';}
+  this.library=new Map([...base,...profiles,...gems,...settings]);this.studio=studio;this.scene.environment=studio.metal;
   for(const id of Object.keys(PROFILES)){const geo=this.library.get('Wedding_'+id);this.profiles.set(id,sampleRingProfile(geo));this.contours.set(id,contour(geo));}
   this.camera=new THREE.PerspectiveCamera(32,this.stage.clientWidth/this.stage.clientHeight,.1,600);this.camera.position.set(5,24,82);
   this.controls=new OrbitControls(this.camera,this.renderer.domElement);this.controls.enableDamping=true;this.controls.dampingFactor=.08;this.controls.enablePan=false;this.controls.autoRotateSpeed=.65;this.controls.minPolarAngle=Math.PI*.12;this.controls.maxPolarAngle=Math.PI*.68;
-  this.group=new THREE.Group();this.scene.add(this.group);this.shadows=[shadow(),shadow()];this.scene.add(...this.shadows);
+  this.group=new THREE.Group();this.scene.add(this.group);this.contact=new ContactShadows(this.renderer);this.scene.add(this.contact.plane);
   // Large studio sources provide metal reflections without pin-point highlights.
   new ResizeObserver(()=>this.resize()).observe(this.stage);new IntersectionObserver(([e])=>this.visible=e.isIntersecting).observe(this.stage);
   this.renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();this.renderer.setAnimationLoop(null);document.querySelector('#kfWebglHinweis').hidden=false;});
@@ -41,12 +50,14 @@ export class WeddingViewer{
   for(let i=0;i<2;i++){
    const k=state.rings[i],signature=JSON.stringify(k);if(this.signatures[i]===signature)continue;
    if(this.rings[i]){this.group.remove(this.rings[i]);dispose(this.rings[i]);this.rings[i]=null;}
-   this.signatures[i]=signature;this.shadows[i].visible=!!k;
+   this.signatures[i]=signature;
    if(!k)continue;const ring=this.makeRing(k);this.rings[i]=ring;this.group.add(ring);
    ring.rotation.set(Math.PI/2,0,0);if(i===0)ring.rotateY(Math.PI);ring.rotateOnWorldAxis(new THREE.Vector3(0,1,0),i===0?.94:-1.14);ring.rotateOnWorldAxis(new THREE.Vector3(0,0,1),i===0?-.17:-.035);ring.userData.basePose=ring.quaternion.clone();
   }
   this.state=state;
-  for(let i=0;i<state.rings.length;i++){const ring=this.rings[i];ring.quaternion.copy(ring.userData.basePose);ring.position.set(0,0,0);ring.updateMatrixWorld(true);ring.userData.contact=lowestContact(ring);const bounds=new THREE.Box3().setFromObject(ring,true),sign=state.rings.length===1?0:i===0?-1:1;const x=sign*((bounds.max.x-bounds.min.x)/2+2.2),z=i===0?-1:1.6;ring.position.set(x,-bounds.min.y,z);const radius=state.rings[i].size/TAU+state.rings[i].height;this.shadows[i].position.set(x+ring.userData.contact.x,.015,z+ring.userData.contact.z);this.shadows[i].scale.set(radius*2.7,radius*1.5,1);}
+  for(let i=0;i<state.rings.length;i++){const ring=this.rings[i];ring.quaternion.copy(ring.userData.basePose);ring.position.set(0,0,0);ring.updateMatrixWorld(true);const bounds=new THREE.Box3().setFromObject(ring,true),sign=state.rings.length===1?0:i===0?-1:1;const x=sign*((bounds.max.x-bounds.min.x)/2+2.2),z=i===0?-1:1.6;ring.position.set(x,-bounds.min.y,z);ring.updateMatrixWorld(true);}
+  const bounce=new THREE.Color(0,0,0),worn=state.rings.filter(Boolean);for(const k of worn)bounce.add(metalColor(k.metals[0]).multiplyScalar(1/worn.length));this.contact.setBounce(bounce);
+  this.contact.fit(new THREE.Box3().setFromObject(this.group,true),0);
   this.fit(fit||!this.hasFrame);this.dirty=true;
  }
  profileIcon(id){if(id==='PB08')return '<svg viewBox="0 0 76 32" aria-hidden="true"><circle cx="38" cy="16" r="12"/></svg>';const rows=this.contours.get(id);if(!rows)return '';const path=rows.map(([y,r],i)=>(i?'L':'M')+(8+(y+2.25)*13.33).toFixed(2)+' '+(26-(r-9)*11).toFixed(2)).join(' ')+'Z';return `<svg viewBox="0 0 76 32" aria-hidden="true"><path d="${path}"/></svg>`;}
@@ -74,7 +85,7 @@ export class WeddingViewer{
    // Resample the Blender section at machining boundaries before applying cuts.
    const source=this.contours.get(k.profile),rows=[];
    for(let i=0;i<source.length;i++){const a=source[i],b=source[(i+1)%source.length],length=Math.hypot((b[0]-a[0])*k.width/4.5,(b[1]-a[1])*k.height/1.7),n=Math.max(1,Math.ceil(length/.045));for(let j=0;j<n;j++){const t=j/n;rows.push(new THREE.Vector2(k.size/TAU+(a[1]+(b[1]-a[1])*t-9)*k.height/1.7,(a[0]+(b[0]-a[0])*t)*k.width/4.5));}}
-   rows.push(rows[0].clone());geo.dispose();geo=new THREE.LatheGeometry(rows,seats.length?512:384);
+   rows.push(rows[0].clone());geo.dispose();geo=adaptiveLathe(rows,this.lathePhis(k,plan));
    const pos=geo.attributes.position,norm=geo.attributes.normal;
    for(let i=0;i<pos.count;i++){const x=pos.getX(i),y=pos.getY(i),z=pos.getZ(i),r=Math.hypot(x,z),radial=(norm.getX(i)*x+norm.getZ(i)*z)/r;if(radial<.12)continue;const depth=this.grooveDepth(k,y,Math.atan2(z,x));pos.setXYZ(i,x*(r-depth)/r,y,z*(r-depth)/r);}
    geo.computeVertexNormals();smoothRingSeams(geo);
@@ -90,13 +101,27 @@ export class WeddingViewer{
   }
   const indices=[];geo.clearGroups();for(let i=0;i<groups.length;i++){if(groups[i].length){geo.addGroup(indices.length,groups[i].length,i);for(const n of groups[i])indices.push(n);}}geo.setIndex(indices);geo.computeBoundingBox();geo.computeBoundingSphere();return geo;
  }
+ // Lathe angles: uniform around the band, densely refined where seats and channels are cut,
+ // so bezel rims and channel walls stay round and straight instead of stair-stepped.
+ lathePhis(k,plan){
+  const base=384,r=k.size/TAU+k.height,intervals=[];
+  for(const p of plan){if(p.preset==='top'||p.preset==='clamping-open')continue;const half=((p.size.width3d||p.size.width)*.78+.32)/r,center=Math.PI/2-p.phi;intervals.push([center-half,center+half]);}
+  if(!intervals.length)return Array.from({length:base+1},(_,i)=>i/base*TAU);
+  const length=intervals.reduce((sum,[a,b])=>sum+(b-a)*r,0),step=Math.max(.022,length/1150)/r,phis=[];
+  for(let i=0;i<=base;i++)phis.push(i/base*TAU);
+  for(const [a,b] of intervals)for(let t=a;t<=b;t+=step){const phi=((t%TAU)+TAU)%TAU;if(phi>1e-6&&phi<TAU-1e-6)phis.push(phi);}
+  phis.sort((a,b)=>a-b);const out=[0];for(const phi of phis)if(phi-out.at(-1)>step*.45)out.push(phi);if(TAU-out.at(-1)<step*.45)out.pop();out.push(TAU);return out;
+ }
  makeRing(k){
   const group=new THREE.Group(),geometry=this.ringGeometry(k),dimensions={circumference:k.size+TAU*k.height,perimeter:2*(k.width+k.height)},materials=[];
   for(let i=0;i<3;i++)materials.push(metalMaterial(k.metals[i],k.metals[i].finish,dimensions,this.aniso),metalMaterial(k.metals[i],'polished',dimensions,this.aniso));
   for(const side of ['left','right'])materials.push(metalMaterial(k.metals[side==='left'?0:effectiveDivision(k).rates.length-1],k.edge[side+'Surface'],dimensions,this.aniso));
   materials.push(metalMaterial({...k.metals[0],color:k.groove.color==='none'?k.metals[0].color:k.groove.color},k.groove.surface,dimensions,this.aniso));
   materials.push(metalMaterial({...k.metals[0],color:k.separation.color==='none'?k.metals[0].color:k.separation.color},'polished',dimensions,this.aniso));
-  group.add(new THREE.Mesh(geometry,materials));
+  // The bore is traced analytically for the second reflection inside the band.
+  const bore={radius:this.radius(k,0,true)+Math.min(.12,k.height*.08),halfWidth:k.width/2-Math.min(k.width*.16,k.height*.55)};
+  for(const m of materials)enhanceMetal(m,bore);
+  const band=new THREE.Mesh(geometry,materials);band.onBeforeRender=()=>syncRingOptics(band);group.add(band);
   const points=this.stonePlan(k);for(const p of points)this.addStone(group,k,p,materials);
   
   if(k.engraving.type!=='none'&&(k.engraving.text||k.engraving.art))group.add(this.engraving(k));
@@ -134,7 +159,7 @@ export class WeddingViewer{
   else gem=diamondMesh(source,this.studio.diamond,{color:GEM_COLORS[p.quality]??0xffffff,ior:['rubin','saphir'].includes(p.quality)?1.77:2.417,dispersion:['rubin','saphir'].includes(p.quality)?.009:.014,absorption:.72,escapeWeight:.22});
   gem.userData.sharedGeometry=true;gem.scale.set(r,r,r);if(p.cut!=='brilliant')gem.scale.z=(p.size.height3d||p.size.height||p.size.width)/2/(p.cut==='oval'?1.38:1);
   setting.add(gem);
-  const primary=k.metals[this.metalIndex(k,p.y,this.radius(k,p.y),p.phi)],metal=new THREE.MeshPhysicalMaterial({color:metalColor(primary),metalness:1,roughness:.075,envMapIntensity:1.15});
+  const primary=k.metals[this.metalIndex(k,p.y,this.radius(k,p.y),p.phi)],metal=enhanceMetal(new THREE.MeshPhysicalMaterial({color:metalColor(primary),metalness:1,roughness:.075,envMapIntensity:1}));
   const tension=p.preset==='clamping-open'||(p.preset==='combined'&&k.stone.setting==='tension');
    const top=p.preset==='top'||(k.stone.preset==='combined'&&k.stone.setting==='top'&&p.preset==='combined');if(!top&&!tension)gem.position.y=-r*.12;
   if(top){const alloy=k.stone.mountingMetal?.split('-')[1]||'white';metal.color=metalColor({color:METALS[alloy]?alloy:'white',grade:585});const name=p.cut==='brilliant'?(k.stone.mounting==='round6'?'round6':'round4'):p.cut,basket=new THREE.Mesh(this.library.get('Basket_'+name),metal);basket.userData.sharedGeometry=true;basket.scale.set(r,r,(p.size.height3d||p.size.height||p.size.width)/2/(p.cut==='oval'?1.38:1));setting.add(basket);topBasket=basket;}
@@ -142,7 +167,7 @@ export class WeddingViewer{
    const n=p.preset==='memoire2'?2:4;
    for(let i=0;i<n;i++){const a=p.preset==='memoire2'?Math.PI*i:p.preset==='memoire4'?[.48,-.48,Math.PI+.48,Math.PI-.48][i]:TAU*i/n+Math.PI/4,bead=new THREE.Mesh(p.preset==='memoire2'?new THREE.CapsuleGeometry(r*.065,r*.9,6,12):new THREE.SphereGeometry(r*.12,24,16),metal);if(p.preset==='memoire2')bead.rotation.x=Math.PI/2;bead.position.set(Math.cos(a)*r*.97,r*.03,Math.sin(a)*r*.9);setting.add(bead);}
   }else if(!p.preset.includes('channel')&&!tension){
-   if(p.cut==='brilliant'||p.cut==='oval'){const rim=new THREE.Mesh(new THREE.TorusGeometry(r*1.02,r*.045,8,40),metal);rim.rotation.x=Math.PI/2;if(p.cut==='oval')rim.scale.y=(p.size.height3d||p.size.height)/(p.size.width3d||p.size.width);setting.add(rim);}
+   if(p.cut==='brilliant'||p.cut==='oval'){const rim=new THREE.Mesh(new THREE.TorusGeometry(r*1.02,r*.045,12,72),metal);rim.rotation.x=Math.PI/2;if(p.cut==='oval')rim.scale.y=(p.size.height3d||p.size.height)/(p.size.width3d||p.size.width);setting.add(rim);}
    else{for(let i=0;i<4;i++){const bar=new THREE.Mesh(new THREE.BoxGeometry(r*2.05,r*.065,r*.065),metal);bar.rotation.y=i*Math.PI/2;bar.position.set(i%2?r*(i===1?1:-1):0,0,i%2?0:r*(i===0?1:-1));setting.add(bar);}}
   }
   const y=p.y,h=.005,dr=(this.radius(k,y+h)-this.radius(k,y-h))/(2*h);let normal=new THREE.Vector3(Math.cos(p.phi),-dr,Math.sin(p.phi)).normalize(),radius=this.radius(k,y),py=y;
@@ -176,7 +201,7 @@ export class WeddingViewer{
   this.fitDistance=distance;this.controls.target.copy(center);this.controls.minDistance=distance*.48;this.controls.maxDistance=distance*2.6;
   this.camera.position.copy(center).addScaledVector(offset.normalize(),distance*zoom);this.controls.update();
  }
- tick(time){if(!this.ready||document.hidden||!this.visible||time-this.lastTime<32)return;const dt=Math.min((time-this.lastTime)/1000,.1);this.lastTime=time;this.controls.autoRotate=false;if(this.rotating){this.motionPhase+=dt*.23;this.rings.forEach((ring,i)=>{if(!ring)return;const angle=Math.sin(this.motionPhase)*(i===0?.18:-.22);ring.quaternion.copy(ring.userData.basePose).premultiply(this.motionQuaternion.setFromAxisAngle(this.motionAxis,angle));const c=ring.userData.contact,cos=Math.cos(angle),sin=Math.sin(angle);this.shadows[i].position.set(ring.position.x+c.x*cos+c.z*sin,.015,ring.position.z-c.x*sin+c.z*cos);});this.dirty=true;}const changed=this.controls.update(dt);if(!changed&&!this.dirty&&this.hasFrame)return;this.renderer.render(this.scene,this.camera);this.dirty=false;this.hasFrame=true;this.stage.classList.add('is-bereit');}
+ tick(time){if(!this.ready||document.hidden||!this.visible||time-this.lastTime<32)return;const dt=Math.min((time-this.lastTime)/1000,.1);this.lastTime=time;this.controls.autoRotate=false;if(this.rotating){this.motionPhase+=dt*.23;this.rings.forEach((ring,i)=>{if(!ring)return;const angle=Math.sin(this.motionPhase)*(i===0?.18:-.22);ring.quaternion.copy(ring.userData.basePose).premultiply(this.motionQuaternion.setFromAxisAngle(this.motionAxis,angle));});this.dirty=true;}const changed=this.controls.update(dt);if(!changed&&!this.dirty&&this.hasFrame)return;if(this.dirty||!this.hasFrame){this.scene.updateMatrixWorld();this.contact.update(this.scene);}this.renderer.render(this.scene,this.camera);this.dirty=false;this.hasFrame=true;this.stage.classList.add('is-bereit');}
  view(name){if(name==='rotate'){this.rotating=!this.rotating;return;}if(name==='in'||name==='out'){const offset=this.camera.position.clone().sub(this.controls.target);offset.multiplyScalar(name==='in'?.86:1.16);offset.clampLength(this.controls.minDistance,this.controls.maxDistance);this.camera.position.copy(this.controls.target).add(offset);}else{const views={hero:[5,14,82],front:[0,2,82],side:[80,16,8],inside:[-25,50,60]},direction=new THREE.Vector3(...views[name]).normalize(),distance=this.camera.position.distanceTo(this.controls.target);this.camera.position.copy(this.controls.target).addScaledVector(direction,distance);}this.controls.update();this.dirty=true;}
  snapshot(){if(!this.ready)return'';this.renderer.render(this.scene,this.camera);return this.renderer.domElement.toDataURL('image/png');}
  download(){const a=document.createElement('a');a.download='damla-trauringe.png';a.href=this.snapshot();a.click();}

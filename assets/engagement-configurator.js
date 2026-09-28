@@ -2,6 +2,8 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/OrbitControls.js';
 import { loadJewelry, weddingGeometry, createStudio, diamondMesh, metalMaterial } from './jewelry-studio.js';
 import { styles, cuts, metals, defaults, validateConfig, encodeConfig as encode, decodeConfig } from './engagement-state.js';
+import { createRingStudio, applyCameraResponse } from './ring-studio.js?v=20260928-real1';
+import { enhanceMetal, syncRingOptics, metalF0, metalF82 } from './ring-optics.js?v=20260928-real1';
 
 const $=id=>document.getElementById(id);
 function fromHash(){return decodeConfig(location.hash.slice(3));}
@@ -49,17 +51,19 @@ function addGem(group,cut,radius,position,normal){
   if(normal)gem.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),normal);
   gem.userData.sharedGeometry=true;group.add(gem);return gem;
 }
-function tube(points,radius,material){return new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(...p))),48,radius,12,false),material.clone());}
+// Each part gets its own enhanced clone: Material.clone() does not carry shader hooks.
+const part=(metal,bore=null)=>enhanceMetal(metal.clone(),bore);
+function tube(points,radius,material){return new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(...p))),48,radius,12,false),part(material));}
 function buildRing(){
   disposeRing();ring=new THREE.Group();scene.add(ring);
   const ri=state.size/(Math.PI*2),T=1.6,r=diameter()/2;
-  const tone=new THREE.Color(state.alloy==='750'&&state.metal==='yellow'?0xf8c767:metals[state.metal][1]);
-  const metal=metalMaterial(tone);
-  const band=new THREE.Mesh(weddingGeometry(models.get('Wedding_oval'),ri,T,state.width),metal.clone());band.rotation.x=Math.PI/2;ring.add(band);
+  const tone=metalF0(state.metal==='rose'?'red':state.metal,Number(state.alloy)||585);
+  const metal=metalMaterial(tone,.06);metal.userData.f82=metalF82(state.metal==='rose'?'red':state.metal);
+  const band=new THREE.Mesh(weddingGeometry(models.get('Wedding_oval'),ri,T,state.width),part(metal,{radius:ri+.1,halfWidth:state.width*.4}));band.onBeforeRender=()=>syncRingOptics(band);band.rotation.x=Math.PI/2;ring.add(band);
   const seat=ri+T+r*.92;
   const center=new THREE.Vector3(0,seat,0);
   addGem(ring,state.cut,r,center);
-  const basket=new THREE.Mesh(models.get('Basket_'+state.prongs),metal.clone());basket.userData.sharedGeometry=true;
+  const basket=new THREE.Mesh(models.get('Basket_'+state.prongs),part(metal));basket.userData.sharedGeometry=true;
   basket.scale.set(r,r,r*(state.cut==='oval'?1.38:state.cut==='emerald'?1.35:1));basket.position.copy(center);ring.add(basket);
   // Rising cathedral shoulders meet the basket beneath the pavilion.
   for(const sign of [-1,1])ring.add(tube([[sign*4.5,Math.sqrt((ri+T*.65)**2-4.5**2),0],[sign*3.4,ri+T+.3,0],[sign*r*.52,seat-r*.72,0]],.38,metal));
@@ -68,7 +72,7 @@ function buildRing(){
       const a=Math.PI/2+sign*(.37+i*.098),normal=new THREE.Vector3(Math.cos(a),Math.sin(a),0);
       addGem(ring,'round',.43,normal.clone().multiplyScalar(ri+T-.12),normal);
       for(const z of [-.53,.53]){
-        const bead=new THREE.Mesh(new THREE.SphereGeometry(.115,8,6),metal.clone());bead.position.copy(normal.clone().multiplyScalar(ri+T-.10));bead.position.z=z;ring.add(bead);
+        const bead=new THREE.Mesh(new THREE.SphereGeometry(.115,8,6),part(metal));bead.position.copy(normal.clone().multiplyScalar(ri+T-.10));bead.position.z=z;ring.add(bead);
       }
     }
   }
@@ -79,14 +83,14 @@ function buildRing(){
     if(outline){
       const points=[[-.64,-1],[.64,-1],[1,-.64],[1,.64],[.64,1],[-.64,1],[-1,.64],[-1,-.64]].map(([x,z])=>new THREE.Vector3(x*hr,seat-.24,z*hr*stretch));
       points.forEach((p,i)=>outline.add(new THREE.LineCurve3(p,points[(i+1)%points.length])));
-      ring.add(new THREE.Mesh(new THREE.TubeGeometry(outline,160,.22,10,true),metal.clone()));
+      ring.add(new THREE.Mesh(new THREE.TubeGeometry(outline,160,.22,10,true),part(metal)));
     }else{
-      const rim=new THREE.Mesh(new THREE.TorusGeometry(hr,.22,10,96),metal.clone());rim.rotation.x=Math.PI/2;rim.scale.y=stretch;rim.position.set(0,seat-.24,0);ring.add(rim);
+      const rim=new THREE.Mesh(new THREE.TorusGeometry(hr,.22,10,96),part(metal));rim.rotation.x=Math.PI/2;rim.scale.y=stretch;rim.position.set(0,seat-.24,0);ring.add(rim);
     }
     const haloPoint=t=>outline?outline.getPointAt(t).setY(seat):new THREE.Vector3(Math.cos(t*Math.PI*2)*hr,seat,Math.sin(t*Math.PI*2)*hr*stretch);
     for(let i=0;i<count;i++){
       addGem(ring,'round',.39,haloPoint(i/count));
-      const bead=new THREE.Mesh(new THREE.SphereGeometry(.105,8,6),metal.clone());bead.position.copy(haloPoint((i+.5)/count)).setY(seat+.025);ring.add(bead);
+      const bead=new THREE.Mesh(new THREE.SphereGeometry(.105,8,6),part(metal));bead.position.copy(haloPoint((i+.5)/count)).setY(seat+.025);ring.add(bead);
     }
   }
   if(state.engraving.trim()){
@@ -109,10 +113,10 @@ function fit(view='hero'){
 async function start(){
   try{
     models=await loadJewelry();
-    renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-    renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.95;
+    renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});renderer.setPixelRatio(Math.min(Math.max(devicePixelRatio||1,1.5),2));
+    applyCameraResponse(renderer);
     renderer.outputColorSpace=THREE.SRGBColorSpace;stage.append(renderer.domElement);renderer.domElement.setAttribute('aria-hidden','true');
-    scene=new THREE.Scene();studio=createStudio(renderer);scene.environment=studio.metal;
+    scene=new THREE.Scene();try{studio=createRingStudio(renderer);}catch(error){console.warn('Studiolicht:',error);studio=createStudio(renderer);}scene.environment=studio.metal;
     camera=new THREE.PerspectiveCamera(32,1,.1,400);controls=new OrbitControls(camera,renderer.domElement);controls.enablePan=false;controls.enableDamping=true;controls.dampingFactor=.08;controls.autoRotateSpeed=.65;
     // Keep the chosen rotation mode during wheel, pinch and button zoom.
     ready=true;buildRing();
