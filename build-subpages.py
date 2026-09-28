@@ -1094,7 +1094,7 @@ TEMPLATE = """<!DOCTYPE html>
 %(style)s
   <style>%(subcss)s  </style>
 %(extrahead)s
-  <link rel="stylesheet" href="site-design.css?v=20260906-layout">
+  <link rel="stylesheet" href="site-design.css?v=20260928-photos">
 </head>
 
 <body>
