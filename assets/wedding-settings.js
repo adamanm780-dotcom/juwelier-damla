@@ -1,6 +1,6 @@
 /** Original machining geometry for the Damla Blender profile library. */
 import * as THREE from 'three';
-const TAU=Math.PI*2,wrap=a=>Math.atan2(Math.sin(a),Math.cos(a));
+const TAU=Math.PI*2,wrap=a=>a-TAU*Math.round(a/TAU);
 export const isTension=k=>k.stone.preset==='clamping-open'||(k.stone.preset==='combined'&&k.stone.setting==='tension');
 
 /** Closed C-shaped solid from the sampled Blender cross-section. Exact cut planes,

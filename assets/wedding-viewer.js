@@ -1,4 +1,4 @@
-import {isTension,closedTensionGeometry,stoneChannels,channelDisplacement,stoneFrame,stoneSeats,seatDisplacement,smoothRingSeams} from './wedding-settings.js?v=20260922-quality4';
+import {isTension,closedTensionGeometry,stoneChannels,channelDisplacement,stoneFrame,stoneSeats,seatDisplacement,smoothRingSeams} from './wedding-settings.js?v=20260929-real2';
 import * as THREE from 'three';
 import {OrbitControls} from 'three/OrbitControls.js';
 import {GLTFLoader} from 'three/GLTFLoader.js';
@@ -13,6 +13,7 @@ import {effectiveDivision,stoneSize,count,OPTIONS,STONE_DATA,PROFILES} from './w
 const TAU=Math.PI*2,up=new THREE.Vector3(0,1,0),FRAME_MARGIN=1.05;
 
 const fontStyle=engravingFont;
+const divisions=new WeakMap(),divisionOf=k=>{let d=divisions.get(k);if(!d){d=effectiveDivision(k);divisions.set(k,d);}return d;};
 const sample=(rows,y)=>{let low=0,high=rows.length-1;y=Math.max(rows[0][0],Math.min(rows[high][0],y));while(high-low>1){const mid=(high+low)>>1;if(rows[mid][0]>y)high=mid;else low=mid;}const a=rows[low],b=rows[high];return a[1]+(b[1]-a[1])*(y-a[0])/(b[0]-a[0]||1);};
 function contour(geometry){const p=geometry.attributes.position,points=new Map();for(let i=0;i<p.count;i++){const y=p.getY(i),r=Math.hypot(p.getX(i),p.getZ(i));points.set(y.toFixed(4)+':'+r.toFixed(4),[y,r]);}return [...points.values()].sort((a,b)=>Math.atan2(b[1]-9.85,b[0])-Math.atan2(a[1]-9.85,a[0]));}
 function dispose(group){const materials=new Set();group.traverse(o=>{if(!o.isMesh)return;if(!o.userData.sharedGeometry)o.geometry.dispose();for(const m of Array.isArray(o.material)?o.material:[o.material])if(m&&!m.userData.sharedJewelry&&!materials.has(m)){materials.add(m);for(const property of ['map','normalMap','roughnessMap','bumpMap'])m[property]?.dispose();m.dispose();}});group.clear();}
@@ -74,11 +75,11 @@ export class WeddingViewer{
    else if(g.form==='perlage')depth=Math.max(depth,d*.55*(1-t*t)*(1+.45*Math.cos(phi*Math.floor(k.size/(g.width*.8)))));
   }
   for(const side of ['left','right'])if(k.edge.type===side||k.edge.type==='both'){const sign=side==='left'?-1:1,edge=k.width/2-k.edge[side+'Width'];if(sign*y>edge)depth=Math.max(depth,.15*Math.min(1,(sign*y-edge)/.045));}
-  const division=effectiveDivision(k);let sum=0,total=division.rates.reduce((a,b)=>a+b,0);for(let i=0;i<division.rates.length-1;i++){sum+=division.rates[i];if(k.separations[i]){const center=(sum/total-.5)*k.width+this.waveOffset(k,phi);const half=k.separation.width/2,t=Math.abs(y-center)/half;if(t<1){const cut=k.groove.form==='v-groove-60'?half/Math.tan(Math.PI/6)*(1-t):half*Math.sqrt(Math.max(0,1-t*t));depth=Math.max(depth,Math.min(k.height*.65,cut));}}}
+  const division=divisionOf(k);let sum=0,total=division.rates.reduce((a,b)=>a+b,0);for(let i=0;i<division.rates.length-1;i++){sum+=division.rates[i];if(k.separations[i]){const center=(sum/total-.5)*k.width+this.waveOffset(k,phi);const half=k.separation.width/2,t=Math.abs(y-center)/half;if(t<1){const cut=k.groove.form==='v-groove-60'?half/Math.tan(Math.PI/6)*(1-t):half*Math.sqrt(Math.max(0,1-t*t));depth=Math.max(depth,Math.min(k.height*.65,cut));}}}
   return depth;
  }
- waveOffset(k,phi,d=effectiveDivision(k)){return d.type==='wave'?Math.sin(phi*k.cycles)*k.width*(d.rates.length===2?.24:.14):d.type==='diagonal'?Math.cos(phi)*k.width*.28:0;}
- metalIndex(k,y,r,phi,d=effectiveDivision(k)){if(d.type==='horizontal')return r>k.size/TAU+k.height*.54?0:1;const t=(y-this.waveOffset(k,phi,d))/k.width+.5,total=d.rates.reduce((a,b)=>a+b,0);let sum=0;for(let i=0;i<d.rates.length;i++){sum+=d.rates[i]/total;if(t<sum)return i;}return d.rates.length-1;}
+ waveOffset(k,phi,d=divisionOf(k)){return d.type==='wave'?Math.sin(phi*k.cycles)*k.width*(d.rates.length===2?.24:.14):d.type==='diagonal'?Math.cos(phi)*k.width*.28:0;}
+ metalIndex(k,y,r,phi,d=divisionOf(k)){if(d.type==='horizontal')return r>k.size/TAU+k.height*.54?0:1;const t=(y-this.waveOffset(k,phi,d))/k.width+.5,total=d.rates.reduce((a,b)=>a+b,0);let sum=0;for(let i=0;i<d.rates.length;i++){sum+=d.rates[i]/total;if(t<sum)return i;}return d.rates.length-1;}
  ringGeometry(k){
   let geo=weddingGeometry(this.library.get('Wedding_'+k.profile),k.size/TAU,k.height,k.width);const plan=this.stonePlan(k),channels=stoneChannels(this,k,plan),seats=stoneSeats(k,plan),innerAtY=y=>this.radius(k,y,true);
   if(!isTension(k)&&(k.groove.quantity||k.edge.type!=='none'||k.separations.some(Boolean)||channels.length||seats.length)){
@@ -93,11 +94,13 @@ export class WeddingViewer{
   if(isTension(k)){geo.dispose();geo=closedTensionGeometry(this,k,stoneSize(k).width);}
    const machined=new Float32Array(geo.attributes.position.count);if(channels.length||seats.length){const p=geo.attributes.position,n=geo.attributes.normal;for(let i=0;i<p.count;i++){const args=[p.getX(i),p.getY(i),p.getZ(i),n.getX(i),n.getY(i),n.getZ(i)],channel=channelDisplacement(k,channels,...args),seat=seatDisplacement(k,seats,...args,innerAtY),result=channel.depth>seat.depth?channel:seat;p.setXYZ(i,result.x,result.y,result.z);machined[i]=result.depth;}geo.computeVertexNormals();smoothRingSeams(geo);}
    const pos=geo.attributes.position,norm=geo.attributes.normal,idx=geo.index,groups=Array.from({length:10},()=>[]);const ri=k.size/TAU;
-  const division=effectiveDivision(k),total=division.rates.reduce((a,b)=>a+b,0),tri=i=>[idx.getX(i),idx.getX(i+1),idx.getX(i+2)];
+  const division=divisionOf(k),total=division.rates.reduce((a,b)=>a+b,0),tri=i=>[idx.getX(i),idx.getX(i+1),idx.getX(i+2)];
   // Classify whole quads: if the two triangles of a quad choose materials separately, every material
   // border (finish/polished edge, grooves, divisions) zig-zags like a saw blade.
   for(let i=0;i<idx.count;i+=3){let ids=tri(i);if(i+3<idx.count){const next=tri(i+3);if(next.filter(v=>ids.includes(v)).length===2){ids=ids.concat(next);i+=3;}}
-   const verts=[...new Set(ids)],n=verts.length;let x=0,y=0,z=0,nr=0;for(const j of verts){const vx=pos.getX(j),vz=pos.getZ(j),r=Math.hypot(vx,vz);x+=vx/n;y+=pos.getY(j)/n;z+=vz/n;nr+=(norm.getX(j)*vx+norm.getZ(j)*vz)/r/n;}const radius=Math.hypot(x,z),phi=Math.atan2(z,x),metal=this.metalIndex(k,y,radius,phi,division);let group=metal*2+(nr>.35?0:1);
+   const verts=[...new Set(ids)],n=verts.length;let x=0,z=0,lo=1,hi=-1,yLo=Infinity,yHi=-Infinity;for(const j of verts){const vx=pos.getX(j),vz=pos.getZ(j),r=Math.hypot(vx,vz),radial=(norm.getX(j)*vx+norm.getZ(j)*vz)/r,vy=pos.getY(j);x+=vx/n;z+=vz/n;lo=Math.min(lo,radial);hi=Math.max(hi,radial);yLo=Math.min(yLo,vy);yHi=Math.max(yHi,vy);}
+   // Midranges: every face between two profile rows gets the same value, so borders follow the rows.
+   const nr=(lo+hi)/2,y=(yLo+yHi)/2;const radius=Math.hypot(x,z),phi=Math.atan2(z,x),metal=this.metalIndex(k,y,radius,phi,division);let group=metal*2+(nr>.35?0:1);
    if(nr>.2){for(const side of ['left','right'])if((k.edge.type===side||k.edge.type==='both')&&(side==='left'?-y:y)>k.width/2-k.edge[side+'Width']+.025)group=side==='left'?6:7;if(k.groove.positions.some(p=>Math.abs(y-p)<k.groove.width*.49))group=k.groove.color==='none'?metal*2+1:8;let sum=0;for(let boundary=0;boundary<division.rates.length-1;boundary++){sum+=division.rates[boundary];const center=(sum/total-.5)*k.width+this.waveOffset(k,phi,division);if(k.separations[boundary]&&Math.abs(y-center)<k.separation.width*.49)group=k.separation.color==='none'?metal*2+1:9;}}
    // Tension settings have an actual opening instead of a stone lying on solid metal.
    if(verts.some(j=>machined[j]>.005))group=metal*2+1;
@@ -121,7 +124,7 @@ export class WeddingViewer{
  makeRing(k){
   const group=new THREE.Group(),geometry=this.ringGeometry(k),dimensions={circumference:k.size+TAU*k.height,perimeter:2*(k.width+k.height)},materials=[];
   for(let i=0;i<3;i++)materials.push(metalMaterial(k.metals[i],k.metals[i].finish,dimensions,this.aniso),metalMaterial(k.metals[i],'polished',dimensions,this.aniso));
-  for(const side of ['left','right'])materials.push(metalMaterial(k.metals[side==='left'?0:effectiveDivision(k).rates.length-1],k.edge[side+'Surface'],dimensions,this.aniso));
+  for(const side of ['left','right'])materials.push(metalMaterial(k.metals[side==='left'?0:divisionOf(k).rates.length-1],k.edge[side+'Surface'],dimensions,this.aniso));
   materials.push(metalMaterial({...k.metals[0],color:k.groove.color==='none'?k.metals[0].color:k.groove.color},k.groove.surface,dimensions,this.aniso));
   materials.push(metalMaterial({...k.metals[0],color:k.separation.color==='none'?k.metals[0].color:k.separation.color},'polished',dimensions,this.aniso));
   // The bore is traced analytically for the second reflection inside the band.

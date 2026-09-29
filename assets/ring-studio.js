@@ -26,10 +26,10 @@ export const METAL_STUDIO = {
   {az: 50, el: 10, w: 36, h: 50, i: 1.0, soft: .6, falloff: .3, color: [1, .985, .96]}
  ],
  flags: [
-  {az: -126, el: 20, w: 14, h: 84, dark: .8, soft: .8},
-  {az: 127, el: 20, w: 14, h: 84, dark: .8, soft: .8},
-  {az: -72, el: 22, w: 12, h: 74, dark: .72, soft: .9},
-  {az: 73, el: 22, w: 12, h: 74, dark: .72, soft: .9},
+  {az: -126, el: 20, w: 18, h: 84, dark: .9, soft: .45},
+  {az: 127, el: 20, w: 18, h: 84, dark: .9, soft: .45},
+  {az: -72, el: 22, w: 15, h: 74, dark: .8, soft: .5},
+  {az: 73, el: 22, w: 15, h: 74, dark: .8, soft: .5},
   {az: 0, el: 14, w: 16, h: 12, dark: .9, soft: .5}
  ]
 };
@@ -133,7 +133,7 @@ function renderCube(renderer, preset, size) {
  * so no extra pass: saturation that fades out towards the highlights and is held back where a colour is
  * already saturated (multi-bounce gold inside the bore), a per-channel toe (deep tones of gold turn amber
  * instead of muddy olive) and the hue-preserving highlight shoulder of Khronos PBR Neutral. */
-export const CAMERA = {exposure: 1.14, saturation: .6, toe: .07, desaturation: .12, satFrom: .04, satTo: .85};
+export const CAMERA = {exposure: 1.08, saturation: .6, toe: .07, desaturation: .12, satFrom: .04, satTo: .85};
 const CUSTOM_STUB = 'vec3 CustomToneMapping( vec3 color ) { return color; }';
 const cameraCurveAvailable = THREE.ShaderChunk.tonemapping_pars_fragment.includes(CUSTOM_STUB);
 if (cameraCurveAvailable) THREE.ShaderChunk.tonemapping_pars_fragment = THREE.ShaderChunk.tonemapping_pars_fragment.replace(CUSTOM_STUB, `vec3 CustomToneMapping( vec3 color ) {

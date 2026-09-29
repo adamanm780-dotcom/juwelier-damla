@@ -26,3 +26,15 @@ Die ältere projektübergreifende Memory liegt in `C:\Users\Adria\.claude\projec
 
 - Korrektur: Nur das echte Original-Logo verwenden. Das generierte `assets/logo-gold-clean.png` wurde abgelehnt, weil es das JD verändert. In Hero und Kontaktbereich die unveränderte Kontur von `assets/logo-mark.webp` per CSS-Alpha-Maske gold färben. Buchstaben, Schriftzug, Kreisbögen und Proportionen exakt erhalten; nicht generativ neu zeichnen. Keine hellen Freistellungsränder.
 - In den drei Kollektionenkarten stehen die Trauringe groß in der Mitte, Schmuck links und Verlobungsringe rechts.
+
+## Ergänzung vom 29. September 2026 – fotorealistische 3D-Ringe
+
+Auftrag: 3D-Ringe in den Konfiguratoren „ultra realistisch“. Beide Konfiguratoren nutzen jetzt dasselbe System:
+- `assets/ring-studio.js`: prozedurales Fotostudio auf der GPU (Softboxen + weiche Abschatter, `METAL_STUDIO`), eigenes kontrastreiches `DIAMOND_STUDIO` (an die Kamera gekoppelt wie ein Drehteller, Objektiv-Abschatter vorne) und die Kamera-Tonkurve `applyCameraResponse`. Die Blender-HDRs `models/wedding-studio*.hdr` werden nicht mehr geladen.
+- `assets/ring-optics.js`: gemessene Legierungsfarben (F0) je Metall und Feingehalt, F82-Kantenfresnel (Weißmetalle dunkler am Rand), analytische Zweitreflexion in der Ringbohrung (nur innerhalb des Bohrungszylinders).
+- `assets/contact-shadow.js`: zweistufige Kontaktschatten (scharfe Auflagelinie + weicher Schatten), beim Schwenken nur jedes 4. Bild neu.
+- Diamant-Shader (`jewelry-studio.js`): ein Strahlengang, Dispersion nur beim Austritt, 2-fach-Supersampling; kein RGB-Rauschen.
+- Einpassung (`wedding-viewer.js` `fit`/`fitDistanceFor`): exakt über alle Ringpunkte inkl. Schwenkbewegung, pro Ansicht; nichts wird abgeschnitten (geprüft: 6 Viewports × 4 Ansichten × Ruhe/Schwenk-Extreme).
+- Materialzonen werden pro Viereck bestimmt (sonst Sägezahn an Kanten), Texturwiederholungen ganzzahlig (sonst Naht).
+- Tonwert-Leitplanken für Gelbgold 585 in der Standardansicht: dunkle Pixel (L<0,30) ca. 5 %, keine ausgebrannten Stellen. Nicht deutlich dunkler machen (Nutzerwunsch: kein dominantes Braun).
+- Achtung Build: `trauringe.html`, `verlobungsringe.html`, `reparaturen.html` haben Template-Drift aus der Logo-Session (index.html-Styles). Ein kompletter `build-subpages.py`-Lauf ändert diese Seiten mit; vorher prüfen.
