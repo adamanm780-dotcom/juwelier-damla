@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Verlobungsring-Konfigurator in 3D | Juwelier Damla Wiesbaden</title>
-  <meta name="description" content="Gestalten Sie Ihren Verlobungsring in 3D: Solitaire, Pavé oder Halo, drei Diamantschliffe, Edelmetall, Steingröße und persönliche Gravur. Beratung bei Juwelier Damla.">
+  <meta name="description" content="Gestalten Sie Ihren Verlobungsring in 3D: Solitaire, Pavé, Halo, Zarge, Trilogie oder Twist, sechs Schliffe, Diamant oder Farbstein, zweifarbige Fassung und persönliche Gravur. Beratung bei Juwelier Damla.">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="canonical" href="https://adamanm780-dotcom.github.io/juwelier-damla/verlobungsring-konfigurator.html">
 
@@ -17,7 +17,7 @@
     "@context": "https://schema.org",
     "@type": "WebPage",
     "name": "Verlobungsring-Konfigurator",
-    "description": "Gestalten Sie Ihren Verlobungsring in 3D: Solitaire, Pavé oder Halo, drei Diamantschliffe, Edelmetall, Steingröße und persönliche Gravur. Beratung bei Juwelier Damla.",
+    "description": "Gestalten Sie Ihren Verlobungsring in 3D: Solitaire, Pavé, Halo, Zarge, Trilogie oder Twist, sechs Schliffe, Diamant oder Farbstein, zweifarbige Fassung und persönliche Gravur. Beratung bei Juwelier Damla.",
     "isPartOf": {
       "@type": "WebSite",
       "name": "Juwelier Damla",
@@ -2817,11 +2817,11 @@
   <link rel="stylesheet" href="atelier.css?v=20260922-quality4">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Verlobungsring-Konfigurator in 3D | Juwelier Damla Wiesbaden">
-<meta property="og:description" content="Gestalten Sie Ihren Verlobungsring in 3D: Solitaire, Pavé oder Halo, drei Diamantschliffe, Edelmetall, Steingröße und persönliche Gravur. Beratung bei Juwelier Damla.">
+<meta property="og:description" content="Gestalten Sie Ihren Verlobungsring in 3D: Solitaire, Pavé, Halo, Zarge, Trilogie oder Twist, sechs Schliffe, Diamant oder Farbstein, zweifarbige Fassung und persönliche Gravur. Beratung bei Juwelier Damla.">
 <meta property="og:url" content="https://adamanm780-dotcom.github.io/juwelier-damla/verlobungsring-konfigurator.html">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Verlobungsring-Konfigurator in 3D | Juwelier Damla Wiesbaden">
-<meta name="twitter:description" content="Gestalten Sie Ihren Verlobungsring in 3D: Solitaire, Pavé oder Halo, drei Diamantschliffe, Edelmetall, Steingröße und persönliche Gravur. Beratung bei Juwelier Damla.">
+<meta name="twitter:description" content="Gestalten Sie Ihren Verlobungsring in 3D: Solitaire, Pavé, Halo, Zarge, Trilogie oder Twist, sechs Schliffe, Diamant oder Farbstein, zweifarbige Fassung und persönliche Gravur. Beratung bei Juwelier Damla.">
   <link rel="stylesheet" href="site-design.css?v=20260906-layout">
 </head>
 
@@ -2897,7 +2897,7 @@
     <p class="sub-crumb"><a href="index.html">Startseite</a> · <a href="verlobungsringe.html">Verlobungsringe</a> · Konfigurator</p>
     <div class="atelier-title"><div><span class="eyebrow">Ihr Ringatelier</span><h1>Ein Ring. Ihr Versprechen.</h1></div>
       <nav class="atelier-modes" aria-label="Konfigurator wählen"><a href="trauring-konfigurator.html">Trauringe</a><a href="verlobungsring-konfigurator.html" aria-current="page">Verlobungsring</a></nav></div>
-    <p>Wählen Sie Fassung, Diamant und Goldton. Entdecken Sie Ihren Entwurf von allen Seiten.</p>
+    <p>Wählen Sie Fassung, Stein und Goldton. Entdecken Sie Ihren Entwurf von allen Seiten.</p>
   </header>
   <section class="kf atelier" aria-label="Verlobungsring konfigurieren">
     <div class="wrap"><div class="kf-grid">
@@ -2920,15 +2920,18 @@
       <div class="kf-panel" id="erPanel">
         <fieldset class="kf-feld"><legend><i>1</i> Die Fassung</legend>
           <div class="kf-chips atelier-choices" id="erStyle"></div><p class="kf-notiz" id="erStyleNote"></p>
-          <label class="atelier-label" for="erProngs">Krappen</label><select id="erProngs"><option value="4">Vier Krappen</option><option value="6">Sechs Krappen</option></select>
+          <div id="erProngsWrap"><label class="atelier-label" for="erProngs">Krappen</label><select id="erProngs"><option value="4">Vier Krappen</option><option value="6">Sechs Krappen</option></select></div>
         </fieldset>
-        <fieldset class="kf-feld"><legend><i>2</i> Der Diamant</legend>
-          <div class="kf-chips" id="erCut"></div>
+        <fieldset class="kf-feld"><legend><i>2</i> Der Mittelstein</legend>
+          <div class="kf-chips" id="erStone" aria-label="Steinart"></div>
+          <p class="atelier-label">Schliff</p><div class="kf-chips" id="erCut"></div>
+          <div id="erGradeWrap"><p class="atelier-label">Qualität <span>Farbe · Reinheit</span></p><div class="kf-chips kf-chips--klein" id="erGrade"></div></div>
           <div class="kf-regler"><label for="erCarat">Steingröße <output id="erCaratValue"></output></label><input type="range" id="erCarat" min="0.3" max="2" step="0.05" value="1"></div>
           <p class="kf-notiz" id="erDiamondSize"></p>
         </fieldset>
         <fieldset class="kf-feld"><legend><i>3</i> Das Edelmetall</legend>
           <div class="kf-chips" id="erMetal"></div><div class="kf-chips kf-chips--klein" id="erAlloy"></div>
+          <p class="atelier-label">Metall der Fassung <span>zweifarbig möglich</span></p><div class="kf-chips kf-chips--klein" id="erHead"></div>
           <div class="kf-regler"><label for="erWidth">Schienenbreite <output id="erWidthValue"></output></label><input type="range" id="erWidth" min="1.8" max="3" step="0.1" value="2.2"></div>
         </fieldset>
         <fieldset class="kf-feld"><legend><i>4</i> Ihre persönliche Note</legend>
@@ -3465,7 +3468,7 @@
     }
   }
   </script>
-  <script type="module" src="assets/engagement-configurator.js?v=20260929-real5"></script>
+  <script type="module" src="assets/engagement-configurator.js?v=20260929-er1"></script>
 
 <script src="assets/site-design.js?v=20260906-layout" defer></script>
 </body>

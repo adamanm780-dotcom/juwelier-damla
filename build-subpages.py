@@ -1234,11 +1234,11 @@ KF_BODY_ENDE = """
 PAGES = [
     dict(slug='verlobungsring-konfigurator.html',
          title='Verlobungsring-Konfigurator in 3D | Juwelier Damla Wiesbaden',
-         desc='Gestalten Sie Ihren Verlobungsring in 3D: Solitaire, Pavé oder Halo, drei Diamantschliffe, Edelmetall, Steingröße und persönliche Gravur. Beratung bei Juwelier Damla.',
+         desc='Gestalten Sie Ihren Verlobungsring in 3D: Solitaire, Pavé, Halo, Zarge, Trilogie oder Twist, sechs Schliffe, Diamant oder Farbstein, zweifarbige Fassung und persönliche Gravur. Beratung bei Juwelier Damla.',
          name='Verlobungsring-Konfigurator', active='verlobungsringe.html',
          body=io.open(os.path.join(DIR, 'verlobungsring-konfigurator.body.html'), encoding='utf-8').read(),
          services=None, extrahead=KF_HEAD,
-         extrabody=KF_BODY_ENDE.replace('assets/konfigurator.js', 'assets/engagement-configurator.js')),
+         extrabody=KF_BODY_ENDE.replace('assets/konfigurator.js?v=20260929-real5', 'assets/engagement-configurator.js?v=20260929-er1')),
     dict(slug='trauringe.html',
          title='Trauringe – unsere Ringauswahl | Juwelier Damla Wiesbaden',
          desc='Trauringe bei Juwelier Damla in Wiesbaden: neun fotografische Ansichten, '
