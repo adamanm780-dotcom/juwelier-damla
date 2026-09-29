@@ -1228,7 +1228,7 @@ KF_BODY_ENDE = """
     }
   }
   </script>
-  <script type="module" src="assets/konfigurator.js?v=20260929-real4"></script>
+  <script type="module" src="assets/konfigurator.js?v=20260929-real5"></script>
 """
 
 PAGES = [

@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/OrbitControls.js';
 import { loadJewelry, weddingGeometry, createStudio, diamondMesh, metalMaterial } from './jewelry-studio.js?v=20260929-real2';
 import { styles, cuts, metals, defaults, validateConfig, encodeConfig as encode, decodeConfig } from './engagement-state.js';
-import { createRingStudio, applyCameraResponse } from './ring-studio.js?v=20260929-real4';
+import { createRingStudio, applyCameraResponse } from './ring-studio.js?v=20260929-real5';
 import { enhanceMetal, syncRingOptics, metalF0, metalF82 } from './ring-optics.js?v=20260929-real4';
 import { ContactShadows } from './contact-shadow.js?v=20260929-real2';
 import { engravingMaps, engravedMetal, faceInward } from './engraving.js?v=20260929-real3';

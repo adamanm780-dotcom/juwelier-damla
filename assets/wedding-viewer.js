@@ -5,7 +5,7 @@ import {GLTFLoader} from 'three/GLTFLoader.js';
 import {loadJewelry,weddingGeometry,createStudio,diamondMesh} from './jewelry-studio.js?v=20260929-real2';
 import {sampleRingProfile} from './wedding-materials.js?v=20260921-blender2';
 import {metalMaterial,metalColor} from './wedding-finishes.js?v=20260929-real4';
-import {createRingStudio,applyCameraResponse} from './ring-studio.js?v=20260929-real4';
+import {createRingStudio,applyCameraResponse} from './ring-studio.js?v=20260929-real5';
 import {enhanceMetal,syncRingOptics,metalF82} from './ring-optics.js?v=20260929-real4';
 import {engravingMaps,engravedMetal,faceInward} from './engraving.js?v=20260929-real3';
 import {ContactShadows} from './contact-shadow.js?v=20260929-real2';
