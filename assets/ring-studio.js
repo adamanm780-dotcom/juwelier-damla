@@ -38,17 +38,17 @@ export const METAL_STUDIO = {
 export const DIAMOND_STUDIO = {
  sky: [.03, .03, .033], horizon: [.01, .01, .011], floor: [.10, .095, .09], floorEdge: .05, skyCurve: 1,
  panels: [
-  {az: 0, el: 20, w: 34, h: 24, i: 16, soft: .25, falloff: .3, color: [1, 1, 1]},
+  {az: 0, el: 40, w: 40, h: 22, i: 16, soft: .25, falloff: .3, color: [1, 1, 1]},
   {az: 0, el: 70, w: 50, h: 30, i: 20, soft: .25, falloff: .3, color: [1, .99, .98]},
-  {az: -60, el: 30, w: 16, h: 44, i: 18, soft: .2, falloff: .3, color: [1, .98, .96]},
-  {az: 60, el: 30, w: 16, h: 44, i: 18, soft: .2, falloff: .3, color: [.97, .99, 1]},
+  {az: -60, el: 30, w: 16, h: 44, i: 21.6, soft: .2, falloff: .3, color: [1, .98, .96]},
+  {az: 60, el: 30, w: 16, h: 44, i: 21.6, soft: .2, falloff: .3, color: [.97, .99, 1]},
   {az: -120, el: 40, w: 22, h: 22, i: 12, soft: .2, falloff: .2, color: [1, 1, 1]},
   {az: 120, el: 40, w: 22, h: 22, i: 12, soft: .2, falloff: .2, color: [1, 1, 1]},
   {az: 180, el: 12, w: 40, h: 18, i: 9, soft: .25, falloff: .2, color: [1, 1, 1]},
   {az: -30, el: -8, w: 20, h: 8, i: 5, soft: .3, falloff: .2, color: [1, .98, .95]},
   {az: 30, el: -8, w: 20, h: 8, i: 5, soft: .3, falloff: .2, color: [1, .98, .95]}
  ],
- flags: []
+ flags: [{az: 0, el: 0, w: 16, h: 16, dark: .97, soft: .35}]
 };
 
 const vertexShader = `varying vec3 vDir; void main(){ vDir = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`;
@@ -160,7 +160,7 @@ export function applyCameraResponse(renderer, exposure = CAMERA.exposure) {
 }
 
 /** Returns {metal: PMREM texture for scene.environment, diamond: sharp cube for the gem tracer}. */
-export function createRingStudio(renderer, {metal = METAL_STUDIO, diamond = DIAMOND_STUDIO, size = 1024} = {}) {
+export function createRingStudio(renderer, {metal = METAL_STUDIO, diamond = DIAMOND_STUDIO, size = 512} = {}) {
  const metalCube = renderCube(renderer, metal, size);
  const pmrem = new THREE.PMREMGenerator(renderer);
  const filtered = pmrem.fromCubemap(metalCube.texture);

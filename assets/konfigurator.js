@@ -1,7 +1,7 @@
 import {individualMarkup,mountIndividual} from './wedding-engraving.js?v=3';
 import * as C from './wedding-catalog.js?v=3';
 import * as S from './wedding-state.js?v=3';
-import {WeddingViewer} from './wedding-viewer.js?v=20260928-real1';
+import {WeddingViewer} from './wedding-viewer.js?v=20260929-real2';
 const $=s=>document.querySelector(s), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=n=>n.toLocaleString('de-DE',{style:'currency',currency:'EUR',maximumFractionDigits:0});
 let state=S.normalizeState(C.initialState()),step=0,segment=0,divisionCount=1,undo=[],notice='',viewer,saveTimer;

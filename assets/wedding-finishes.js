@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import {METALS} from './wedding-catalog.js?v=3';
-import {metalF0,metalF82} from './ring-optics.js?v=20260928-real1';
+import {metalF0,metalF82} from './ring-optics.js?v=20260929-real2';
 const cache=new Map();
 const random=(x,y)=>{const n=Math.sin(x*127.1+y*311.7)*43758.5453;return n-Math.floor(n);};
 // Roughness along the tool marks; brushed finishes get their cross-groove roughness from anisotropy.
@@ -66,7 +66,7 @@ export function metalMaterial(m,finish,dimensions,aniso){
  const mat=new THREE.MeshPhysicalMaterial({color:metalColor(m),metalness:1,roughness:roughness[finish]??.15,envMapIntensity:1,clearcoat:0});mat.userData.f82=metalF82(METALS[m.color]?m.color:'yellow');
  if(finish!=='polished'){
   const maps=surfaceMaps(finish),tile=finish.startsWith('hammered')?5:4,brushed=/brushed|horizontal|diagonal|cross/.test(finish);
-  for(const [property,key] of [['normalMap','normal'],['roughnessMap','rough']]){const t=maps[key].clone();t.needsUpdate=true;t.repeat.set(dimensions.circumference/tile,dimensions.perimeter/tile);t.anisotropy=aniso;mat[property]=t;}
+  for(const [property,key] of [['normalMap','normal'],['roughnessMap','rough']]){const t=maps[key].clone();t.needsUpdate=true;t.repeat.set(Math.max(1,Math.round(dimensions.circumference/tile)),Math.max(1,Math.round(dimensions.perimeter/tile)));t.anisotropy=aniso;mat[property]=t;}
   const strength=finish==='hammered-big'?.5:finish==='hammered-matte'?.42:finish.includes('diamond')?.4:finish==='ice-matte'?.32:brushed?.36:.23;mat.normalScale.set(strength,strength);
   // Brushing scatters light across the grooves, so the highlight stretches perpendicular to the tool
   // marks (u runs around the ring, v across the band; the canvas is flipped in v).

@@ -1,14 +1,14 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/OrbitControls.js';
-import { loadJewelry, weddingGeometry, createStudio, diamondMesh, metalMaterial } from './jewelry-studio.js';
+import { loadJewelry, weddingGeometry, createStudio, diamondMesh, metalMaterial } from './jewelry-studio.js?v=20260929-real2';
 import { styles, cuts, metals, defaults, validateConfig, encodeConfig as encode, decodeConfig } from './engagement-state.js';
-import { createRingStudio, applyCameraResponse } from './ring-studio.js?v=20260928-real1';
-import { enhanceMetal, syncRingOptics, metalF0, metalF82 } from './ring-optics.js?v=20260928-real1';
+import { createRingStudio, applyCameraResponse } from './ring-studio.js?v=20260929-real2';
+import { enhanceMetal, syncRingOptics, metalF0, metalF82 } from './ring-optics.js?v=20260929-real2';
 
 const $=id=>document.getElementById(id);
 function fromHash(){return decodeConfig(location.hash.slice(3));}
 let state=location.hash.startsWith('#e=')?fromHash():defaults();
-let renderer,scene,camera,controls,studio,models,ring,ready=false,rotation=false,visible=true,scheduled=false;
+let renderer,scene,camera,controls,studio,models,ring,ready=false,rotation=false,visible=true,scheduled=false,dirty=true;
 const stage=$('erStage');
 const format=n=>n.toLocaleString('de-DE',{maximumFractionDigits:2});
 const diameter=()=>6.5*Math.cbrt(state.carat/(state.cut==='oval'?1.38:state.cut==='emerald'?1.35:1));
@@ -53,7 +53,15 @@ function addGem(group,cut,radius,position,normal){
 }
 // Each part gets its own enhanced clone: Material.clone() does not carry shader hooks.
 const part=(metal,bore=null)=>enhanceMetal(metal.clone(),bore);
-function tube(points,radius,material){return new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(...p))),48,radius,12,false),part(material));}
+// Tube along a curve; `tip` tapers the last half so a shoulder can run into the thin gallery rail.
+function tube(points,radius,material,tip=radius){
+  const curve=new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(...p))),geo=new THREE.TubeGeometry(curve,48,radius,12,false);
+  if(tip!==radius){const p=geo.attributes.position,c=new THREE.Vector3(),v=new THREE.Vector3();
+    for(let i=0;i<=48;i++){const k=1+(tip/radius-1)*THREE.MathUtils.smoothstep(i/48,.45,1);curve.getPointAt(i/48,c);
+      for(let j=0;j<=12;j++){const n=i*13+j;v.fromBufferAttribute(p,n).sub(c).multiplyScalar(k).add(c);p.setXYZ(n,v.x,v.y,v.z);}}
+    p.needsUpdate=true;geo.computeVertexNormals();geo.computeBoundingSphere();}
+  return new THREE.Mesh(geo,part(material));
+}
 function buildRing(){
   disposeRing();ring=new THREE.Group();scene.add(ring);
   const ri=state.size/(Math.PI*2),T=1.6,r=diameter()/2;
@@ -66,7 +74,11 @@ function buildRing(){
   const basket=new THREE.Mesh(models.get('Basket_'+state.prongs),part(metal));basket.userData.sharedGeometry=true;
   basket.scale.set(r,r,r*(state.cut==='oval'?1.38:state.cut==='emerald'?1.35:1));basket.position.copy(center);ring.add(basket);
   // Rising cathedral shoulders meet the basket beneath the pavilion.
-  for(const sign of [-1,1])ring.add(tube([[sign*4.5,Math.sqrt((ri+T*.65)**2-4.5**2),0],[sign*3.4,ri+T+.3,0],[sign*r*.52,seat-r*.72,0]],.38,metal));
+  // The shoulders end inside the basket's gallery rail (local y -0.42, radius 0.81), tapered to its thickness,
+  // and a bearer ring joins the prong feet, so no tube ends open in mid-air.
+  for(const sign of [-1,1])ring.add(tube([[sign*4.5,Math.sqrt((ri+T*.65)**2-4.5**2),0],[sign*3.4,ri+T+.3,0],[sign*r*.79,seat-r*.42,0]],.38,metal,r*.05));
+  const stretch0=state.cut==='oval'?1.38:state.cut==='emerald'?1.35:1;
+  const bearer=new THREE.Mesh(new THREE.TorusGeometry(r*.44,r*.045,10,64),part(metal));bearer.rotation.x=Math.PI/2;bearer.scale.y=stretch0;bearer.position.set(0,seat-r*.92,0);ring.add(bearer);
   if(state.style==='pave'){
     for(const sign of [-1,1])for(let i=0;i<7;i++){
       const a=Math.PI/2+sign*(.37+i*.098),normal=new THREE.Vector3(Math.cos(a),Math.sin(a),0);
@@ -100,6 +112,7 @@ function buildRing(){
     const engraving=new THREE.Mesh(new THREE.CylinderGeometry(ri-.014,ri-.014,state.width*.8,192,1,true),new THREE.MeshBasicMaterial({map:tex,side:THREE.BackSide,transparent:true,depthWrite:false}));engraving.rotation.x=Math.PI/2;ring.add(engraving);
   }
   metal.dispose();
+  dirty=true;
   stage.setAttribute('aria-label',`3D-Ansicht: ${styles[state.style][0]}, ${cuts[state.cut]}, ${format(state.carat)} Karat, ${metals[state.metal][0]}`);
 }
 function fit(view='hero'){
@@ -117,12 +130,12 @@ async function start(){
     applyCameraResponse(renderer);
     renderer.outputColorSpace=THREE.SRGBColorSpace;stage.append(renderer.domElement);renderer.domElement.setAttribute('aria-hidden','true');
     scene=new THREE.Scene();try{studio=createRingStudio(renderer);}catch(error){console.warn('Studiolicht:',error);studio=createStudio(renderer);}scene.environment=studio.metal;
-    camera=new THREE.PerspectiveCamera(32,1,.1,400);controls=new OrbitControls(camera,renderer.domElement);controls.enablePan=false;controls.enableDamping=true;controls.dampingFactor=.08;controls.autoRotateSpeed=.65;
+    camera=new THREE.PerspectiveCamera(32,1,.1,400);controls=new OrbitControls(camera,renderer.domElement);controls.addEventListener('change',()=>{dirty=true;});controls.enablePan=false;controls.enableDamping=true;controls.dampingFactor=.08;controls.autoRotateSpeed=.65;
     // Keep the chosen rotation mode during wheel, pinch and button zoom.
     ready=true;buildRing();
-    new ResizeObserver(()=>{camera.aspect=stage.clientWidth/stage.clientHeight;camera.updateProjectionMatrix();renderer.setSize(stage.clientWidth,stage.clientHeight);fit();}).observe(stage);
+    new ResizeObserver(()=>{camera.aspect=stage.clientWidth/stage.clientHeight;camera.updateProjectionMatrix();renderer.setSize(stage.clientWidth,stage.clientHeight);fit();dirty=true;}).observe(stage);
     new IntersectionObserver(([entry])=>{visible=entry.isIntersecting;}).observe(stage);
-    renderer.setAnimationLoop(()=>{if(document.hidden||!visible)return;controls.autoRotate=rotation;controls.update();renderer.render(scene,camera);stage.classList.add('is-bereit');});
+    renderer.setAnimationLoop(()=>{if(document.hidden||!visible)return;controls.autoRotate=rotation;const moved=controls.update();if(!moved&&!dirty)return;dirty=false;renderer.render(scene,camera);stage.classList.add('is-bereit');});
     renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();ready=false;renderer.setAnimationLoop(null);fallback();});
     document.querySelectorAll('[data-er-view]').forEach(b=>b.disabled=false);$('erImage').disabled=false;
   }catch(error){console.error('Ringansicht',error);ready=false;renderer?.setAnimationLoop(null);fallback();}

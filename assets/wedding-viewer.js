@@ -2,15 +2,15 @@ import {isTension,closedTensionGeometry,stoneChannels,channelDisplacement,stoneF
 import * as THREE from 'three';
 import {OrbitControls} from 'three/OrbitControls.js';
 import {GLTFLoader} from 'three/GLTFLoader.js';
-import {loadJewelry,weddingGeometry,createStudio,diamondMesh} from './jewelry-studio.js?v=20260922-quality4';
+import {loadJewelry,weddingGeometry,createStudio,diamondMesh} from './jewelry-studio.js?v=20260929-real2';
 import {sampleRingProfile} from './wedding-materials.js?v=20260921-blender2';
-import {metalMaterial,metalColor} from './wedding-finishes.js?v=20260928-real1';
-import {createRingStudio,applyCameraResponse} from './ring-studio.js?v=20260928-real1';
-import {enhanceMetal,syncRingOptics} from './ring-optics.js?v=20260928-real1';
-import {ContactShadows} from './contact-shadow.js?v=20260928-real1';
+import {metalMaterial,metalColor} from './wedding-finishes.js?v=20260929-real2';
+import {createRingStudio,applyCameraResponse} from './ring-studio.js?v=20260929-real2';
+import {enhanceMetal,syncRingOptics} from './ring-optics.js?v=20260929-real2';
+import {ContactShadows} from './contact-shadow.js?v=20260929-real2';
 import {METALS,GEM_COLORS,FONTS,engravingFont,clone} from './wedding-catalog.js?v=3';
 import {effectiveDivision,stoneSize,count,OPTIONS,STONE_DATA,PROFILES} from './wedding-state.js?v=3';
-const TAU=Math.PI*2,up=new THREE.Vector3(0,1,0);
+const TAU=Math.PI*2,up=new THREE.Vector3(0,1,0),FRAME_MARGIN=1.05;
 
 const fontStyle=engravingFont;
 const sample=(rows,y)=>{let low=0,high=rows.length-1;y=Math.max(rows[0][0],Math.min(rows[high][0],y));while(high-low>1){const mid=(high+low)>>1;if(rows[mid][0]>y)high=mid;else low=mid;}const a=rows[low],b=rows[high];return a[1]+(b[1]-a[1])*(y-a[0])/(b[0]-a[0]||1);};
@@ -28,7 +28,7 @@ function adaptiveLathe(points,phis){
 }
 
 export class WeddingViewer{
- constructor(stage){this.stage=stage;this.rings=[];this.signatures=[];this.rotating=!matchMedia('(prefers-reduced-motion: reduce)').matches;this.dirty=true;this.visible=true;this.ready=false;this.lastTime=0;this.motionPhase=0;this.motionQuaternion=new THREE.Quaternion();this.motionAxis=new THREE.Vector3(0,1,0);this.profiles=new Map();this.contours=new Map();}
+ constructor(stage){this.stage=stage;this.rings=[];this.signatures=[];this.rotating=!matchMedia('(prefers-reduced-motion: reduce)').matches;this.dirty=true;this.visible=true;this.ready=false;this.lastTime=0;this.motionPhase=0;this.shadowTick=0;this.contactDirty=true;this.motionQuaternion=new THREE.Quaternion();this.motionAxis=new THREE.Vector3(0,1,0);this.profiles=new Map();this.contours=new Map();}
  async init(){
   this.renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true,powerPreference:'high-performance'});this.renderer.setPixelRatio(Math.min(Math.max(window.devicePixelRatio||1,1.5),2));this.renderer.setSize(this.stage.clientWidth,this.stage.clientHeight);this.renderer.outputColorSpace=THREE.SRGBColorSpace;applyCameraResponse(this.renderer);this.aniso=this.renderer.capabilities.getMaxAnisotropy();this.stage.append(this.renderer.domElement);this.renderer.domElement.setAttribute('aria-hidden','true');
   this.scene=new THREE.Scene();
@@ -57,7 +57,7 @@ export class WeddingViewer{
   this.state=state;
   for(let i=0;i<state.rings.length;i++){const ring=this.rings[i];ring.quaternion.copy(ring.userData.basePose);ring.position.set(0,0,0);ring.updateMatrixWorld(true);const bounds=new THREE.Box3().setFromObject(ring,true),sign=state.rings.length===1?0:i===0?-1:1;const x=sign*((bounds.max.x-bounds.min.x)/2+2.2),z=i===0?-1:1.6;ring.position.set(x,-bounds.min.y,z);ring.updateMatrixWorld(true);}
   const bounce=new THREE.Color(0,0,0),worn=state.rings.filter(Boolean);for(const k of worn)bounce.add(metalColor(k.metals[0]).multiplyScalar(1/worn.length));this.contact.setBounce(bounce);
-  this.contact.fit(new THREE.Box3().setFromObject(this.group,true),0);
+  this.contact.fit(new THREE.Box3().setFromObject(this.group,true),0);this.contactDirty=true;
   this.fit(fit||!this.hasFrame);this.dirty=true;
  }
  profileIcon(id){if(id==='PB08')return '<svg viewBox="0 0 76 32" aria-hidden="true"><circle cx="38" cy="16" r="12"/></svg>';const rows=this.contours.get(id);if(!rows)return '';const path=rows.map(([y,r],i)=>(i?'L':'M')+(8+(y+2.25)*13.33).toFixed(2)+' '+(26-(r-9)*11).toFixed(2)).join(' ')+'Z';return `<svg viewBox="0 0 76 32" aria-hidden="true"><path d="${path}"/></svg>`;}
@@ -77,8 +77,8 @@ export class WeddingViewer{
   const division=effectiveDivision(k);let sum=0,total=division.rates.reduce((a,b)=>a+b,0);for(let i=0;i<division.rates.length-1;i++){sum+=division.rates[i];if(k.separations[i]){const center=(sum/total-.5)*k.width+this.waveOffset(k,phi);const half=k.separation.width/2,t=Math.abs(y-center)/half;if(t<1){const cut=k.groove.form==='v-groove-60'?half/Math.tan(Math.PI/6)*(1-t):half*Math.sqrt(Math.max(0,1-t*t));depth=Math.max(depth,Math.min(k.height*.65,cut));}}}
   return depth;
  }
- waveOffset(k,phi){const d=effectiveDivision(k);return d.type==='wave'?Math.sin(phi*k.cycles)*k.width*(d.rates.length===2?.24:.14):d.type==='diagonal'?Math.cos(phi)*k.width*.28:0;}
- metalIndex(k,y,r,phi){const d=effectiveDivision(k);if(d.type==='horizontal')return r>k.size/TAU+k.height*.54?0:1;const t=(y-this.waveOffset(k,phi))/k.width+.5,total=d.rates.reduce((a,b)=>a+b,0);let sum=0;for(let i=0;i<d.rates.length;i++){sum+=d.rates[i]/total;if(t<sum)return i;}return d.rates.length-1;}
+ waveOffset(k,phi,d=effectiveDivision(k)){return d.type==='wave'?Math.sin(phi*k.cycles)*k.width*(d.rates.length===2?.24:.14):d.type==='diagonal'?Math.cos(phi)*k.width*.28:0;}
+ metalIndex(k,y,r,phi,d=effectiveDivision(k)){if(d.type==='horizontal')return r>k.size/TAU+k.height*.54?0:1;const t=(y-this.waveOffset(k,phi,d))/k.width+.5,total=d.rates.reduce((a,b)=>a+b,0);let sum=0;for(let i=0;i<d.rates.length;i++){sum+=d.rates[i]/total;if(t<sum)return i;}return d.rates.length-1;}
  ringGeometry(k){
   let geo=weddingGeometry(this.library.get('Wedding_'+k.profile),k.size/TAU,k.height,k.width);const plan=this.stonePlan(k),channels=stoneChannels(this,k,plan),seats=stoneSeats(k,plan),innerAtY=y=>this.radius(k,y,true);
   if(!isTension(k)&&(k.groove.quantity||k.edge.type!=='none'||k.separations.some(Boolean)||channels.length||seats.length)){
@@ -93,10 +93,14 @@ export class WeddingViewer{
   if(isTension(k)){geo.dispose();geo=closedTensionGeometry(this,k,stoneSize(k).width);}
    const machined=new Float32Array(geo.attributes.position.count);if(channels.length||seats.length){const p=geo.attributes.position,n=geo.attributes.normal;for(let i=0;i<p.count;i++){const args=[p.getX(i),p.getY(i),p.getZ(i),n.getX(i),n.getY(i),n.getZ(i)],channel=channelDisplacement(k,channels,...args),seat=seatDisplacement(k,seats,...args,innerAtY),result=channel.depth>seat.depth?channel:seat;p.setXYZ(i,result.x,result.y,result.z);machined[i]=result.depth;}geo.computeVertexNormals();smoothRingSeams(geo);}
    const pos=geo.attributes.position,norm=geo.attributes.normal,idx=geo.index,groups=Array.from({length:10},()=>[]);const ri=k.size/TAU;
-  for(let i=0;i<idx.count;i+=3){const ids=[idx.getX(i),idx.getX(i+1),idx.getX(i+2)];let x=0,y=0,z=0,nr=0;for(const j of ids){const vx=pos.getX(j),vz=pos.getZ(j),r=Math.hypot(vx,vz);x+=vx/3;y+=pos.getY(j)/3;z+=vz/3;nr+=(norm.getX(j)*vx+norm.getZ(j)*vz)/r/3;}const radius=Math.hypot(x,z),phi=Math.atan2(z,x);let group=this.metalIndex(k,y,radius,phi)*2+(nr>.35?0:1);
-   if(nr>.2){for(const side of ['left','right'])if((k.edge.type===side||k.edge.type==='both')&&(side==='left'?-y:y)>k.width/2-k.edge[side+'Width']+.025)group=side==='left'?6:7;if(k.groove.positions.some(p=>Math.abs(y-p)<k.groove.width*.49))group=k.groove.color==='none'?this.metalIndex(k,y,radius,phi)*2+1:8;const division=effectiveDivision(k);let sum=0,total=division.rates.reduce((a,b)=>a+b,0);for(let boundary=0;boundary<division.rates.length-1;boundary++){sum+=division.rates[boundary];const center=(sum/total-.5)*k.width+this.waveOffset(k,phi);if(k.separations[boundary]&&Math.abs(y-center)<k.separation.width*.49)group=k.separation.color==='none'?this.metalIndex(k,y,radius,phi)*2+1:9;}}
+  const division=effectiveDivision(k),total=division.rates.reduce((a,b)=>a+b,0),tri=i=>[idx.getX(i),idx.getX(i+1),idx.getX(i+2)];
+  // Classify whole quads: if the two triangles of a quad choose materials separately, every material
+  // border (finish/polished edge, grooves, divisions) zig-zags like a saw blade.
+  for(let i=0;i<idx.count;i+=3){let ids=tri(i);if(i+3<idx.count){const next=tri(i+3);if(next.filter(v=>ids.includes(v)).length===2){ids=ids.concat(next);i+=3;}}
+   const verts=[...new Set(ids)],n=verts.length;let x=0,y=0,z=0,nr=0;for(const j of verts){const vx=pos.getX(j),vz=pos.getZ(j),r=Math.hypot(vx,vz);x+=vx/n;y+=pos.getY(j)/n;z+=vz/n;nr+=(norm.getX(j)*vx+norm.getZ(j)*vz)/r/n;}const radius=Math.hypot(x,z),phi=Math.atan2(z,x),metal=this.metalIndex(k,y,radius,phi,division);let group=metal*2+(nr>.35?0:1);
+   if(nr>.2){for(const side of ['left','right'])if((k.edge.type===side||k.edge.type==='both')&&(side==='left'?-y:y)>k.width/2-k.edge[side+'Width']+.025)group=side==='left'?6:7;if(k.groove.positions.some(p=>Math.abs(y-p)<k.groove.width*.49))group=k.groove.color==='none'?metal*2+1:8;let sum=0;for(let boundary=0;boundary<division.rates.length-1;boundary++){sum+=division.rates[boundary];const center=(sum/total-.5)*k.width+this.waveOffset(k,phi,division);if(k.separations[boundary]&&Math.abs(y-center)<k.separation.width*.49)group=k.separation.color==='none'?metal*2+1:9;}}
    // Tension settings have an actual opening instead of a stone lying on solid metal.
-   if(ids.some(j=>machined[j]>.005))group=this.metalIndex(k,y,radius,phi)*2+1;
+   if(verts.some(j=>machined[j]>.005))group=metal*2+1;
    groups[group].push(...ids);
   }
   const indices=[];geo.clearGroups();for(let i=0;i<groups.length;i++){if(groups[i].length){geo.addGroup(indices.length,groups[i].length,i);for(const n of groups[i])indices.push(n);}}geo.setIndex(indices);geo.computeBoundingBox();geo.computeBoundingSphere();return geo;
@@ -104,10 +108,12 @@ export class WeddingViewer{
  // Lathe angles: uniform around the band, densely refined where seats and channels are cut,
  // so bezel rims and channel walls stay round and straight instead of stair-stepped.
  lathePhis(k,plan){
-  const base=384,r=k.size/TAU+k.height,intervals=[];
-  for(const p of plan){if(p.preset==='top'||p.preset==='clamping-open')continue;const half=((p.size.width3d||p.size.width)*.78+.32)/r,center=Math.PI/2-p.phi;intervals.push([center-half,center+half]);}
-  if(!intervals.length)return Array.from({length:base+1},(_,i)=>i/base*TAU);
-  const length=intervals.reduce((sum,[a,b])=>sum+(b-a)*r,0),step=Math.max(.022,length/1150)/r,phis=[];
+  const base=384,r=k.size/TAU+k.height,raw=[];
+  for(const p of plan){if(p.preset==='top'||p.preset==='clamping-open')continue;const half=((p.size.width3d||p.size.width)*.78+.32)/r,center=Math.PI/2-p.phi;raw.push([center-half,center+half]);}
+  if(!raw.length)return Array.from({length:base+1},(_,i)=>i/base*TAU);
+  // Merge overlapping seats (rows, both-sided memoire) so shared arcs are sampled once.
+  raw.sort((a,b)=>a[0]-b[0]);const intervals=[raw[0].slice()];for(const [a,b] of raw.slice(1)){const last=intervals.at(-1);if(a<=last[1])last[1]=Math.max(last[1],b);else intervals.push([a,b]);}
+  const length=intervals.reduce((sum,[a,b])=>sum+(b-a)*r,0),step=Math.max(.045,length/512)/r,phis=[];
   for(let i=0;i<=base;i++)phis.push(i/base*TAU);
   for(const [a,b] of intervals)for(let t=a;t<=b;t+=step){const phi=((t%TAU)+TAU)%TAU;if(phi>1e-6&&phi<TAU-1e-6)phis.push(phi);}
   phis.sort((a,b)=>a-b);const out=[0];for(const phi of phis)if(phi-out.at(-1)>step*.45)out.push(phi);if(TAU-out.at(-1)<step*.45)out.pop();out.push(TAU);return out;
@@ -191,18 +197,34 @@ export class WeddingViewer{
   const geometry=new THREE.LatheGeometry(rows,256,Math.PI*.2,Math.PI*1.6),material=new THREE.MeshPhysicalMaterial({color:metalColor(k.metals[0]),metalness:1,roughness:.34,map:texture,bumpMap:texture,bumpScale:-.045,transparent:true,side:THREE.BackSide,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-1});return new THREE.Mesh(geometry,material);
  }
  resize(){if(!this.ready)return;const w=this.stage.clientWidth,h=this.stage.clientHeight;if(!w||!h)return;this.renderer.setSize(w,h);this.camera.aspect=w/h;this.camera.updateProjectionMatrix();if(this.state)this.fit(true);this.dirty=true;}
+ // Vertices of every ring over the whole gentle sway (same amplitudes as tick), so no pose leaves the frame.
+ framePoints(){
+  const points=[],q=new THREE.Quaternion(),v=new THREE.Vector3(),axis=this.motionAxis||up;
+  this.rings.forEach((ring,i)=>{if(!ring)return;const keep=ring.quaternion.clone(),base=ring.userData.basePose,amp=base?(i===0?.18:.22):0;
+   for(const s of amp?[-1,-.5,0,.5,1]:[0]){if(base)ring.quaternion.copy(base).premultiply(q.setFromAxisAngle(axis,s*amp));ring.updateMatrixWorld(true);
+    ring.traverse(o=>{const p=o.isMesh&&o.geometry.attributes.position;if(!p)return;const stride=Math.max(1,Math.floor(p.count/5000));for(let k=0;k<p.count;k+=stride)points.push(v.fromBufferAttribute(p,k).applyMatrix4(o.matrixWorld).clone());});}
+   ring.quaternion.copy(keep);ring.updateMatrixWorld(true);});
+  return points;
+ }
+ // Camera distance along dir at which every sampled point lies inside the frustum, with a margin.
+ fitDistanceFor(dir,center){
+  const ty=Math.tan(THREE.MathUtils.degToRad(this.camera.fov)/2)/FRAME_MARGIN,tx=ty*this.camera.aspect,right=new THREE.Vector3().crossVectors(this.camera.up,dir).normalize(),top=new THREE.Vector3().crossVectors(dir,right),r=new THREE.Vector3();let d=0;
+  for(const p of this.framePointCache||[]){r.subVectors(p,center);const depth=r.dot(dir);d=Math.max(d,depth+Math.abs(r.dot(right))/tx,depth+Math.abs(r.dot(top))/ty);}
+  return d;
+ }
  fit(force=false){
   if(!this.rings.some(Boolean))return;
-  const bounds=new THREE.Box3().setFromObject(this.group,true),size=bounds.getSize(new THREE.Vector3()),center=bounds.getCenter(new THREE.Vector3()),fy=THREE.MathUtils.degToRad(this.camera.fov),fx=2*Math.atan(Math.tan(fy/2)*this.camera.aspect);
-  const distance=Math.max(size.x/(2*Math.tan(fx/2)),size.y/(2*Math.tan(fy/2)))*1.22;
+  const center=new THREE.Box3().setFromObject(this.group,true).getCenter(new THREE.Vector3());
   // Preserve the user's zoom relative to the fitted scene when its dimensions change.
   // Capture the offset before moving the target so re-centering cannot add a zoom.
   const offset=this.camera.position.clone().sub(this.controls.target),zoom=force||!this.fitDistance?1:THREE.MathUtils.clamp(offset.length()/this.fitDistance,.48,2.6);
+  offset.normalize();this.framePointCache=this.framePoints();const distance=this.fitDistanceFor(offset,center);
   this.fitDistance=distance;this.controls.target.copy(center);this.controls.minDistance=distance*.48;this.controls.maxDistance=distance*2.6;
-  this.camera.position.copy(center).addScaledVector(offset.normalize(),distance*zoom);this.controls.update();
+  this.camera.position.copy(center).addScaledVector(offset,distance*zoom);this.controls.update();
  }
- tick(time){if(!this.ready||document.hidden||!this.visible||time-this.lastTime<32)return;const dt=Math.min((time-this.lastTime)/1000,.1);this.lastTime=time;this.controls.autoRotate=false;if(this.rotating){this.motionPhase+=dt*.23;this.rings.forEach((ring,i)=>{if(!ring)return;const angle=Math.sin(this.motionPhase)*(i===0?.18:-.22);ring.quaternion.copy(ring.userData.basePose).premultiply(this.motionQuaternion.setFromAxisAngle(this.motionAxis,angle));});this.dirty=true;}const changed=this.controls.update(dt);if(!changed&&!this.dirty&&this.hasFrame)return;if(this.dirty||!this.hasFrame){this.scene.updateMatrixWorld();this.contact.update(this.scene);}this.renderer.render(this.scene,this.camera);this.dirty=false;this.hasFrame=true;this.stage.classList.add('is-bereit');}
- view(name){if(name==='rotate'){this.rotating=!this.rotating;return;}if(name==='in'||name==='out'){const offset=this.camera.position.clone().sub(this.controls.target);offset.multiplyScalar(name==='in'?.86:1.16);offset.clampLength(this.controls.minDistance,this.controls.maxDistance);this.camera.position.copy(this.controls.target).add(offset);}else{const views={hero:[5,14,82],front:[0,2,82],side:[80,16,8],inside:[-25,50,60]},direction=new THREE.Vector3(...views[name]).normalize(),distance=this.camera.position.distanceTo(this.controls.target);this.camera.position.copy(this.controls.target).addScaledVector(direction,distance);}this.controls.update();this.dirty=true;}
+ tick(time){if(!this.ready||document.hidden||!this.visible||time-this.lastTime<32)return;const dt=Math.min((time-this.lastTime)/1000,.1);this.lastTime=time;this.controls.autoRotate=false;if(this.rotating){this.motionPhase+=dt*.23;this.rings.forEach((ring,i)=>{if(!ring)return;const angle=Math.sin(this.motionPhase)*(i===0?.18:-.22);ring.quaternion.copy(ring.userData.basePose).premultiply(this.motionQuaternion.setFromAxisAngle(this.motionAxis,angle));});this.dirty=true;}const changed=this.controls.update(dt);if(!changed&&!this.dirty&&this.hasFrame)return;// The sway moves the rings by ~0.1° per frame; the blurred height map need not follow every frame.
+  if(this.contactDirty||!this.hasFrame||(this.rotating&&++this.shadowTick%4===0)){this.scene.updateMatrixWorld();this.contact.update(this.scene);this.contactDirty=false;}this.renderer.render(this.scene,this.camera);this.dirty=false;this.hasFrame=true;this.stage.classList.add('is-bereit');}
+ view(name){if(name==='rotate'){this.rotating=!this.rotating;this.contactDirty=true;this.dirty=true;return;}if(name==='in'||name==='out'){const offset=this.camera.position.clone().sub(this.controls.target);offset.multiplyScalar(name==='in'?.86:1.16);offset.clampLength(this.controls.minDistance,this.controls.maxDistance);this.camera.position.copy(this.controls.target).add(offset);}else{const views={hero:[5,14,82],front:[0,2,82],side:[80,16,8],inside:[-25,50,60]},direction=new THREE.Vector3(...views[name]).normalize(),zoom=this.fitDistance?THREE.MathUtils.clamp(this.camera.position.distanceTo(this.controls.target)/this.fitDistance,.48,2.6):1,distance=this.fitDistanceFor(direction,this.controls.target);if(distance>0){this.fitDistance=distance;this.controls.minDistance=distance*.48;this.controls.maxDistance=distance*2.6;this.camera.position.copy(this.controls.target).addScaledVector(direction,distance*zoom);}}this.controls.update();this.dirty=true;}
  snapshot(){if(!this.ready)return'';this.renderer.render(this.scene,this.camera);return this.renderer.domElement.toDataURL('image/png');}
  download(){const a=document.createElement('a');a.download='damla-trauringe.png';a.href=this.snapshot();a.click();}
 }

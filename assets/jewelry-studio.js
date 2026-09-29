@@ -92,7 +92,7 @@ export async function createWeddingStudio(renderer) {
   return {metal:filtered.texture,diamond:cube.texture,dispose(){filtered.dispose();cube.dispose();}};
 }
 
-const planeCache=new WeakMap();
+const planeCache=new WeakMap(),cameraSpace=new THREE.Matrix4();
 const diamondMaterialCache=new WeakMap();
 function facetPlanes(geo) {
   if(planeCache.has(geo))return planeCache.get(geo);
@@ -133,11 +133,11 @@ export function diamondMesh(geometry, environment, optical={}) {
       varying vec3 localPosition; varying vec3 localNormal;
       vec3 sampleStudio(vec3 d){return textureCube(env,normalize(orientation*d)).rgb;}
       float fresnel(float cosine,float ior){float r=(ior-1.0)/(ior+1.0);r*=r;return r+(1.0-r)*pow(1.0-clamp(cosine,0.0,1.0),5.0);}
-      vec3 traceGem(vec3 incident,vec3 normal,float ior){
+      vec3 traceGem(vec3 start,vec3 incident,vec3 normal,float ior){
         float entry=fresnel(dot(-incident,normal),ior);
         vec3 light=sampleStudio(reflect(incident,normal))*entry;
         vec3 direction=refract(incident,normal,1.0/ior);
-        vec3 origin=localPosition+direction*.0005;
+        vec3 origin=start+direction*.0005;
         vec3 energy=vec3(1.0-entry);
         for(int bounce=0;bounce<5;bounce++){
           float distance=1.e8;vec3 hitNormal=normal;
@@ -151,15 +151,22 @@ export function diamondMesh(geometry, environment, optical={}) {
           origin+=direction*distance;energy*=exp(-absorption*distance);
           vec3 exitDirection=refract(direction,-hitNormal,ior);
           float reflection=fresnel(dot(direction,hitNormal),ior);
-          if(dot(exitDirection,exitDirection)>.01){light+=sampleStudio(exitDirection)*energy*(1.0-reflection);energy*=reflection;}
+          if(dot(exitDirection,exitDirection)>.01){
+            // One path for all wavelengths; dispersion splits only the exiting ray, so fire shows as
+            // coherent coloured facets instead of per-pixel RGB speckle.
+            vec3 exitR=refract(direction,-hitNormal,ior-dispersion*.7),exitB=refract(direction,-hitNormal,ior+dispersion*1.3);
+            if(dot(exitR,exitR)<.01)exitR=exitDirection;if(dot(exitB,exitB)<.01)exitB=exitDirection;
+            light+=vec3(sampleStudio(exitR).r,sampleStudio(exitDirection).g,sampleStudio(exitB).b)*energy*(1.0-reflection);energy*=reflection;}
           direction=reflect(direction,hitNormal);origin+=direction*.0005;
         }
         light+=sampleStudio(direction)*energy*escapeWeight;
         return light;
       }
-      void main(){vec3 incident=normalize(localPosition-eye);vec3 n=normalize(localNormal);
-        vec3 red=traceGem(incident,n,ior-dispersion*.7);vec3 green=traceGem(incident,n,ior);vec3 blue=traceGem(incident,n,ior+dispersion*1.3);
-        gl_FragColor=vec4(vec3(red.r,green.g,blue.b)*environmentIntensity,1.0);
+      void main(){vec3 n=normalize(localNormal);
+        // Two samples on a diagonal inside the pixel footprint anti-alias the internal facet edges.
+        vec3 offset=.25*(dFdx(localPosition)+dFdy(localPosition)),a=localPosition+offset,b=localPosition-offset;
+        vec3 light=traceGem(a,normalize(a-eye),n,ior)+traceGem(b,normalize(b-eye),n,ior);
+        gl_FragColor=vec4(light*.5*environmentIntensity,1.0);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
       }`,
@@ -169,7 +176,8 @@ export function diamondMesh(geometry, environment, optical={}) {
   const mesh=new THREE.Mesh(geometry,material);
   mesh.onBeforeRender=(_renderer,_scene,camera)=>{
     mesh.worldToLocal(material.uniforms.eye.value.setFromMatrixPosition(camera.matrixWorld));
-    material.uniforms.orientation.value.setFromMatrix4(mesh.matrixWorld);
+    // Gems are lit like a photographer's turntable: the diamond studio stays fixed to the camera.
+    material.uniforms.orientation.value.setFromMatrix4(cameraSpace.multiplyMatrices(camera.matrixWorldInverse,mesh.matrixWorld));
     material.uniformsNeedUpdate=true;
   };
   return mesh;

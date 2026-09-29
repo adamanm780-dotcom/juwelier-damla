@@ -14,13 +14,13 @@ import * as THREE from 'three';
 const F0 = {
  yellow: [[333, [.863, .752, .576]], [375, [.884, .749, .546]], [585, [.942, .727, .443]], [750, [.977, .708, .380]], [900, [1, .691, .331]], [916, [1, .690, .327]]],
  red: [[333, [.91, .655, .54]], [375, [.925, .645, .525]], [585, [.955, .62, .49]], [750, [.96, .595, .465]]],
- honey: [[585, [.979, .706, .395]], [750, [1, .689, .354]]],
- champagne: [[585, [.888, .746, .564]], [750, [.905, .743, .541]]],
- white: [[333, [.765, .757, .74]], [375, [.768, .76, .744]], [585, [.775, .768, .755]], [750, [.785, .778, .765]]],
- gray: [[585, [.58, .565, .54]], [750, [.60, .585, .56]]],
- palladium: [[500, [.70, .675, .64]], [950, [.73, .705, .67]]],
- platinum: [[600, [.63, .615, .585]], [950, [.65, .635, .60]]],
- silver: [[925, [.95, .93, .88]]]
+ honey: [[585, [.99, .665, .33]], [750, [1, .635, .27]]],
+ champagne: [[585, [.88, .745, .63]], [750, [.895, .74, .61]]],
+ white: [[333, [.762, .764, .766]], [375, [.765, .767, .769]], [585, [.77, .773, .777]], [750, [.78, .783, .787]]],
+ gray: [[585, [.47, .47, .46]], [750, [.49, .49, .48]]],
+ palladium: [[500, [.66, .65, .63]], [950, [.69, .68, .66]]],
+ platinum: [[600, [.60, .605, .60]], [950, [.62, .625, .62]]],
+ silver: [[925, [.955, .945, .915]]]
 };
 export function metalF0(color, grade = 585) {
  const rows = F0[color] || F0.yellow;
@@ -62,9 +62,10 @@ const ENV_CHUNK = THREE.ShaderChunk.envmap_physical_pars_fragment
 				if ( inward > 0.05 && a > 1e-5 ) {
 					float b = dot( p.xz, d.xz );
 					float c = pr * pr - uBore.x * uBore.x;
-					float disc = max( b * b - a * c, 0.0 );
-					float t = ( - b + sqrt( disc ) ) / a;
-					if ( t > 1e-3 ) {
+					// Only points inside the bore cylinder see its opposite wall (c < 0); the rounded lip does not.
+					float disc = b * b - a * c;
+					float t = ( - b + sqrt( max( disc, 0.0 ) ) ) / a;
+					if ( c < 0.0 && t > 1e-3 ) {
 						vec3 h = p + d * t;
 						float wall = 1.0 - smoothstep( uBore.y - uBore.z, uBore.y + uBore.z, abs( h.y ) );
 						vec3 n2 = normalize( vec3( - h.x, 0.0, - h.z ) );
@@ -73,7 +74,7 @@ const ENV_CHUNK = THREE.ShaderChunk.envmap_physical_pars_fragment
 						float cosine = clamp( dot( - d, n2 ), 0.0, 1.0 );
 						vec3 f2 = diffuse + ( mix( vec3( 1.0 ), diffuse, uEdgeTint ) - diffuse ) * pow( 1.0 - cosine, 5.0 );
 						f2 -= ( diffuse + ( 1.0 - diffuse ) * 0.462664 ) * ( 1.0 - uF82 ) * 17.6479 * cosine * pow( 1.0 - cosine, 6.0 );
-						envMapColor = mix( envMapColor, second * f2 * uBore.w, wall * smoothstep( 0.05, 0.35, inward ) );
+						envMapColor = mix( envMapColor, second * f2 * uBore.w, wall * smoothstep( 0.05, 0.35, inward ) * ( 1.0 - smoothstep( uBore.x - 0.15, uBore.x, pr ) ) );
 					}
 				}
 			}
