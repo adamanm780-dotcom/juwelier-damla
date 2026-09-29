@@ -12,7 +12,7 @@ import * as THREE from 'three';
 // and red golds are derived from CIELab colour coordinates of standard gold colours (ISO 8654 2N/3N, 5N;
 // a* +1..+11, b* 14..36); white, platinum and palladium follow rhodium/Pt/Pd reflectance.
 const F0 = {
- yellow: [[333, [.863, .752, .576]], [375, [.884, .749, .546]], [585, [.942, .727, .443]], [750, [.977, .708, .380]], [900, [1, .691, .331]], [916, [1, .690, .327]]],
+ yellow: [[333, [.863, .752, .576]], [375, [.884, .749, .546]], [585, [.95, .745, .40]], [750, [.977, .708, .380]], [900, [1, .691, .331]], [916, [1, .690, .327]]],
  red: [[333, [.91, .655, .54]], [375, [.925, .645, .525]], [585, [.955, .62, .49]], [750, [.96, .595, .465]]],
  honey: [[585, [.99, .665, .33]], [750, [1, .635, .27]]],
  champagne: [[585, [.88, .745, .63]], [750, [.895, .74, .61]]],
@@ -43,7 +43,10 @@ function f82FromColor(c) {
  return new THREE.Vector3(.985 + (.81 - .985) * w, .995 + (.827 - .995) * w, 1 + (.846 - 1) * w);
 }
 // edgeTint: share of the alloy colour kept in the grazing Fresnel term (0 = Schlick; a light touch keeps rims warm).
-export const OPTICS = {edgeTint: .12, boreGain: 1, boreFeather: .12};
+// chromaLift: extra colour saturation of the reflected light for coloured alloys (gold, rose) only,
+// like a jeweller's colour grade: gold stays rich yellow into the highlights; white metals are untouched.
+export const OPTICS = {edgeTint: .12, boreGain: 1, boreFeather: .12, chromaLift: .1};
+function alloyChroma(c) { const max = Math.max(c.r, c.g, c.b); return max > 0 ? (max - Math.min(c.r, c.g, c.b)) / max : 0; }
 
 // Patched copies of three's physical lighting chunks (r169). Built once; verified below.
 const LIGHTS_CHUNK = THREE.ShaderChunk.lights_physical_pars_fragment
@@ -89,6 +92,7 @@ const matrix3 = new THREE.Matrix3();
 export function enhanceMetal(material, bore = null) {
  const uniforms = {
   uEdgeTint: {value: OPTICS.edgeTint}, uF82: {value: material.userData.f82 || f82FromColor(material.color)},
+  uChroma: {value: OPTICS.chromaLift * THREE.MathUtils.smoothstep(alloyChroma(material.color), .15, .4)},
   uBore: {value: new THREE.Vector4(bore?.radius || 1, bore?.halfWidth || 1, OPTICS.boreFeather, OPTICS.boreGain)},
   uToLocal: {value: new THREE.Matrix3()}, uToWorld: {value: new THREE.Matrix3()}
  };
@@ -105,12 +109,15 @@ export function enhanceMetal(material, bore = null) {
   }
   shader.fragmentShader = shader.fragmentShader
    .replace('#include <common>', `#include <common>
-uniform float uEdgeTint; uniform vec3 uF82; uniform vec4 uBore; uniform mat3 uToLocal; uniform mat3 uToWorld;
+uniform float uEdgeTint; uniform vec3 uF82; uniform vec4 uBore; uniform mat3 uToLocal; uniform mat3 uToWorld; uniform float uChroma;
 #ifdef RING_BORE
 varying vec3 vRingLocal; varying vec3 vRingLocalNormal;
 #endif`)
    .replace('#include <lights_physical_pars_fragment>', LIGHTS_CHUNK)
-   .replace('#include <envmap_physical_pars_fragment>', ENV_CHUNK);
+   .replace('#include <envmap_physical_pars_fragment>', ENV_CHUNK)
+   .replace('#include <opaque_fragment>', `float ringLuma = dot( outgoingLight, vec3( 0.2126, 0.7152, 0.0722 ) );
+outgoingLight = max( vec3( 0.0 ), mix( vec3( ringLuma ), outgoingLight, 1.0 + uChroma ) );
+#include <opaque_fragment>`);
  };
  material.customProgramCacheKey = () => 'damla-ring-optics-' + (bore ? 'bore' : 'plain');
  material.needsUpdate = true;
