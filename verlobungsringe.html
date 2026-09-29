@@ -571,8 +571,8 @@
     }
     .collections-header .gold-bar { margin: 0 auto; }
 
-    /* Drei Karten, die mittlere gross: Verlobungsringe stehen im
-       Mittelpunkt, Schmuck und Trauringe flankieren sie. */
+    /* Drei Karten, die mittlere gross: Trauringe stehen im
+       Mittelpunkt, Schmuck und Verlobungsringe flankieren sie. */
     .collections-grid {
       display: grid;
       grid-template-columns: 0.82fr 1.34fr 0.82fr;
@@ -582,7 +582,7 @@
       margin: 0 auto;
     }
     .collection-card a { display: block; color: inherit; }
-    .collection-card--gross img { aspect-ratio: 4 / 5.8; }
+    .collections-grid .collection-card--gross img { aspect-ratio: 4 / 5.8; }
     .collection-card--gross figcaption strong { font-size: 1.5rem; }
 
     .collection-card {
@@ -592,6 +592,7 @@
       border-radius: 240px 240px 8px 8px;  /* Bogen-Form */
       transition: transform 0.6s var(--ease-out), box-shadow 0.6s ease;
     }
+    .contact-atelier .contact-atelier__aside figure img.photo-pair { aspect-ratio: 3 / 2; object-fit: contain; background: #e9e2d7; }
     .collection-card:hover {
       transform: translateY(-8px);
       box-shadow: var(--shadow-card);
@@ -1291,8 +1292,8 @@
 
       .contact-grid { grid-template-columns: 1fr; gap: 48px; }
       .collections-grid { grid-template-columns: 1fr 1fr; max-width: 780px; }
-      .collection-card--gross { grid-column: span 2; }
-      .collection-card--gross img { aspect-ratio: 16 / 10; }
+      .collection-card--gross { grid-column: span 2; grid-row: 1; }
+      .collections-grid .collection-card--gross img { aspect-ratio: 16 / 10; }
       .services-grid .service-card { flex-basis: calc(50% - 1px); }
       .gallery-card--wide img { aspect-ratio: 16 / 10; }
       .reviews-grid { grid-template-columns: 1fr 1fr; }
@@ -1331,9 +1332,9 @@
       /* Untereinander werden die Bogen sonst sehr hoch — drei Karten
          a 520 px sind ein halber Bildschirm zu viel Scrollweg. */
       .collections-grid { grid-template-columns: 1fr; gap: 16px; }
-      .collection-card--gross { grid-column: auto; }
+      .collection-card--gross { grid-column: auto; grid-row: auto; }
       .collection-card img { aspect-ratio: 4 / 4.5; }
-      .collection-card--gross img { aspect-ratio: 4 / 5; }
+      .collections-grid .collection-card--gross img { aspect-ratio: 4 / 5; }
       .collection-card--gross figcaption strong { font-size: 1.35rem; }
       .collections-header { margin-bottom: 40px; }
 
@@ -1587,7 +1588,7 @@
     }
 
     /* Dunkelt die Clips ab. Zwei Lagen: ein gleichmaessiger Schleier ueber
-       das ganze Bild und ein weicher Schatten in der Mitte, damit das weisse
+       das ganze Bild und ein weicher Schatten in der Mitte, damit das goldene
        Logo auch vor der hell beleuchteten Auslage steht. */
     .hero__shade {
       position: absolute;
@@ -1604,6 +1605,16 @@
           rgba(18,14,11,0.36) 100%);
     }
 
+    /* Originalkontur: nur die Farbe aendern, das JD niemals neu zeichnen. */
+    .damla-original-logo {
+      display: block;
+      aspect-ratio: 900 / 917;
+      background-color: #c9a45a;
+      -webkit-mask: url('assets/logo-mark.webp') center / contain no-repeat;
+      mask: url('assets/logo-mark.webp') center / contain no-repeat;
+      mask-mode: alpha;
+    }
+
     /* das freigestellte Logo steht mittig vor dem Video */
     .hero__mark {
       position: absolute;
@@ -1614,7 +1625,7 @@
       height: auto;
       transform: translate(-50%, -50%);
       pointer-events: none;
-      filter: drop-shadow(0 6px 22px rgba(0,0,0,0.5));
+      filter: none;
       opacity: 0;
       animation: fadeIn 1.6s ease 0.35s forwards;
     }
@@ -2232,7 +2243,7 @@
     }
   </style>
 
-  <link rel="stylesheet" href="site-design.css?v=20260906-layout">
+  <link rel="stylesheet" href="site-design.css?v=20260928-photos">
 </head>
 
 <body>
@@ -2340,42 +2351,42 @@
     <div class="ring-scroll__pin">
       <div class="ring-scroll__head">
         <span class="eyebrow">Unsere Verlobungsringe</span>
-        <h2 class="section-title" id="modelleTitle">Drei Schliffe, ein Versprechen</h2>
+        <h2 class="section-title" id="modelleTitle">Ein Blick in unsere Auswahl</h2>
         <div class="gold-bar" role="presentation"></div>
       </div>
 
-      <div class="ring-scroll__viewport" tabindex="0" role="group" aria-label="Ringmodelle – zum nächsten Modell scrollen oder wischen">
+      <div class="ring-scroll__viewport" tabindex="0" role="group" aria-label="Ringauswahl – zur nächsten Aufnahme scrollen oder wischen">
         <div class="ring-scroll__track">
 
           <article class="ring-panel">
             <div class="ring-panel__inner">
-              <img class="ring-panel__img" src="assets/vr-modell-1-cut.webp" alt="Verlobungsring mit Tropfenschliff und seitlichen Diamanten, Gelbgold, freigestellt" loading="lazy" width="587" height="397">
+              <img class="ring-panel__img" src="assets/photos-20260928/schmuck-sortiment.webp" srcset="assets/photos-20260928/schmuck-sortiment-640.webp 640w, assets/photos-20260928/schmuck-sortiment.webp 1086w" sizes="(max-width: 900px) 86vw, 600px" alt="Ringauswahl in einem dunklen Schmucktableau" loading="lazy" decoding="async" width="1086" height="1448">
               <div class="ring-panel__body">
-                <h3 class="ring-panel__name">Der Tropfen</h3>
+                <h3 class="ring-panel__name">Klare Formen</h3>
                 <div class="gold-bar" role="presentation"></div>
-                <p class="ring-panel__desc">Ein Diamant im Tropfenschliff, flankiert von zwei feinen Beisteinen. Klassisch in der Linie, unverwechselbar in der Wirkung.</p>
+                <p class="ring-panel__desc">Runde und rechteckige Steinformen, feine Schienen und unterschiedliche Größen. Ein Blick auf die Details unserer fotografierten Auswahl.</p>
               </div>
             </div>
           </article>
 
           <article class="ring-panel">
             <div class="ring-panel__inner">
-              <img class="ring-panel__img" src="assets/vr-modell-2-cut.webp" alt="Verlobungsring mit Smaragdschliff als Solitär in Gelbgold, freigestellt" loading="lazy" width="576" height="482">
+              <img class="ring-panel__img" src="assets/photos-20260928/verlobungsringe-sortiment.webp" srcset="assets/photos-20260928/verlobungsringe-sortiment-640.webp 640w, assets/photos-20260928/verlobungsringe-sortiment.webp 1122w" sizes="(max-width: 900px) 86vw, 600px" alt="Solitär-Ringe in vier Reihen eines hellen Schmucktableaus" loading="lazy" decoding="async" width="1122" height="1402">
               <div class="ring-panel__body">
-                <h3 class="ring-panel__name">Der Smaragdschliff</h3>
+                <h3 class="ring-panel__name">Feine Unterschiede</h3>
                 <div class="gold-bar" role="presentation"></div>
-                <p class="ring-panel__desc">Ruhige, klare Facetten auf einer schlichten Schiene. Der Solitär für alle, die es reduziert und zeitlos mögen.</p>
+                <p class="ring-panel__desc">Fassung, Steinform und Ringschiene prägen den Eindruck. Nebeneinander werden die Unterschiede sichtbar.</p>
               </div>
             </div>
           </article>
 
           <article class="ring-panel">
             <div class="ring-panel__inner">
-              <img class="ring-panel__img" src="assets/vr-modell-3-cut.webp" alt="Verlobungsring mit Ovalschliff als Solitär in Gelbgold, freigestellt" loading="lazy" width="618" height="571">
+              <img class="ring-panel__img" src="assets/photos-20260928/ringe-sortiment.webp" srcset="assets/photos-20260928/ringe-sortiment-640.webp 640w, assets/photos-20260928/ringe-sortiment.webp 1122w" sizes="(max-width: 900px) 86vw, 600px" alt="Verschiedene Ringe in einem silbergrauen Schmucktableau" loading="lazy" decoding="async" width="1122" height="1402">
               <div class="ring-panel__body">
-                <h3 class="ring-panel__name">Der Ovale</h3>
+                <h3 class="ring-panel__name">In Ruhe auswählen</h3>
                 <div class="gold-bar" role="presentation"></div>
-                <p class="ring-panel__desc">Der ovale Solitär streckt den Finger und fängt das Licht aus jedem Winkel – ein wenig Glanz mehr als beim runden Brillanten.</p>
+                <p class="ring-panel__desc">Manchmal entscheidet ein kleines Detail. Wir nehmen uns Zeit, gemeinsam mit Ihnen genauer hinzusehen.</p>
               </div>
             </div>
           </article>
@@ -2814,6 +2825,8 @@
       const FADE = 800;      // muss zur CSS-Transition passen
 
       // Fortschritt fuer den Ladescreen: jeder Clip meldet sich einmal.
+      // Beide Clips werden ausdruecklich angestossen, damit der zweite
+      // bereits gepuffert ist, wenn die erste Blende kommt.
       vids.forEach(function (v) {
         let told = false;
         function ready() {
@@ -2821,12 +2834,18 @@
           told = true;
           if (window.__heroWarm) window.__heroWarm();
         }
+        v.muted = true;
+        v.setAttribute('muted', '');
+        try { v.load(); } catch (e) {}
         if (v.readyState >= 2) ready();
         else {
           v.addEventListener('loadeddata', ready, { once: true });
           v.addEventListener('error', ready, { once: true });
         }
       });
+      // Ein Clip gilt als spielbereit, wenn er ueber das erste Bild hinaus
+      // gepuffert hat oder fehlgeschlagen ist (dann zeigt er sein Poster).
+      function canShow(v) { return v.readyState >= 3 || !!v.error; }
 
       // Wer weniger Bewegung moechte, bekommt nur das Standbild.
       const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -2860,12 +2879,33 @@
             if (vids[idx] !== prev) prev.classList.remove('is-on');
           }, FADE);
         }
-        try { next.currentTime = 0; } catch (e) {}
-        next.classList.add('is-on');
+        try { if (next.currentTime > 0.05) next.currentTime = 0; } catch (e) {}
+        // Erst einblenden, wenn der Clip wirklich laeuft (oder nach kurzer
+        // Frist mit seinem Poster) — so gibt es kein leeres Bild.
+        clearTimeout(next.__reveal);
+        const reveal = function () { clearTimeout(next.__reveal); next.classList.add('is-on'); };
+        if (!prev) reveal();
+        else {
+          next.addEventListener('playing', reveal, { once: true });
+          next.__reveal = setTimeout(reveal, 350);
+        }
         play(next);
         clearTimeout(timer);
         nextAt = Date.now() + SLOT;
-        timer = setTimeout(function () { show((i + 1) % vids.length, next); }, SLOT);
+        timer = setTimeout(function () { advance(i, next); }, SLOT);
+      }
+
+      // Weiter zum naechsten Clip — aber nur, wenn der schon gepuffert
+      // ist. Sonst laeuft der aktuelle noch einmal von vorn, statt dass
+      // eine leere oder ruckelnde Blende zu sehen ist.
+      function advance(i, cur) {
+        const n = (i + 1) % vids.length;
+        const next = vids[n];
+        if (canShow(next) || Date.now() > nextAt + 4000) { show(n, cur); return; }
+        if (cur.paused || cur.ended) { try { cur.currentTime = 0; } catch (e) {} play(cur); }
+        nextAt = Date.now() + 700;
+        clearTimeout(timer);
+        timer = setTimeout(function () { advance(i, cur); }, 700);
       }
 
       // Sicherheitsnetz, damit die Schleife wirklich nie endet: iOS haelt
@@ -2875,7 +2915,7 @@
       function watch() {
         if (!running) return;
         const v = vids[idx];
-        if (Date.now() > nextAt + 900) { show((idx + 1) % vids.length, v); return; }
+        if (Date.now() > nextAt + 900) { advance(idx, v); return; }
         if (v.paused && !v.ended) play(v);
       }
 
@@ -2908,6 +2948,18 @@
         if (document.hidden) stop();
         else if (sec.getBoundingClientRect().bottom > 0) start();
       });
+      // Zurueck aus dem Browser-Cache: Timer und Videos neu anstossen.
+      window.addEventListener('pageshow', function (e) {
+        if (e.persisted) { stop(); if (sec.getBoundingClientRect().bottom > 0) start(); }
+      });
+      // Wenn der Browser das automatische Abspielen verweigert (z. B. iOS
+      // Stromsparmodus), startet die erste Beruehrung die Clips.
+      const unlock = function () {
+        const v = vids[idx];
+        if (running && v.paused) play(v);
+      };
+      window.addEventListener('touchstart', unlock, { passive: true, once: true });
+      window.addEventListener('pointerdown', unlock, { passive: true, once: true });
       start();
 
       // Scroll-Hinweis verblasst, sobald es losgeht.
@@ -3020,8 +3072,10 @@
 
     // ── Schmuckkästchen: Scroll-Animation (Frame-Scrubbing) ──
     // 50 Frames aus einem Greenscreen-Video, beim Freistellen schon
-    // mit Alphakanal versehen. Deshalb hier kein Keying mehr pro Bild
-    // wie beim alten Ring — das Canvas zeichnet nur noch.
+    // mit Alphakanal versehen. Das Canvas zeichnet nur noch.
+    // Die Frames werden früh, in Scroll-Nähe zuerst und mit begrenzter
+    // Parallelität geladen und vor dem Zeichnen dekodiert, damit die
+    // Bewegung von Anfang an ohne Sprünge läuft.
     (function () {
       const canvas  = document.getElementById('kastenCanvas');
       const sektion = document.getElementById('ring');
@@ -3029,40 +3083,92 @@
       if (!canvas || !sektion) return;
       const ctx = canvas.getContext('2d');
       const FRAMES = 50;
+      const PARALLEL = 3;
       const SRC = i => 'assets/kasten/kasten-' + String(i + 1).padStart(3, '0') + '.webp';
       const imgs = new Array(FRAMES);
+      const done = new Array(FRAMES).fill(false);
       const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      let current = -1;
-      const ready = i => imgs[i] && imgs[i].complete && imgs[i].naturalWidth;
+      let current = -1, target = 0, loading = 0, started = false;
 
       function draw(i) {
-        if (!ready(i)) return;
+        if (!done[i]) return;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(imgs[i], 0, 0, canvas.width, canvas.height);
         current = i;
       }
-      function load(i, cb) {
+      // Das dem Ziel nächste bereits geladene Bild, bevorzugt davor.
+      function nearest(i) {
+        for (let d = 0; d < FRAMES; d++) {
+          if (i - d >= 0 && done[i - d]) return i - d;
+          if (i + d < FRAMES && done[i + d]) return i + d;
+        }
+        return -1;
+      }
+      function settle() {
+        const j = nearest(target);
+        if (j >= 0 && j !== current) draw(j);
+      }
+      function finished(i) {
+        done[i] = true;
+        loading--;
+        settle();
+        pump();
+      }
+      function load(i) {
         if (imgs[i]) return;
         const im = new Image();
         im.decoding = 'async';
-        if (cb) im.onload = cb;
-        im.src = SRC(i);
         imgs[i] = im;
+        loading++;
+        im.onload = function () {
+          if (im.decode) im.decode().then(() => finished(i), () => finished(i));
+          else finished(i);
+        };
+        im.onerror = function () { loading--; imgs[i] = null; pump(); };
+        im.src = SRC(i);
+      }
+      // Reihenfolge: Ziel-Frame, dann abwechselnd davor und danach.
+      function next() {
+        for (let d = 0; d < FRAMES; d++) {
+          const a = target + d, b = target - d;
+          if (a < FRAMES && !imgs[a]) return a;
+          if (b >= 0 && !imgs[b]) return b;
+        }
+        return -1;
+      }
+      function pump() {
+        if (!started) return;
+        while (loading < PARALLEL) {
+          const i = next();
+          if (i < 0) return;
+          load(i);
+        }
+      }
+      function start() {
+        if (started) return;
+        started = true;
+        pump();
       }
 
       if (reduced) {                       // offener Kasten genügt
-        load(FRAMES - 1, () => draw(FRAMES - 1));
+        target = FRAMES - 1;
+        start();
         return;
       }
 
-      load(0, () => draw(0));
-      // Die restlichen Bilder sind zusammen gut zwei Megabyte. Erst
-      // laden, wenn die Seite steht — sonst nehmen sie dem Hero-Video
-      // die Leitung weg.
-      const rest = () => { for (let i = 1; i < FRAMES; i++) load(i); };
-      if (document.readyState === 'complete') rest();
-      else window.addEventListener('load', rest, { once: true });
+      // Das erste Bild sofort; die übrigen, sobald der Kasten in die
+      // Nähe rückt oder die Seite kurz gestanden hat — nicht erst nach
+      // dem vollständigen Laden der Hero-Videos.
+      load(0);
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(function (es, obs) {
+          if (es.some(e => e.isIntersecting)) { start(); obs.disconnect(); }
+        }, { rootMargin: '150% 0px' }).observe(sektion);
+      }
+      window.addEventListener('DOMContentLoaded', () => setTimeout(start, 900), { once: true });
+      window.addEventListener('load', start, { once: true });
+      setTimeout(start, 2500);
 
       let ticking = false;
       function update() {
@@ -3070,12 +3176,8 @@
         const runway = sektion.offsetHeight - window.innerHeight;
         if (runway <= 0) return;
         const p = Math.min(1, Math.max(0, -sektion.getBoundingClientRect().top / runway));
-        const idx = Math.min(FRAMES - 1, Math.round(p * (FRAMES - 1)));
-        if (idx !== current) {
-          let j = idx;
-          while (j >= 0 && !ready(j)) j--;        // nächstes geladenes Frame
-          if (j >= 0 && j !== current) draw(j);
-        }
+        target = Math.min(FRAMES - 1, Math.round(p * (FRAMES - 1)));
+        if (target !== current) { settle(); pump(); }
         canvas.style.transform = 'scale(' + (0.95 + p * 0.08).toFixed(4) + ')';
         // Gegenbewegung: der Schimmer wandert nach unten, während die
         // Seite nach oben läuft. Bewusst klein gehalten — er soll Tiefe
@@ -3084,10 +3186,10 @@
           schimmer.style.transform = 'translateY(' + ((p - 0.5) * 96).toFixed(1) + 'px)';
         }
       }
-      window.addEventListener('scroll', () => {
-        if (!ticking) { ticking = true; requestAnimationFrame(update); }
-      }, { passive: true });
-      window.addEventListener('resize', update);
+      const schedule = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
+      window.addEventListener('scroll', schedule, { passive: true });
+      window.addEventListener('resize', schedule);
+      window.addEventListener('pageshow', schedule);
       update();
     })();
 

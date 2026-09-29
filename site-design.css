@@ -101,3 +101,13 @@ a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible,s
 .tr-konf>*,.atelier-title>*{min-width:0;max-width:100%}
 .atelier-title h1{overflow-wrap:anywhere}
 .eyebrow{max-width:100%;white-space:normal;overflow-wrap:anywhere}
+
+/* Echte Damla-Fotoquellen, KI-retuschiert und freigestellt. */
+.tr-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.tr-karte__bild { width: 100%; max-width: 280px; height: clamp(180px, 20vw, 270px); }
+.ring-story__card figure.photo-contain { background: #eee8dd; }
+.ring-story__card .photo-contain img { object-fit: contain; object-position: center; }
+@media (max-width: 760px) {
+  .tr-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .tr-karte__bild { height: clamp(130px, 34vw, 210px); }
+}

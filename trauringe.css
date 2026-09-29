@@ -254,3 +254,12 @@
       .tr-karte:hover { transform: none; }
       .tr-karte:hover .tr-karte__bild { transform: none; }
     }
+
+    /* Quadratische Freisteller aus echten Fotoquellen. */
+    .tr-kopf__reihe { gap: clamp(8px, 2.6vw, 40px); }
+    .tr-kopf__reihe li { flex: 1 1 0; min-width: 0; max-width: 168px; }
+    .tr-kopf__reihe img { width: 100%; height: auto; aspect-ratio: 1; object-fit: contain; }
+    @media (max-width: 600px) {
+      .tr-kopf__reihe { gap: 6px; }
+      .tr-kopf__reihe img { height: auto; }
+    }

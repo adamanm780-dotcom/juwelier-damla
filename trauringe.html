@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trauringe – zehn Modelle aus unserer Vitrine | Juwelier Damla Wiesbaden</title>
-  <meta name="description" content="Trauringe bei Juwelier Damla in Wiesbaden: zehn Modelle in Gelb-, Weiß- und Rotgold, bicolor, mattiert oder mit Brillanten. Dazu der Konfigurator zum Selbstzusammenstellen. Wellritzstraße 3, ohne Termin.">
+  <title>Trauringe – unsere Ringauswahl | Juwelier Damla Wiesbaden</title>
+  <meta name="description" content="Trauringe bei Juwelier Damla in Wiesbaden: neun fotografische Ansichten, satinierte und polierte Oberflächen, schlichte Formen und feine Steinreihen. Persönliche Beratung und Anprobe in der Wellritzstraße 3.">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="canonical" href="https://adamanm780-dotcom.github.io/juwelier-damla/trauringe.html">
 
@@ -17,7 +17,7 @@
     "@context": "https://schema.org",
     "@type": "WebPage",
     "name": "Trauringe",
-    "description": "Trauringe bei Juwelier Damla in Wiesbaden: zehn Modelle in Gelb-, Weiß- und Rotgold, bicolor, mattiert oder mit Brillanten. Dazu der Konfigurator zum Selbstzusammenstellen. Wellritzstraße 3, ohne Termin.",
+    "description": "Trauringe bei Juwelier Damla in Wiesbaden: neun fotografische Ansichten, satinierte und polierte Oberflächen, schlichte Formen und feine Steinreihen. Persönliche Beratung und Anprobe in der Wellritzstraße 3.",
     "isPartOf": {
       "@type": "WebSite",
       "name": "Juwelier Damla",
@@ -571,8 +571,8 @@
     }
     .collections-header .gold-bar { margin: 0 auto; }
 
-    /* Drei Karten, die mittlere gross: Verlobungsringe stehen im
-       Mittelpunkt, Schmuck und Trauringe flankieren sie. */
+    /* Drei Karten, die mittlere gross: Trauringe stehen im
+       Mittelpunkt, Schmuck und Verlobungsringe flankieren sie. */
     .collections-grid {
       display: grid;
       grid-template-columns: 0.82fr 1.34fr 0.82fr;
@@ -582,7 +582,7 @@
       margin: 0 auto;
     }
     .collection-card a { display: block; color: inherit; }
-    .collection-card--gross img { aspect-ratio: 4 / 5.8; }
+    .collections-grid .collection-card--gross img { aspect-ratio: 4 / 5.8; }
     .collection-card--gross figcaption strong { font-size: 1.5rem; }
 
     .collection-card {
@@ -592,6 +592,7 @@
       border-radius: 240px 240px 8px 8px;  /* Bogen-Form */
       transition: transform 0.6s var(--ease-out), box-shadow 0.6s ease;
     }
+    .contact-atelier .contact-atelier__aside figure img.photo-pair { aspect-ratio: 3 / 2; object-fit: contain; background: #e9e2d7; }
     .collection-card:hover {
       transform: translateY(-8px);
       box-shadow: var(--shadow-card);
@@ -1291,8 +1292,8 @@
 
       .contact-grid { grid-template-columns: 1fr; gap: 48px; }
       .collections-grid { grid-template-columns: 1fr 1fr; max-width: 780px; }
-      .collection-card--gross { grid-column: span 2; }
-      .collection-card--gross img { aspect-ratio: 16 / 10; }
+      .collection-card--gross { grid-column: span 2; grid-row: 1; }
+      .collections-grid .collection-card--gross img { aspect-ratio: 16 / 10; }
       .services-grid .service-card { flex-basis: calc(50% - 1px); }
       .gallery-card--wide img { aspect-ratio: 16 / 10; }
       .reviews-grid { grid-template-columns: 1fr 1fr; }
@@ -1331,9 +1332,9 @@
       /* Untereinander werden die Bogen sonst sehr hoch — drei Karten
          a 520 px sind ein halber Bildschirm zu viel Scrollweg. */
       .collections-grid { grid-template-columns: 1fr; gap: 16px; }
-      .collection-card--gross { grid-column: auto; }
+      .collection-card--gross { grid-column: auto; grid-row: auto; }
       .collection-card img { aspect-ratio: 4 / 4.5; }
-      .collection-card--gross img { aspect-ratio: 4 / 5; }
+      .collections-grid .collection-card--gross img { aspect-ratio: 4 / 5; }
       .collection-card--gross figcaption strong { font-size: 1.35rem; }
       .collections-header { margin-bottom: 40px; }
 
@@ -1587,7 +1588,7 @@
     }
 
     /* Dunkelt die Clips ab. Zwei Lagen: ein gleichmaessiger Schleier ueber
-       das ganze Bild und ein weicher Schatten in der Mitte, damit das weisse
+       das ganze Bild und ein weicher Schatten in der Mitte, damit das goldene
        Logo auch vor der hell beleuchteten Auslage steht. */
     .hero__shade {
       position: absolute;
@@ -1604,6 +1605,16 @@
           rgba(18,14,11,0.36) 100%);
     }
 
+    /* Originalkontur: nur die Farbe aendern, das JD niemals neu zeichnen. */
+    .damla-original-logo {
+      display: block;
+      aspect-ratio: 900 / 917;
+      background-color: #c9a45a;
+      -webkit-mask: url('assets/logo-mark.webp') center / contain no-repeat;
+      mask: url('assets/logo-mark.webp') center / contain no-repeat;
+      mask-mode: alpha;
+    }
+
     /* das freigestellte Logo steht mittig vor dem Video */
     .hero__mark {
       position: absolute;
@@ -1614,7 +1625,7 @@
       height: auto;
       transform: translate(-50%, -50%);
       pointer-events: none;
-      filter: drop-shadow(0 6px 22px rgba(0,0,0,0.5));
+      filter: none;
       opacity: 0;
       animation: fadeIn 1.6s ease 0.35s forwards;
     }
@@ -2216,7 +2227,7 @@
 
     /* — Portrait-Variante der Editorial-Reihen — */
     .ed-media--portrait { max-width: 400px; }
-    .ed-media--portrait img { aspect-ratio: 3 / 4; }
+    .ed-media--portrait img { height: auto; aspect-ratio: auto; object-fit: contain; }
 
     @media (max-width: 900px) {
       .ed-row { grid-template-columns: 1fr; gap: 28px; }
@@ -2488,8 +2499,17 @@
       .tr-karte:hover { transform: none; }
       .tr-karte:hover .tr-karte__bild { transform: none; }
     }
+
+    /* Quadratische Freisteller aus echten Fotoquellen. */
+    .tr-kopf__reihe { gap: clamp(8px, 2.6vw, 40px); }
+    .tr-kopf__reihe li { flex: 1 1 0; min-width: 0; max-width: 168px; }
+    .tr-kopf__reihe img { width: 100%; height: auto; aspect-ratio: 1; object-fit: contain; }
+    @media (max-width: 600px) {
+      .tr-kopf__reihe { gap: 6px; }
+      .tr-kopf__reihe img { height: auto; }
+    }
   </style>
-  <link rel="stylesheet" href="site-design.css?v=20260906-layout">
+  <link rel="stylesheet" href="site-design.css?v=20260928-photos">
 </head>
 
 <body>
@@ -2565,12 +2585,12 @@
   ═══════════════════════════════════ -->
   <section class="sub-hero">
     <div class="sub-band tr-kopf">
-      <ul class="tr-kopf__reihe" aria-label="Trauringe aus unserer Vitrine">
-        <li><img src="assets/trauringe/modell-05.webp" alt="Schlichter, polierter Trauring in Gelbgold" width="403" height="736" fetchpriority="high" decoding="async"></li>
-        <li><img src="assets/trauringe/modell-01.webp" alt="Trauring in Gelbgold mit gebürstetem Weißgoldband" width="403" height="736" fetchpriority="high" decoding="async"></li>
-        <li><img src="assets/trauringe/modell-06.webp" alt="Trauring mit Brillantreihe in einem Weißgoldkanal" width="403" height="736" fetchpriority="high" decoding="async"></li>
-        <li><img src="assets/trauringe/modell-04.webp" alt="Trauring in Weißgold mit feiner Gelbgoldlinie" width="403" height="736" decoding="async"></li>
-        <li><img src="assets/trauringe/modell-08.webp" alt="Trauring in Gelbgold mit dichter Pavé-Brillantreihe" width="403" height="736" decoding="async"></li>
+      <ul class="tr-kopf__reihe" aria-label="Ringauswahl von Juwelier Damla">
+        <li><img src="assets/photos-20260928/ring-01.webp" alt="Satinierter Ring mit feiner Rille" width="1000" height="1000" fetchpriority="high" decoding="async"></li>
+        <li><img src="assets/photos-20260928/ring-02.webp" alt="Satinierter Ring mit randständiger Steinreihe" width="1000" height="1000" fetchpriority="high" decoding="async"></li>
+        <li><img src="assets/photos-20260928/ring-05.webp" alt="Gerundeter, hochglanzpolierter Ring" width="1000" height="1000" loading="lazy" decoding="async"></li>
+        <li><img src="assets/photos-20260928/ring-07.webp" alt="Flacher Ring mit breiter Hochglanzfläche" width="1000" height="1000" loading="lazy" decoding="async"></li>
+        <li><img src="assets/photos-20260928/ring-08.webp" alt="Hochglanzpolierter Ring mit randständiger Steinreihe" width="1000" height="1000" loading="lazy" decoding="async"></li>
       </ul>
       <div class="sub-band__cap" aria-hidden="true">Trauringe · Wellritzstraße 3</div>
     </div>
@@ -2585,7 +2605,7 @@
         <p class="sub-hero__sub reveal d3">
           Ein Trauring wird jeden Tag getragen – jahrzehntelang. Deshalb entscheidet
           am Ende nicht der Katalog, sondern wie er sich am Finger anfühlt.
-          Hier sehen Sie, was bei uns in der Vitrine liegt.
+          Entdecken Sie ausgewählte Ringe aus unseren eigenen Fotografien.
         </p>
         <div class="sub-actions reveal d3">
           <a href="trauring-konfigurator.html" class="btn-solid">Ring selbst zusammenstellen</a>
@@ -2601,100 +2621,84 @@
   <section id="modelle" aria-labelledby="modelleTitel">
     <div class="wrap">
       <div class="sub-head">
-        <span class="eyebrow reveal">Aus unserer Vitrine</span>
-        <h2 class="section-title reveal d1" id="modelleTitel">Zehn Ringe,<br>zehn Handschriften</h2>
+        <span class="eyebrow reveal">Unsere Ringauswahl</span>
+        <h2 class="section-title reveal d1" id="modelleTitel">Neun Ansichten,<br>viele Details</h2>
         <div class="gold-bar reveal d2" role="presentation"></div>
         <p class="sub-intro reveal d3">
-          Bicolor oder einfarbig, poliert oder mattiert, mit Brillanten oder ganz ruhig.
-          Jedes Modell fertigen wir in Gelb-, Weiß- oder Rotgold und in Ihrer Breite.
+          Satinierte Flächen, klare Linien, warmer Glanz und feine Steinreihen.
+          Sehen Sie sich die Unterschiede in Ruhe an.
         </p>
       </div>
 
+      <!-- Echte Fotoquellen, KI-freigestellt und retuschiert; keine SKU- oder Preiszuordnung. -->
       <div class="tr-grid">
         <article class="tr-karte reveal">
-          <img class="tr-karte__bild" src="assets/trauringe/modell-01.webp"
-               alt="Trauring in Gelbgold mit gebürstetem Weißgoldband in der Mitte" width="403" height="736" loading="lazy" decoding="async">
-          <h3 class="tr-karte__name">Wellritz</h3>
-          <span class="tr-karte__mass">6 mm · Bicolor</span>
-          <p class="tr-karte__text">Gebürstetes Weißgoldband zwischen polierten Gelbgoldkanten.</p>
+          <img class="tr-karte__bild" src="assets/photos-20260928/ring-01.webp"
+               alt="Satinierter Ring mit feiner Rille" width="1000" height="1000" loading="lazy" decoding="async">
+          <h3 class="tr-karte__name">Ansicht 01</h3>
+          <p class="tr-karte__text">Satinierte Fläche und eine feine Rille nahe der Kante.</p>
         </article>
 
         <article class="tr-karte reveal d1">
-          <img class="tr-karte__bild" src="assets/trauringe/modell-02.webp"
-               alt="Flacher Trauring in Gelbgold mit eingelassenem Weißgoldfeld" width="403" height="736" loading="lazy" decoding="async">
-          <h3 class="tr-karte__name">Carré</h3>
-          <span class="tr-karte__mass">6 mm · Bicolor</span>
-          <p class="tr-karte__text">Flache Schiene mit eingelassenem, poliertem Weißgoldfeld.</p>
+          <img class="tr-karte__bild" src="assets/photos-20260928/ring-02.webp"
+               alt="Satinierter Ring mit randständiger Steinreihe" width="1000" height="1000" loading="lazy" decoding="async">
+          <h3 class="tr-karte__name">Ansicht 02</h3>
+          <p class="tr-karte__text">Satinierte Fläche mit einer Steinreihe an einem Rand.</p>
         </article>
 
         <article class="tr-karte reveal d2">
-          <img class="tr-karte__bild" src="assets/trauringe/modell-03.webp"
-               alt="Mattierter Trauring in Gelbgold mit Brillantreihe an einer Kante" width="403" height="736" loading="lazy" decoding="async">
-          <h3 class="tr-karte__name">Saum</h3>
-          <span class="tr-karte__mass">5 mm · mit Brillanten</span>
-          <p class="tr-karte__text">Mattierte Schiene, eine Brillantreihe läuft an einer Kante entlang.</p>
+          <img class="tr-karte__bild" src="assets/photos-20260928/ring-03.webp"
+               alt="Flacher, satinierter Ring ohne Steinbesatz" width="1000" height="1000" loading="lazy" decoding="async">
+          <h3 class="tr-karte__name">Ansicht 03</h3>
+          <p class="tr-karte__text">Schlichte, flache Form mit ruhiger satinierter Oberfläche.</p>
         </article>
 
         <article class="tr-karte reveal">
-          <img class="tr-karte__bild" src="assets/trauringe/modell-04.webp"
-               alt="Trauring in Weißgold, seidenmatt, mit feiner Gelbgoldlinie" width="403" height="736" loading="lazy" decoding="async">
-          <h3 class="tr-karte__name">Linie</h3>
-          <span class="tr-karte__mass">5 mm · Weißgold</span>
-          <p class="tr-karte__text">Seidenmatte Fläche, eine feine Gelbgoldlinie und eine Rille daneben.</p>
+          <img class="tr-karte__bild" src="assets/photos-20260928/ring-04.webp"
+               alt="Breiter wirkender Ring mit satinierter Oberfläche" width="1000" height="1000" loading="lazy" decoding="async">
+          <h3 class="tr-karte__name">Ansicht 04</h3>
+          <p class="tr-karte__text">Breite satinierte Fläche mit klaren, glatten Kanten.</p>
         </article>
 
         <article class="tr-karte reveal d1">
-          <img class="tr-karte__bild" src="assets/trauringe/modell-05.webp"
-               alt="Schlichter, polierter Trauring in Gelbgold" width="403" height="736" loading="lazy" decoding="async">
-          <h3 class="tr-karte__name">Klar</h3>
-          <span class="tr-karte__mass">6 mm · Gelbgold</span>
-          <p class="tr-karte__text">Ganz ohne Zutat: hochglanzpoliert und sanft gewölbt.</p>
+          <img class="tr-karte__bild" src="assets/photos-20260928/ring-05.webp"
+               alt="Gerundeter, hochglanzpolierter Ring ohne Steinbesatz" width="1000" height="1000" loading="lazy" decoding="async">
+          <h3 class="tr-karte__name">Ansicht 05</h3>
+          <p class="tr-karte__text">Sanft gerundete Form und durchgehender Hochglanz.</p>
         </article>
 
         <article class="tr-karte reveal d2">
-          <img class="tr-karte__bild" src="assets/trauringe/modell-06.webp"
-               alt="Trauring in Gelbgold mit Brillantreihe in einem Weißgoldkanal" width="403" height="736" loading="lazy" decoding="async">
-          <h3 class="tr-karte__name">Kanal</h3>
-          <span class="tr-karte__mass">5,5 mm · mit Brillanten</span>
-          <p class="tr-karte__text">Brillantreihe in einem Weißgoldkanal, beidseitig mattiertes Gold.</p>
+          <img class="tr-karte__bild" src="assets/photos-20260928/ring-06.webp"
+               alt="Schmaler Ring mit Steinreihe zwischen glatten Rändern" width="1000" height="1000" loading="lazy" decoding="async">
+          <h3 class="tr-karte__name">Ansicht 06</h3>
+          <p class="tr-karte__text">Eine feine Steinreihe zwischen zwei glatten Rändern.</p>
         </article>
 
         <article class="tr-karte reveal">
-          <img class="tr-karte__bild" src="assets/trauringe/modell-07.webp"
-               alt="Flacher, kantiger Trauring mit breitem gebürstetem Weißgoldfeld" width="403" height="736" loading="lazy" decoding="async">
-          <h3 class="tr-karte__name">Tafel</h3>
-          <span class="tr-karte__mass">6,5 mm · Bicolor</span>
-          <p class="tr-karte__text">Flach und kantig, mit breitem gebürstetem Weißgoldfeld.</p>
+          <img class="tr-karte__bild" src="assets/photos-20260928/ring-07.webp"
+               alt="Flacher Ring mit breiter Hochglanzfläche" width="1000" height="1000" loading="lazy" decoding="async">
+          <h3 class="tr-karte__name">Ansicht 07</h3>
+          <p class="tr-karte__text">Flache Form mit einer breiten, spiegelnden Fläche.</p>
         </article>
 
         <article class="tr-karte reveal d1">
-          <img class="tr-karte__bild" src="assets/trauringe/modell-08.webp"
-               alt="Polierter Trauring in Gelbgold mit dichter Pavé-Brillantreihe" width="403" height="736" loading="lazy" decoding="async">
-          <h3 class="tr-karte__name">Pavé</h3>
-          <span class="tr-karte__mass">4,5 mm · mit Brillanten</span>
-          <p class="tr-karte__text">Dichte Brillantreihe über die ganze Mitte der Schiene.</p>
+          <img class="tr-karte__bild" src="assets/photos-20260928/ring-08.webp"
+               alt="Hochglanzpolierter Ring mit randständiger Steinreihe" width="1000" height="1000" loading="lazy" decoding="async">
+          <h3 class="tr-karte__name">Ansicht 08</h3>
+          <p class="tr-karte__text">Hochglanzfläche mit einer Steinreihe entlang der Kante.</p>
         </article>
 
         <article class="tr-karte reveal d2">
-          <img class="tr-karte__bild" src="assets/trauringe/modell-09.webp"
-               alt="Gewölbter, seidenmatter Trauring in Gelbgold mit feiner Weißgoldlinie" width="403" height="736" loading="lazy" decoding="async">
-          <h3 class="tr-karte__name">Faden</h3>
-          <span class="tr-karte__mass">5 mm · Gelbgold</span>
-          <p class="tr-karte__text">Sanft gewölbt und seidenmatt, mit einer feinen Weißgoldlinie.</p>
-        </article>
-
-        <article class="tr-karte reveal">
-          <img class="tr-karte__bild" src="assets/trauringe/modell-10.webp"
-               alt="Schmaler, polierter Trauring in Gelbgold mit Brillanten an einer Kante" width="403" height="736" loading="lazy" decoding="async">
-          <h3 class="tr-karte__name">Zart</h3>
-          <span class="tr-karte__mass">3,5 mm · mit Brillanten</span>
-          <p class="tr-karte__text">Schmale polierte Schiene, Brillanten an einer Kante.</p>
+          <img class="tr-karte__bild" src="assets/photos-20260928/ring-09.webp"
+               alt="Schmaler Ring mit Steinreihe und glattem Streifen" width="1000" height="1000" loading="lazy" decoding="async">
+          <h3 class="tr-karte__name">Ansicht 09</h3>
+          <p class="tr-karte__text">Schmale Form mit Steinreihe und einem glatten Streifen.</p>
         </article>
       </div>
 
       <p class="sub-note reveal">
-        Die Abbildungen zeigen die Modelle, nicht den tagesaktuellen Bestand.
-        Was gerade im Haus ist, sehen Sie am besten bei uns in der Wellritzstraße.
+        Fotografische Auswahl. Verfügbarkeit, Material und weitere Details
+        besprechen wir persönlich mit Ihnen in der Wellritzstraße.
       </p>
     </div>
   </section>
@@ -2706,16 +2710,16 @@
     <div class="wrap ring-story__head"><span class="eyebrow">Was Ihren Ring besonders macht</span><h2 class="section-title" id="ringStoryTitle">Kleine Details.<br><em>Ein Leben lang.</em></h2><p>Form, Goldton und Oberfläche machen aus zwei Ringen Ihr Paar.</p></div>
     <div class="wrap ring-story__stack">
       <article class="ring-story__card">
-        <figure><img src="assets/trauringe/breit-1.webp" alt="Zwei polierte Trauringe in warmem Gelbgold auf hellem Stein" width="2000" height="848" loading="lazy" decoding="async"></figure>
+        <figure class="photo-contain"><img src="assets/photos-20260928/trauringpaar.webp" srcset="assets/photos-20260928/trauringpaar-640.webp 640w, assets/photos-20260928/trauringpaar.webp 1122w" sizes="(max-width: 899px) 94vw, 62vw" alt="Zwei Ringe aus den Fotografien von Juwelier Damla" width="1122" height="1402" loading="lazy" decoding="async"></figure>
         <div class="ring-story__copy"><span class="ring-story__number">01 / Die Form</span><h3>So individuell<br>wie Ihre Hand.</h3><p>Schmal oder markant, sanft gerundet oder mit klarer Kante: Ein Ring soll Ihnen gefallen und sich jeden Tag gut anfühlen.</p><a class="text-link" href="trauring-konfigurator.html">Profile ausprobieren <svg class="arrow-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg></a></div>
       </article>
       <article class="ring-story__card">
-        <figure><img src="assets/editorial/rings-silk.webp" alt="Ein Trauringpaar in Gelbgold und Weißgold auf elfenbeinfarbener Seide" width="1536" height="1024" loading="lazy" decoding="async"></figure>
+        <figure class="photo-contain"><img src="assets/photos-20260928/trauringpaar-glanz.webp" srcset="assets/photos-20260928/trauringpaar-glanz-640.webp 640w, assets/photos-20260928/trauringpaar-glanz.webp 1536w" sizes="(max-width: 899px) 94vw, 62vw" alt="Poliertes Ringpaar aus den Fotografien von Juwelier Damla" width="1536" height="1024" loading="lazy" decoding="async"></figure>
         <div class="ring-story__copy"><span class="ring-story__number">02 / Das Gefühl</span><h3>Ein gutes Gefühl.<br>Jeden Tag.</h3><p>Kein Finger ist wie der andere. Wir nehmen uns die Zeit, bis Ihr Ring sitzt – und nicht nur passt.</p><a class="text-link" href="tel:+496115807830">Anprobe vereinbaren <svg class="arrow-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg></a></div>
       </article>
       <article class="ring-story__card">
-        <figure><img src="assets/trauringe/breit-3.webp" alt="Unterschiedliche Trauringprofile auf hellem Leinen" width="2000" height="848" loading="lazy" decoding="async"></figure>
-        <div class="ring-story__copy"><span class="ring-story__number">03 / Ihre Handschrift</span><h3>Außen Ihr Stil.<br>Innen Ihre Worte.</h3><p>Ein warmes Gold, ein feiner Brillant, eine persönliche Gravur. Sie entscheiden, welche Details Ihre Geschichte erzählen.</p><a class="text-link" href="trauring-konfigurator.html">Ihr Paar gestalten <svg class="arrow-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg></a></div>
+        <figure class="photo-contain"><img src="assets/photos-20260928/trauringpaar-fein.webp" srcset="assets/photos-20260928/trauringpaar-fein-640.webp 640w, assets/photos-20260928/trauringpaar-fein.webp 1536w" sizes="(max-width: 899px) 94vw, 62vw" alt="Ringpaar mit feiner Steinreihe aus den Fotografien von Juwelier Damla" width="1536" height="1024" loading="lazy" decoding="async"></figure>
+        <div class="ring-story__copy"><span class="ring-story__number">03 / Ihre Handschrift</span><h3>Außen Ihr Stil.<br>Innen Ihre Worte.</h3><p>Ein warmer Goldton, eine feine Steinreihe, eine persönliche Gravur. Sie entscheiden, welche Details Ihre Geschichte erzählen.</p><a class="text-link" href="trauring-konfigurator.html">Ihr Paar gestalten <svg class="arrow-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg></a></div>
       </article>
     </div>
   </section>
@@ -2743,7 +2747,7 @@
         </div>
 
         <figure class="tr-konf__bild reveal-img">
-          <img src="assets/trauringe/modell-06.webp" alt="Trauring in Gelbgold mit einer Brillantreihe im Weißgoldkanal" width="403" height="736" loading="lazy">
+          <img src="assets/photos-20260928/ring-06.webp" alt="Schmaler Ring mit Steinreihe zwischen glatten Rändern" width="1000" height="1000" loading="lazy" decoding="async">
         </figure>
       </div>
     </div>
@@ -2878,6 +2882,8 @@
       const FADE = 800;      // muss zur CSS-Transition passen
 
       // Fortschritt fuer den Ladescreen: jeder Clip meldet sich einmal.
+      // Beide Clips werden ausdruecklich angestossen, damit der zweite
+      // bereits gepuffert ist, wenn die erste Blende kommt.
       vids.forEach(function (v) {
         let told = false;
         function ready() {
@@ -2885,12 +2891,18 @@
           told = true;
           if (window.__heroWarm) window.__heroWarm();
         }
+        v.muted = true;
+        v.setAttribute('muted', '');
+        try { v.load(); } catch (e) {}
         if (v.readyState >= 2) ready();
         else {
           v.addEventListener('loadeddata', ready, { once: true });
           v.addEventListener('error', ready, { once: true });
         }
       });
+      // Ein Clip gilt als spielbereit, wenn er ueber das erste Bild hinaus
+      // gepuffert hat oder fehlgeschlagen ist (dann zeigt er sein Poster).
+      function canShow(v) { return v.readyState >= 3 || !!v.error; }
 
       // Wer weniger Bewegung moechte, bekommt nur das Standbild.
       const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -2924,12 +2936,33 @@
             if (vids[idx] !== prev) prev.classList.remove('is-on');
           }, FADE);
         }
-        try { next.currentTime = 0; } catch (e) {}
-        next.classList.add('is-on');
+        try { if (next.currentTime > 0.05) next.currentTime = 0; } catch (e) {}
+        // Erst einblenden, wenn der Clip wirklich laeuft (oder nach kurzer
+        // Frist mit seinem Poster) — so gibt es kein leeres Bild.
+        clearTimeout(next.__reveal);
+        const reveal = function () { clearTimeout(next.__reveal); next.classList.add('is-on'); };
+        if (!prev) reveal();
+        else {
+          next.addEventListener('playing', reveal, { once: true });
+          next.__reveal = setTimeout(reveal, 350);
+        }
         play(next);
         clearTimeout(timer);
         nextAt = Date.now() + SLOT;
-        timer = setTimeout(function () { show((i + 1) % vids.length, next); }, SLOT);
+        timer = setTimeout(function () { advance(i, next); }, SLOT);
+      }
+
+      // Weiter zum naechsten Clip — aber nur, wenn der schon gepuffert
+      // ist. Sonst laeuft der aktuelle noch einmal von vorn, statt dass
+      // eine leere oder ruckelnde Blende zu sehen ist.
+      function advance(i, cur) {
+        const n = (i + 1) % vids.length;
+        const next = vids[n];
+        if (canShow(next) || Date.now() > nextAt + 4000) { show(n, cur); return; }
+        if (cur.paused || cur.ended) { try { cur.currentTime = 0; } catch (e) {} play(cur); }
+        nextAt = Date.now() + 700;
+        clearTimeout(timer);
+        timer = setTimeout(function () { advance(i, cur); }, 700);
       }
 
       // Sicherheitsnetz, damit die Schleife wirklich nie endet: iOS haelt
@@ -2939,7 +2972,7 @@
       function watch() {
         if (!running) return;
         const v = vids[idx];
-        if (Date.now() > nextAt + 900) { show((idx + 1) % vids.length, v); return; }
+        if (Date.now() > nextAt + 900) { advance(idx, v); return; }
         if (v.paused && !v.ended) play(v);
       }
 
@@ -2972,6 +3005,18 @@
         if (document.hidden) stop();
         else if (sec.getBoundingClientRect().bottom > 0) start();
       });
+      // Zurueck aus dem Browser-Cache: Timer und Videos neu anstossen.
+      window.addEventListener('pageshow', function (e) {
+        if (e.persisted) { stop(); if (sec.getBoundingClientRect().bottom > 0) start(); }
+      });
+      // Wenn der Browser das automatische Abspielen verweigert (z. B. iOS
+      // Stromsparmodus), startet die erste Beruehrung die Clips.
+      const unlock = function () {
+        const v = vids[idx];
+        if (running && v.paused) play(v);
+      };
+      window.addEventListener('touchstart', unlock, { passive: true, once: true });
+      window.addEventListener('pointerdown', unlock, { passive: true, once: true });
       start();
 
       // Scroll-Hinweis verblasst, sobald es losgeht.
@@ -3084,8 +3129,10 @@
 
     // ── Schmuckkästchen: Scroll-Animation (Frame-Scrubbing) ──
     // 50 Frames aus einem Greenscreen-Video, beim Freistellen schon
-    // mit Alphakanal versehen. Deshalb hier kein Keying mehr pro Bild
-    // wie beim alten Ring — das Canvas zeichnet nur noch.
+    // mit Alphakanal versehen. Das Canvas zeichnet nur noch.
+    // Die Frames werden früh, in Scroll-Nähe zuerst und mit begrenzter
+    // Parallelität geladen und vor dem Zeichnen dekodiert, damit die
+    // Bewegung von Anfang an ohne Sprünge läuft.
     (function () {
       const canvas  = document.getElementById('kastenCanvas');
       const sektion = document.getElementById('ring');
@@ -3093,40 +3140,92 @@
       if (!canvas || !sektion) return;
       const ctx = canvas.getContext('2d');
       const FRAMES = 50;
+      const PARALLEL = 3;
       const SRC = i => 'assets/kasten/kasten-' + String(i + 1).padStart(3, '0') + '.webp';
       const imgs = new Array(FRAMES);
+      const done = new Array(FRAMES).fill(false);
       const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      let current = -1;
-      const ready = i => imgs[i] && imgs[i].complete && imgs[i].naturalWidth;
+      let current = -1, target = 0, loading = 0, started = false;
 
       function draw(i) {
-        if (!ready(i)) return;
+        if (!done[i]) return;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(imgs[i], 0, 0, canvas.width, canvas.height);
         current = i;
       }
-      function load(i, cb) {
+      // Das dem Ziel nächste bereits geladene Bild, bevorzugt davor.
+      function nearest(i) {
+        for (let d = 0; d < FRAMES; d++) {
+          if (i - d >= 0 && done[i - d]) return i - d;
+          if (i + d < FRAMES && done[i + d]) return i + d;
+        }
+        return -1;
+      }
+      function settle() {
+        const j = nearest(target);
+        if (j >= 0 && j !== current) draw(j);
+      }
+      function finished(i) {
+        done[i] = true;
+        loading--;
+        settle();
+        pump();
+      }
+      function load(i) {
         if (imgs[i]) return;
         const im = new Image();
         im.decoding = 'async';
-        if (cb) im.onload = cb;
-        im.src = SRC(i);
         imgs[i] = im;
+        loading++;
+        im.onload = function () {
+          if (im.decode) im.decode().then(() => finished(i), () => finished(i));
+          else finished(i);
+        };
+        im.onerror = function () { loading--; imgs[i] = null; pump(); };
+        im.src = SRC(i);
+      }
+      // Reihenfolge: Ziel-Frame, dann abwechselnd davor und danach.
+      function next() {
+        for (let d = 0; d < FRAMES; d++) {
+          const a = target + d, b = target - d;
+          if (a < FRAMES && !imgs[a]) return a;
+          if (b >= 0 && !imgs[b]) return b;
+        }
+        return -1;
+      }
+      function pump() {
+        if (!started) return;
+        while (loading < PARALLEL) {
+          const i = next();
+          if (i < 0) return;
+          load(i);
+        }
+      }
+      function start() {
+        if (started) return;
+        started = true;
+        pump();
       }
 
       if (reduced) {                       // offener Kasten genügt
-        load(FRAMES - 1, () => draw(FRAMES - 1));
+        target = FRAMES - 1;
+        start();
         return;
       }
 
-      load(0, () => draw(0));
-      // Die restlichen Bilder sind zusammen gut zwei Megabyte. Erst
-      // laden, wenn die Seite steht — sonst nehmen sie dem Hero-Video
-      // die Leitung weg.
-      const rest = () => { for (let i = 1; i < FRAMES; i++) load(i); };
-      if (document.readyState === 'complete') rest();
-      else window.addEventListener('load', rest, { once: true });
+      // Das erste Bild sofort; die übrigen, sobald der Kasten in die
+      // Nähe rückt oder die Seite kurz gestanden hat — nicht erst nach
+      // dem vollständigen Laden der Hero-Videos.
+      load(0);
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(function (es, obs) {
+          if (es.some(e => e.isIntersecting)) { start(); obs.disconnect(); }
+        }, { rootMargin: '150% 0px' }).observe(sektion);
+      }
+      window.addEventListener('DOMContentLoaded', () => setTimeout(start, 900), { once: true });
+      window.addEventListener('load', start, { once: true });
+      setTimeout(start, 2500);
 
       let ticking = false;
       function update() {
@@ -3134,12 +3233,8 @@
         const runway = sektion.offsetHeight - window.innerHeight;
         if (runway <= 0) return;
         const p = Math.min(1, Math.max(0, -sektion.getBoundingClientRect().top / runway));
-        const idx = Math.min(FRAMES - 1, Math.round(p * (FRAMES - 1)));
-        if (idx !== current) {
-          let j = idx;
-          while (j >= 0 && !ready(j)) j--;        // nächstes geladenes Frame
-          if (j >= 0 && j !== current) draw(j);
-        }
+        target = Math.min(FRAMES - 1, Math.round(p * (FRAMES - 1)));
+        if (target !== current) { settle(); pump(); }
         canvas.style.transform = 'scale(' + (0.95 + p * 0.08).toFixed(4) + ')';
         // Gegenbewegung: der Schimmer wandert nach unten, während die
         // Seite nach oben läuft. Bewusst klein gehalten — er soll Tiefe
@@ -3148,10 +3243,10 @@
           schimmer.style.transform = 'translateY(' + ((p - 0.5) * 96).toFixed(1) + 'px)';
         }
       }
-      window.addEventListener('scroll', () => {
-        if (!ticking) { ticking = true; requestAnimationFrame(update); }
-      }, { passive: true });
-      window.addEventListener('resize', update);
+      const schedule = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
+      window.addEventListener('scroll', schedule, { passive: true });
+      window.addEventListener('resize', schedule);
+      window.addEventListener('pageshow', schedule);
       update();
     })();
 
