@@ -1,4 +1,4 @@
-import {METALS,FINISHES,PRESETS,CUTS,QUALITIES,GROOVES,FONTS,ENGRAVINGS,EDGE_TYPES,ORIENTATIONS,defaults,initialState,clone,number} from './wedding-catalog.js?v=3';
+import {METALS,FINISHES,PRESETS,CUTS,QUALITIES,GROOVES,FONTS,ENGRAVINGS,EDGE_TYPES,ORIENTATIONS,defaults,initialState,clone,number} from './wedding-catalog.js?v=4';
 const read=async name=>{const response=await fetch(new URL(name,import.meta.url));if(!response.ok)throw new Error('Auswahldaten fehlen: '+name);return response.json();};
 export const [OPTIONS,PROFILES,DIMENSIONS]=await Promise.all([read('wedding-options.json?v=3'),read('wedding-profiles.json?v=3'),read('wedding-dimensions.json?v=3')]);
 export let STONE_DATA={presets:{},size_catalogs:{brilliant:OPTIONS.sizes}};

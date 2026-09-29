@@ -23,6 +23,6 @@ const after=projected();close(after.width,before.width,'screen width after geome
 fixture.scale.setScalar(1);fixture.position.set(0,0,0);viewer.fit(false);
 const restored=projected();close(restored.width,before.width,'return to previous geometry');
 viewer.fit(true);assert(projected().width<before.width,'explicit reset returns to full view');
-const C=await import('../assets/wedding-catalog.js?v=3');const S=await import('../assets/wedding-state.js?v=3');
+const C=await import('../assets/wedding-catalog.js?v=4');const S=await import('../assets/wedding-state.js?v=4');
 const ring=S.normalizeRing(C.defaults());const oldSize=ring.size;ring.profile='PB08';const round=S.normalizeRing(ring);assert.equal(round.size,oldSize,'profile change retains finger size');assert.equal(round.height,round.width,'PB08 remains round');
 console.log('FRAMING_OK: stable screen extent and relative zoom, moving target, return switch, explicit reset, PB08 dimensions');

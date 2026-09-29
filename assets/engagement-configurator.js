@@ -4,11 +4,13 @@ import { loadJewelry, weddingGeometry, createStudio, diamondMesh, metalMaterial 
 import { styles, cuts, metals, defaults, validateConfig, encodeConfig as encode, decodeConfig } from './engagement-state.js';
 import { createRingStudio, applyCameraResponse } from './ring-studio.js?v=20260929-real2';
 import { enhanceMetal, syncRingOptics, metalF0, metalF82 } from './ring-optics.js?v=20260929-real2';
+import { ContactShadows } from './contact-shadow.js?v=20260929-real2';
+import { engravingMaps, engravedMetal, faceInward } from './engraving.js?v=20260929-real3';
 
 const $=id=>document.getElementById(id);
 function fromHash(){return decodeConfig(location.hash.slice(3));}
 let state=location.hash.startsWith('#e=')?fromHash():defaults();
-let renderer,scene,camera,controls,studio,models,ring,ready=false,rotation=false,visible=true,scheduled=false,dirty=true;
+let renderer,scene,camera,controls,studio,models,ring,contact,ready=false,rotation=false,visible=true,scheduled=false,dirty=true;
 const stage=$('erStage');
 const format=n=>n.toLocaleString('de-DE',{maximumFractionDigits:2});
 const diameter=()=>6.5*Math.cbrt(state.carat/(state.cut==='oval'?1.38:state.cut==='emerald'?1.35:1));
@@ -45,7 +47,7 @@ function update(){
   if(ready&&!scheduled){scheduled=true;requestAnimationFrame(()=>{scheduled=false;buildRing();});}
 }
 
-function disposeRing(){if(!ring)return;scene.remove(ring);ring.traverse(o=>{if(o.isMesh){if(!o.userData.sharedGeometry)o.geometry.dispose();o.material.map?.dispose();o.material.dispose();}});}
+function disposeRing(){if(!ring)return;scene.remove(ring);ring.traverse(o=>{if(o.isMesh){if(!o.userData.sharedGeometry)o.geometry.dispose();for(const key of ['map','normalMap','roughnessMap','aoMap','alphaMap'])o.material[key]?.dispose();o.material.dispose();}});}
 function addGem(group,cut,radius,position,normal){
   const gem=diamondMesh(models.get('Diamond_'+cut),studio.diamond);gem.scale.setScalar(radius);gem.position.copy(position);
   if(normal)gem.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),normal);
@@ -106,12 +108,15 @@ function buildRing(){
     }
   }
   if(state.engraving.trim()){
-    const canvas=document.createElement('canvas');canvas.width=2048;canvas.height=256;const ctx=canvas.getContext('2d');
-    ctx.translate(2048,0);ctx.scale(-1,1);ctx.fillStyle='#4d4035';ctx.font='72px Georgia';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(state.engraving,1024,128,1800);
-    const tex=new THREE.CanvasTexture(canvas);tex.colorSpace=THREE.SRGBColorSpace;
-    const engraving=new THREE.Mesh(new THREE.CylinderGeometry(ri-.014,ri-.014,state.width*.8,192,1,true),new THREE.MeshBasicMaterial({map:tex,side:THREE.BackSide,transparent:true,depthWrite:false}));engraving.rotation.x=Math.PI/2;ring.add(engraving);
+    // Laser-engraved lettering cut into the inner surface (relief maps, same alloy and optics as the band).
+    const mask=document.createElement('canvas');mask.width=2048;mask.height=256;const ctx=mask.getContext('2d',{willReadFrequently:true});
+    ctx.fillStyle='#000';ctx.fillRect(0,0,2048,256);ctx.translate(2048,0);ctx.scale(-1,1);ctx.fillStyle='#fff';ctx.font='72px Georgia, "Times New Roman", serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(state.engraving,1024,128,1800);
+    const material=engravedMetal(tone,engravingMaps(mask,'laser'),renderer.capabilities.getMaxAnisotropy());material.userData.f82=metalF82(state.metal==='rose'?'red':state.metal);enhanceMetal(material,{radius:ri+.1,halfWidth:state.width*.4});
+    const engraving=new THREE.Mesh(faceInward(new THREE.CylinderGeometry(ri-.014,ri-.014,state.width*.8,192,1,true)),material);engraving.onBeforeRender=()=>syncRingOptics(engraving);engraving.rotation.x=Math.PI/2;ring.add(engraving);
   }
   metal.dispose();
+  // The ring stands on the studio floor: contact line where the band touches, soft shadow around it.
+  ring.updateMatrixWorld(true);const bounds=new THREE.Box3().setFromObject(ring,true);contact.fit(bounds,bounds.min.y);contact.setBounce(tone);scene.updateMatrixWorld();contact.update(scene);
   dirty=true;
   stage.setAttribute('aria-label',`3D-Ansicht: ${styles[state.style][0]}, ${cuts[state.cut]}, ${format(state.carat)} Karat, ${metals[state.metal][0]}`);
 }
@@ -129,16 +134,26 @@ async function start(){
     renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});renderer.setPixelRatio(Math.min(Math.max(devicePixelRatio||1,1.5),2));
     applyCameraResponse(renderer);
     renderer.outputColorSpace=THREE.SRGBColorSpace;stage.append(renderer.domElement);renderer.domElement.setAttribute('aria-hidden','true');
-    scene=new THREE.Scene();try{studio=createRingStudio(renderer);}catch(error){console.warn('Studiolicht:',error);studio=createStudio(renderer);}scene.environment=studio.metal;
+    scene=new THREE.Scene();makeStudio();contact=new ContactShadows(renderer,{softHeight:14,softOpacity:.38});scene.add(contact.plane);
     camera=new THREE.PerspectiveCamera(32,1,.1,400);controls=new OrbitControls(camera,renderer.domElement);controls.addEventListener('change',()=>{dirty=true;});controls.enablePan=false;controls.enableDamping=true;controls.dampingFactor=.08;controls.autoRotateSpeed=.65;
     // Keep the chosen rotation mode during wheel, pinch and button zoom.
     ready=true;buildRing();
     new ResizeObserver(()=>{camera.aspect=stage.clientWidth/stage.clientHeight;camera.updateProjectionMatrix();renderer.setSize(stage.clientWidth,stage.clientHeight);fit();dirty=true;}).observe(stage);
     new IntersectionObserver(([entry])=>{visible=entry.isIntersecting;}).observe(stage);
-    renderer.setAnimationLoop(()=>{if(document.hidden||!visible)return;controls.autoRotate=rotation;const moved=controls.update();if(!moved&&!dirty)return;dirty=false;renderer.render(scene,camera);stage.classList.add('is-bereit');});
+    renderer.setAnimationLoop(loop);
     renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();ready=false;renderer.setAnimationLoop(null);fallback();});
+    renderer.domElement.addEventListener('webglcontextrestored',restore);
     document.querySelectorAll('[data-er-view]').forEach(b=>b.disabled=false);$('erImage').disabled=false;
   }catch(error){console.error('Ringansicht',error);ready=false;renderer?.setAnimationLoop(null);fallback();}
+}
+function makeStudio(){try{studio=createRingStudio(renderer);}catch(error){console.warn('Studiolicht:',error);studio=createStudio(renderer);}scene.environment=studio.metal;}
+function loop(){if(document.hidden||!visible)return;controls.autoRotate=rotation;const moved=controls.update();if(!moved&&!dirty)return;dirty=false;renderer.render(scene,camera);stage.classList.add('is-bereit');}
+// After a lost WebGL context the browser hands back an empty one: three re-uploads meshes and textures
+// by itself, but rendered environments are gone, so the studio and the ring are rebuilt.
+function restore(){
+  try{makeStudio();if(ring){scene.remove(ring);ring=null;}stage.hidden=false;$('erFallback').hidden=true;$('erImage').hidden=false;
+    document.querySelectorAll('[data-er-view]').forEach(b=>b.disabled=false);ready=true;buildRing();fit();dirty=true;renderer.setAnimationLoop(loop);}
+  catch(error){console.error('Ringansicht',error);ready=false;fallback();}
 }
 function fallback(){stage.hidden=true;$('erFallback').hidden=false;$('erImage').hidden=true;document.querySelectorAll('[data-er-view]').forEach(b=>b.disabled=true);}
 function rotationLabel(){const b=document.querySelector('[data-er-view="rotate"]');b.textContent=rotation?'Drehung pausieren':'Drehung starten';b.setAttribute('aria-pressed',String(rotation));}

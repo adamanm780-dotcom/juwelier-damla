@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import {METALS} from './wedding-catalog.js?v=3';
+import {METALS} from './wedding-catalog.js?v=4';
 import {metalF0,metalF82} from './ring-optics.js?v=20260929-real2';
 const cache=new Map();
 const random=(x,y)=>{const n=Math.sin(x*127.1+y*311.7)*43758.5453;return n-Math.floor(n);};

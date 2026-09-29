@@ -1,7 +1,7 @@
-import {individualMarkup,mountIndividual} from './wedding-engraving.js?v=3';
-import * as C from './wedding-catalog.js?v=3';
-import * as S from './wedding-state.js?v=3';
-import {WeddingViewer} from './wedding-viewer.js?v=20260929-real2';
+import {individualMarkup,mountIndividual} from './wedding-engraving.js?v=4';
+import * as C from './wedding-catalog.js?v=4';
+import * as S from './wedding-state.js?v=4';
+import {WeddingViewer} from './wedding-viewer.js?v=20260929-real3';
 const $=s=>document.querySelector(s), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=n=>n.toLocaleString('de-DE',{style:'currency',currency:'EUR',maximumFractionDigits:0});
 let state=S.normalizeState(C.initialState()),step=0,segment=0,divisionCount=1,undo=[],notice='',viewer,saveTimer;
@@ -136,6 +136,8 @@ function summaryData(k){const d=S.effectiveDivision(k),s=k.stone;return [
  ];}
 function renderSummary(){$('#wcSummaryContent').innerHTML=state.rings.map((k,i)=>`<article><h3>Ring ${i+1}</h3><dl>${summaryData(k).map(([name,value])=>`<dt>${esc(name)}</dt><dd>${esc(value)}</dd>`).join('')}</dl></article>`).join('');}
 const summaryText=()=>state.rings.map((r,i)=>'Ring '+(i+1)+'\n'+summaryData(r).map(([k,v])=>k+': '+v).join('\n')).join('\n\n')+'\n\nEntwurf: '+location.origin+location.pathname+'#d='+S.encode(state);
+// The rotate button shows the viewer's real state; with reduced motion the rings start paused.
+function rotateButton(){const b=$('[data-view="rotate"]');if(!b||!viewer)return;b.setAttribute('aria-pressed',String(viewer.rotating));b.setAttribute('aria-label',viewer.rotating?'Drehung pausieren':'Drehung starten');b.textContent=viewer.rotating?'Ⅱ':'▷';}
 function toast(text){$('#wcToast').textContent=text;$('#wcToast').hidden=false;setTimeout(()=>$('#wcToast').hidden=true,3500);}
 async function copy(text){try{await navigator.clipboard.writeText(text);toast('In die Zwischenablage kopiert.');}catch{dialog('<h2>Zum Kopieren</h2><textarea readonly>'+esc(text)+'</textarea>');$('#wcDialog textarea').select();}}
 function dialog(html){$('#wcDialogContent').innerHTML=html;$('#wcDialog').showModal();}
@@ -158,7 +160,7 @@ $('.wc').addEventListener('click',e=>{
  else if(b.dataset.ring!==undefined){state.pair=b.dataset.ring==='pair';if(!state.pair)state.active=Number(b.dataset.ring);segment=0;render();}
  else if(b.dataset.segment!==undefined){segment=Number(b.dataset.segment);render();}
  else if(b.dataset.path){apply(b.dataset.path,b.dataset.value);}
- else if(b.dataset.view){viewer?.view(b.dataset.view);if(b.dataset.view==='rotate'){b.setAttribute('aria-pressed',String(viewer.rotating));b.setAttribute('aria-label',viewer.rotating?'Drehung pausieren':'Drehung starten');b.textContent=viewer.rotating?'Ⅱ':'▷';}}
+ else if(b.dataset.view){viewer?.view(b.dataset.view);if(b.dataset.view==='rotate')rotateButton();}
  else if(b.dataset.symbol){const region=b.closest('[data-engraving-ring]'),index=region?Number(region.dataset.engravingRing):state.active,field=(region||$('#wcControls')).querySelector('input[type=text]'),text=state.rings[index].engraving.text,start=field?.selectionStart??text.length,end=field?.selectionEnd??start;apply('@'+index+'.engraving.text',(text.slice(0,start)+C.SYMBOLS[b.dataset.symbol]+text.slice(end)).slice(0,40));}
  else if(b.dataset.deleteStone!==undefined){const stones=C.clone(current().stone.free);stones.splice(Number(b.dataset.deleteStone),1);apply('stone.free',stones);}
  else if(b.id==='wcAddStone'){const list=C.clone(current().stone.free);list.push({angle:(list.length*20)%360,position:0,size:'brilliant-100-0',quality:'tw/vsi'});apply('stone.free',list);}
@@ -178,6 +180,6 @@ $('#wcWhatsapp').onclick=()=>window.open('https://wa.me/?text='+encodeURICompone
 $('#wcFullscreen').onclick=()=>{if(document.fullscreenElement)document.exitFullscreen();else $('.wc-studio').requestFullscreen?.().catch(()=>toast('Vollbild ist in diesem Browser nicht verfügbar.'));};
 window.addEventListener('hashchange',()=>{try{if(/^#[dk]=/.test(location.hash))loadState(S.decode(location.href));}catch{toast('Der Konfigurationslink ist nicht gültig.');}});
 render();
-try{viewer=new WeddingViewer($('#kfBuehne'));await viewer.init();viewer.update(state,true);render();}catch(error){console.error('3D-Ansicht:',error);$('#kfWebglHinweis').hidden=false;$('.wc-loading').hidden=true;}
+try{viewer=new WeddingViewer($('#kfBuehne'));await viewer.init();viewer.update(state,true);rotateButton();render();}catch(error){console.error('3D-Ansicht:',error);$('#kfWebglHinweis').hidden=false;$('.wc-loading').hidden=true;}
 // Expose immutable diagnostics for browser QA and support, never renderer internals.
 window.damlaConfigurator={getState:()=>C.clone(state),getCatalog:()=>({profiles:Object.keys(S.PROFILES).length,metals:Object.keys(C.METALS).length,finishes:Object.keys(C.FINISHES).length,divisions:S.OPTIONS.divisions.length,presets:Object.keys(C.PRESETS).length}),setState:loadState};

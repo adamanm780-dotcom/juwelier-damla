@@ -4,19 +4,20 @@ import {OrbitControls} from 'three/OrbitControls.js';
 import {GLTFLoader} from 'three/GLTFLoader.js';
 import {loadJewelry,weddingGeometry,createStudio,diamondMesh} from './jewelry-studio.js?v=20260929-real2';
 import {sampleRingProfile} from './wedding-materials.js?v=20260921-blender2';
-import {metalMaterial,metalColor} from './wedding-finishes.js?v=20260929-real2';
+import {metalMaterial,metalColor} from './wedding-finishes.js?v=20260929-real3';
 import {createRingStudio,applyCameraResponse} from './ring-studio.js?v=20260929-real2';
-import {enhanceMetal,syncRingOptics} from './ring-optics.js?v=20260929-real2';
+import {enhanceMetal,syncRingOptics,metalF82} from './ring-optics.js?v=20260929-real2';
+import {engravingMaps,engravedMetal,faceInward} from './engraving.js?v=20260929-real3';
 import {ContactShadows} from './contact-shadow.js?v=20260929-real2';
-import {METALS,GEM_COLORS,FONTS,engravingFont,clone} from './wedding-catalog.js?v=3';
-import {effectiveDivision,stoneSize,count,OPTIONS,STONE_DATA,PROFILES} from './wedding-state.js?v=3';
+import {METALS,GEM_COLORS,FONTS,engravingFont,clone} from './wedding-catalog.js?v=4';
+import {effectiveDivision,stoneSize,count,OPTIONS,STONE_DATA,PROFILES} from './wedding-state.js?v=4';
 const TAU=Math.PI*2,up=new THREE.Vector3(0,1,0),FRAME_MARGIN=1.05;
 
 const fontStyle=engravingFont;
 const divisions=new WeakMap(),divisionOf=k=>{let d=divisions.get(k);if(!d){d=effectiveDivision(k);divisions.set(k,d);}return d;};
 const sample=(rows,y)=>{let low=0,high=rows.length-1;y=Math.max(rows[0][0],Math.min(rows[high][0],y));while(high-low>1){const mid=(high+low)>>1;if(rows[mid][0]>y)high=mid;else low=mid;}const a=rows[low],b=rows[high];return a[1]+(b[1]-a[1])*(y-a[0])/(b[0]-a[0]||1);};
 function contour(geometry){const p=geometry.attributes.position,points=new Map();for(let i=0;i<p.count;i++){const y=p.getY(i),r=Math.hypot(p.getX(i),p.getZ(i));points.set(y.toFixed(4)+':'+r.toFixed(4),[y,r]);}return [...points.values()].sort((a,b)=>Math.atan2(b[1]-9.85,b[0])-Math.atan2(a[1]-9.85,a[0]));}
-function dispose(group){const materials=new Set();group.traverse(o=>{if(!o.isMesh)return;if(!o.userData.sharedGeometry)o.geometry.dispose();for(const m of Array.isArray(o.material)?o.material:[o.material])if(m&&!m.userData.sharedJewelry&&!materials.has(m)){materials.add(m);for(const property of ['map','normalMap','roughnessMap','bumpMap'])m[property]?.dispose();m.dispose();}});group.clear();}
+function dispose(group){const materials=new Set();group.traverse(o=>{if(!o.isMesh)return;if(!o.userData.sharedGeometry)o.geometry.dispose();for(const m of Array.isArray(o.material)?o.material:[o.material])if(m&&!m.userData.sharedJewelry&&!materials.has(m)){materials.add(m);for(const property of ['map','normalMap','roughnessMap','bumpMap','aoMap','alphaMap'])m[property]?.dispose();m.dispose();}});group.clear();}
 
 /** LatheGeometry with an explicit, non-uniform list of angles (0..2π); same vertex layout,
  * UVs and winding as THREE.LatheGeometry so seam smoothing and finish maps are unchanged. */
@@ -43,7 +44,8 @@ export class WeddingViewer{
   this.group=new THREE.Group();this.scene.add(this.group);this.contact=new ContactShadows(this.renderer);this.scene.add(this.contact.plane);
   // Large studio sources provide metal reflections without pin-point highlights.
   new ResizeObserver(()=>this.resize()).observe(this.stage);new IntersectionObserver(([e])=>this.visible=e.isIntersecting).observe(this.stage);
-  this.renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();this.renderer.setAnimationLoop(null);document.querySelector('#kfWebglHinweis').hidden=false;});
+  this.renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();this.renderer.setAnimationLoop(null);const note=document.querySelector('#kfWebglHinweis');note.dataset.text??=note.textContent;note.textContent='Die 3D-Ansicht wird wiederhergestellt …';note.hidden=false;});
+  this.renderer.domElement.addEventListener('webglcontextrestored',()=>this.restore());
   this.renderer.setAnimationLoop(time=>this.tick(time));this.ready=true;
  }
  update(state,fit=false){if(!this.ready)return;this.pending={state:clone(state),fit};if(this.updateRequested)return;this.updateRequested=true;requestAnimationFrame(()=>{this.updateRequested=false;const next=this.pending;this.build(next.state,next.fit);});}
@@ -133,7 +135,7 @@ export class WeddingViewer{
   const band=new THREE.Mesh(geometry,materials);band.onBeforeRender=()=>syncRingOptics(band);group.add(band);
   const points=this.stonePlan(k);for(const p of points)this.addStone(group,k,p,materials);
   
-  if(k.engraving.type!=='none'&&(k.engraving.text||k.engraving.art))group.add(this.engraving(k));
+  if(k.engraving.type!=='none'&&(k.engraving.text||k.engraving.art))group.add(this.engraving(k,bore));
   return group;
  }
  stonePlan(k){
@@ -191,13 +193,28 @@ export class WeddingViewer{
   }
   group.add(setting);
  }
- engraving(k){
-  const canvas=document.createElement('canvas');canvas.width=2048;canvas.height=256;const ctx=canvas.getContext('2d');
-  const draw=()=>{ctx.clearRect(0,0,2048,256);ctx.save();ctx.translate(2048,0);ctx.scale(-1,1);ctx.fillStyle='#8b784e';ctx.font='100px '+fontStyle(k.engraving);ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(k.engraving.text,1024,128,1900);ctx.restore();};draw();
-  const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;
-  if(k.engraving.type==='individual'&&k.engraving.art){const image=new Image();image.onload=()=>{ctx.clearRect(0,0,2048,256);ctx.save();ctx.translate(2048,0);ctx.scale(-1,1);ctx.drawImage(image,0,0,2048,256);ctx.restore();const pixels=ctx.getImageData(0,0,2048,256);for(let i=0;i<pixels.data.length;i+=4){const shade=(pixels.data[i]+pixels.data[i+1]+pixels.data[i+2])/3;pixels.data[i]=112;pixels.data[i+1]=92;pixels.data[i+2]=52;pixels.data[i+3]=255-shade;}ctx.putImageData(pixels,0,0);texture.needsUpdate=true;this.dirty=true;};image.src=k.engraving.art;}
+ engraving(k,bore){
+  // Mask: white lettering on black, mirrored so it reads correctly from inside the band.
+  const mask=document.createElement('canvas');mask.width=2048;mask.height=256;const ctx=mask.getContext('2d',{willReadFrequently:true});
+  ctx.fillStyle='#000';ctx.fillRect(0,0,2048,256);ctx.save();ctx.translate(2048,0);ctx.scale(-1,1);ctx.fillStyle='#fff';ctx.font='100px '+fontStyle(k.engraving);ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(k.engraving.text,1024,128,1900);ctx.restore();
+  const type=k.engraving.type==='diamond'?'diamond':'laser',maps=engravingMaps(mask,type);
+  if(k.engraving.type==='individual'&&k.engraving.art){const image=new Image();image.onload=()=>{ctx.clearRect(0,0,2048,256);ctx.save();ctx.translate(2048,0);ctx.scale(-1,1);ctx.drawImage(image,0,0,2048,256);ctx.restore();const pixels=ctx.getImageData(0,0,2048,256),d=pixels.data;
+   // Dark ink on the drawing becomes groove; transparent or white paper stays polished.
+   for(let i=0;i<d.length;i+=4){const ink=d[i+3]/255*(1-(d[i]+d[i+1]+d[i+2])/765)*255;d[i]=d[i+1]=d[i+2]=ink;d[i+3]=255;}ctx.putImageData(pixels,0,0);engravingMaps(mask,type,maps);this.dirty=true;};image.src=k.engraving.art;}
   const rows=[];for(let i=0;i<=64;i++){const y=(-.36+i/64*.72)*k.width;rows.push(new THREE.Vector2(this.radius(k,y,true)-.018,y));}
-  const geometry=new THREE.LatheGeometry(rows,256,Math.PI*.2,Math.PI*1.6),material=new THREE.MeshPhysicalMaterial({color:metalColor(k.metals[0]),metalness:1,roughness:.34,map:texture,bumpMap:texture,bumpScale:-.045,transparent:true,side:THREE.BackSide,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-1});return new THREE.Mesh(geometry,material);
+  // The lettering is cut into the inner metal (for inner/outer divisions that is the inner alloy).
+  const alloy=k.metals[this.metalIndex(k,0,this.radius(k,0,true),0)],material=engravedMetal(metalColor(alloy),maps,this.aniso);material.userData.f82=metalF82(METALS[alloy.color]?alloy.color:'yellow');enhanceMetal(material,bore);
+  const mesh=new THREE.Mesh(faceInward(new THREE.LatheGeometry(rows,256,Math.PI*.2,Math.PI*1.6)),material);mesh.onBeforeRender=()=>syncRingOptics(mesh);return mesh;
+ }
+ // A restored WebGL context is empty: three re-uploads meshes and textures itself, but rendered
+ // environments are lost, so the studio is rendered again and the rings are rebuilt (old GPU
+ // objects belong to the lost context and are dropped, not disposed).
+ restore(){
+  try{this.studio=createRingStudio(this.renderer);}catch(error){this.studio=createStudio(this.renderer);}
+  this.scene.environment=this.studio.metal;for(const ring of this.rings)if(ring)this.group.remove(ring);this.rings=[];this.signatures=[];
+  if(this.state)this.build(this.state,false);this.contactDirty=true;this.dirty=true;this.hasFrame=false;
+  const note=document.querySelector('#kfWebglHinweis');note.hidden=true;if(note.dataset.text)note.textContent=note.dataset.text;
+  this.renderer.setAnimationLoop(time=>this.tick(time));
  }
  resize(){if(!this.ready)return;const w=this.stage.clientWidth,h=this.stage.clientHeight;if(!w||!h)return;this.renderer.setSize(w,h);this.camera.aspect=w/h;this.camera.updateProjectionMatrix();if(this.state)this.fit(true);this.dirty=true;}
  // Vertices of every ring over the whole gentle sway (same amplitudes as tick), so no pose leaves the frame.

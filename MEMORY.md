@@ -37,4 +37,6 @@ Auftrag: 3D-Ringe in den Konfiguratoren „ultra realistisch“. Beide Konfigura
 - Einpassung (`wedding-viewer.js` `fit`/`fitDistanceFor`): exakt über alle Ringpunkte inkl. Schwenkbewegung, pro Ansicht; nichts wird abgeschnitten (geprüft: 6 Viewports × 4 Ansichten × Ruhe/Schwenk-Extreme).
 - Materialzonen werden pro Viereck bestimmt (sonst Sägezahn an Kanten), Texturwiederholungen ganzzahlig (sonst Naht).
 - Tonwert-Leitplanken für Gelbgold 585 in der Standardansicht: dunkle Pixel (L<0,30) ca. 5 %, keine ausgebrannten Stellen. Nicht deutlich dunkler machen (Nutzerwunsch: kein dominantes Braun).
+- Gravur (`assets/engraving.js`): Schrift/Motiv wird zu echtem Relief (Normal-, Rauheits-, Verschattungskarte) im Metall des Rings; Laser = matter, dunklerer Rillengrund, Diamant = glänzende V-Schnitte. Skriptschriften fallen auf System-Skriptschriften zurück (`SCRIPT_FALLBACK` in `wedding-catalog.js`).
+- Verlobungsring steht auf der Studiofläche (Kontaktschatten), rendert nur bei Bedarf. Beide Viewer bauen Studio und Ringe nach einem WebGL-Kontextverlust neu auf; der Drehen-Knopf zeigt den echten Zustand (reduzierte Bewegung startet pausiert).
 - Achtung Build: `trauringe.html`, `verlobungsringe.html`, `reparaturen.html` haben Template-Drift aus der Logo-Session (index.html-Styles). Ein kompletter `build-subpages.py`-Lauf ändert diese Seiten mit; vorher prüfen.

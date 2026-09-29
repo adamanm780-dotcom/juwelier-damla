@@ -37,14 +37,16 @@ export const GROOVES={
  'raised-groove':{label:'Bombierte Fuge',widths:[.2,.4,.6,.8,1,1.5,2]},
  perlage:{label:'Perlfuge',widths:[.7,.9]}
 };
+// Script engraving fonts fall back to installed script faces (Windows, macOS/iOS, Linux; Android maps cursive to a script face).
+const SCRIPT_FALLBACK='"Segoe Script", "Apple Chancery", "Snell Roundhand", "URW Chancery L", cursive';
 export const FONTS={
- amazonebt:{label:'Amazone',css:'"Amazone BT", "URW Chancery L", cursive'},
+ amazonebt:{label:'Amazone',css:'"Amazone BT", '+SCRIPT_FALLBACK},
  arial:{label:'Arial',css:'Arial, sans-serif'},
- monotypeCorsiva:{label:'Monotype Corsiva',css:'"Monotype Corsiva", "Brush Script MT", cursive'},
+ monotypeCorsiva:{label:'Monotype Corsiva',css:'"Monotype Corsiva", '+SCRIPT_FALLBACK},
  TimesNewRoman:{label:'Times New Roman',css:'"Times New Roman", serif'},
- LucidaCalligraphy:{label:'Lucida Calligraphy',css:'"Lucida Calligraphy", "Segoe Script", cursive'}
+ LucidaCalligraphy:{label:'Lucida Calligraphy',css:'"Lucida Calligraphy", '+SCRIPT_FALLBACK}
 };
-export const engravingFont=e=>FONTS[e.font]?.css||(e.font==='palscri'?'"Monotype Corsiva", "Brush Script MT", cursive':'Arial, sans-serif');
+export const engravingFont=e=>FONTS[e.font]?.css||(e.font==='palscri'?'"Monotype Corsiva", '+SCRIPT_FALLBACK:'Arial, sans-serif');
 export const ENGRAVINGS={none:'Ohne Gravur',laser:'Lasergravur',diamond:'Diamantgravur',individual:'Eigene Handschrift / Motiv'};
 export const SYMBOLS={infinity:'∞',heart:'♥','2hearts':'♡♥','2rings':'⚭'};
 export const ORIENTATIONS={left:'Links',center:'Mittig',right:'Rechts',free:'Frei positionieren'};
