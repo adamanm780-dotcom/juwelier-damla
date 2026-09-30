@@ -1215,7 +1215,7 @@ TR_HEAD = '  <style>\n%s  </style>' % TR_CSS
 KF_BODY = io.open(os.path.join(DIR, 'konfigurator.body.html'), encoding='utf-8').read()
 KF_CSS = io.open(os.path.join(DIR, 'konfigurator.css'), encoding='utf-8').read()
 
-KF_HEAD = '  <style>\n%s  </style>\n  <link rel="stylesheet" href="atelier.css?v=20260922-quality4">' % KF_CSS
+KF_HEAD = '  <style>\n%s  </style>\n  <link rel="stylesheet" href="atelier.css?v=20260930-er3">' % KF_CSS
 
 # three.js liegt lokal unter assets/vendor — kein CDN, damit die Seite
 # ohne Verbindung zu Dritten auskommt (DSGVO).
@@ -1234,11 +1234,11 @@ KF_BODY_ENDE = """
 PAGES = [
     dict(slug='verlobungsring-konfigurator.html',
          title='Verlobungsring-Konfigurator in 3D | Juwelier Damla Wiesbaden',
-         desc='Gestalten Sie Ihren Verlobungsring in 3D: Solitaire, Pavé, Halo, Zarge, Trilogie oder Twist, sechs Schliffe, Diamant oder Farbstein, zweifarbige Fassung und persönliche Gravur. Beratung bei Juwelier Damla.',
+         desc='Gestalten Sie Ihren Verlobungsring in 3D: Solitär, Halo, Trilogie oder Toi et Moi, Krappen, Zarge oder Spannring-Optik, zwölf Steinformen, Diamant oder Farbstein, sechs Schienenformen und persönliche Gravur. Beratung bei Juwelier Damla.',
          name='Verlobungsring-Konfigurator', active='verlobungsringe.html',
          body=io.open(os.path.join(DIR, 'verlobungsring-konfigurator.body.html'), encoding='utf-8').read(),
          services=None, extrahead=KF_HEAD,
-         extrabody=KF_BODY_ENDE.replace('assets/konfigurator.js?v=20260929-real5', 'assets/engagement-configurator.js?v=20260929-er1')),
+         extrabody=KF_BODY_ENDE.replace('assets/konfigurator.js?v=20260929-real5', 'assets/engagement-configurator.js?v=20260930-er3')),
     dict(slug='trauringe.html',
          title='Trauringe – unsere Ringauswahl | Juwelier Damla Wiesbaden',
          desc='Trauringe bei Juwelier Damla in Wiesbaden: neun fotografische Ansichten, '

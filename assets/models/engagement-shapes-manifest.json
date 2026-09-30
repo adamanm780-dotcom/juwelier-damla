@@ -1,0 +1,87 @@
+{
+  "generator": "5.1.1",
+  "contract": "girdle y=0, half-width 1 (x), length along -z in glTF; pear point and heart lobes on -z; side stones long along x, wide end on -x",
+  "meshes": {
+    "Diamond_pear": {
+      "vertices": 58,
+      "facets": 91,
+      "optical_planes": 91,
+      "width": 1.995785117149353,
+      "length": 3.240000009536743,
+      "crown": 0.30000001192092896,
+      "pavilion": 0.8500000238418579
+    },
+    "Diamond_marquise": {
+      "vertices": 58,
+      "facets": 89,
+      "optical_planes": 89,
+      "width": 2.0,
+      "length": 4.099999904632568,
+      "crown": 0.30000001192092896,
+      "pavilion": 0.8500000238418579
+    },
+    "Diamond_asscher": {
+      "vertices": 81,
+      "facets": 81,
+      "optical_planes": 81,
+      "width": 2.0,
+      "length": 2.0,
+      "crown": 0.30000001192092896,
+      "pavilion": 0.8500000238418579
+    },
+    "Diamond_elongatedCushion": {
+      "vertices": 62,
+      "facets": 95,
+      "optical_planes": 95,
+      "width": 2.0,
+      "length": 2.4000000953674316,
+      "crown": 0.30000001192092896,
+      "pavilion": 0.8500000238418579
+    },
+    "Diamond_oldEuropean": {
+      "vertices": 60,
+      "facets": 94,
+      "optical_planes": 94,
+      "width": 2.0,
+      "length": 2.0,
+      "crown": 0.33000001311302185,
+      "pavilion": 0.8999999761581421
+    },
+    "Diamond_taperedBaguette": {
+      "vertices": 38,
+      "facets": 39,
+      "optical_planes": 39,
+      "width": 2.0,
+      "length": 1.0,
+      "crown": 0.25999999046325684,
+      "pavilion": 0.8199999928474426
+    },
+    "Diamond_trapez": {
+      "vertices": 38,
+      "facets": 39,
+      "optical_planes": 39,
+      "width": 2.0,
+      "length": 1.6399999856948853,
+      "crown": 0.25999999046325684,
+      "pavilion": 0.8199999928474426
+    },
+    "Diamond_heart": {
+      "vertices": 91,
+      "facets": 91,
+      "optical_planes": 91,
+      "width": 1.991773247718811,
+      "length": 1.8176406025886536,
+      "crown": 0.30000001192092896,
+      "pavilion": 0.8500000238418579
+    },
+    "Optics_heart": {
+      "vertices": 76,
+      "facets": 76,
+      "optical_planes": 76,
+      "width": 1.991773247718811,
+      "length": 1.8176406025886536,
+      "crown": 0.30000001192092896,
+      "pavilion": 0.8500000238418579
+    }
+  }
+}
