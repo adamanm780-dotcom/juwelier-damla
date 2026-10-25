@@ -44,5 +44,5 @@ Auftrag: 3D-Ringe in den Konfiguratoren „ultra realistisch“. Beide Konfigura
 
 ## Shop-Vitrine (25.10.2026)
 - `shop.html#vitrine`: 19 echte Ringe aus dem Laden, Daten in `vitrine.json` (aus Etiketten-Fotos, Paket `Ringe_ImageGen_57_Bilder.zip`), Bilder `assets/vitrine/ring-NN-{a,b,c}[-s].webp` (a=frontal, b=links, c=rechts), Logik `assets/vitrine.js`.
-- Unsichere Werte (Ring 1 + 18 Mittelstein) bleiben weg; Handschriftlicher Preis geht IMMER vor Etikettpreis (User 25.10.). Nr. 10 = 2850, Nr. 19 = 2900 (Foto Z1-089, im ZIP falsch Ring 17 zugeordnet). Ohne Preis: 4, 6, 7 (nur Aufdruck 3408/3645/3786 ohne €), 11, 12.
+- Unsichere Werte (Ring 1 + 18 Mittelstein) bleiben weg; Handschriftlicher Preis geht IMMER vor Etikettpreis (User 25.10.). Nr. 10 = 2850, Nr. 19 = 2900 (Foto Z1-089, im ZIP falsch Ring 17 zugeordnet). Nr. 4/6/7 = Aufdruck 3408/3645/3786 € (vom User bestätigt). Ohne Preis: 11, 12.
 - Steinart bewusst neutral („Mittelstein"): Etiketten tragen LG-/LAB-/CVD-Hinweise → vermutlich Labordiamanten, vom Haus nicht bestätigt. Vor „Diamant"-Wording Kennzeichnung klären.

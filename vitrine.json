@@ -59,7 +59,7 @@
    "stein2": null,
    "farbe": "E",
    "reinheit": "VS1",
-   "preis": null
+   "preis": 3408
   },
   {
    "nr": 5,
@@ -89,7 +89,7 @@
    "stein2": 0.17,
    "farbe": "F",
    "reinheit": "D1: VS1; D2: VS",
-   "preis": null
+   "preis": 3645
   },
   {
    "nr": 7,
@@ -104,7 +104,7 @@
    "stein2": null,
    "farbe": "F",
    "reinheit": "VS2",
-   "preis": null
+   "preis": 3786
   },
   {
    "nr": 8,
