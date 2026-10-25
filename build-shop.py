@@ -203,6 +203,83 @@ ab_karten = '\n\n'.join(
           zusatz='Beispielbild')
     for d in ARMBAENDER)
 
+# ══════════════════════════════════════════════════════════
+#  Vitrine — echte Einzelstuecke aus dem Laden (vitrine.json)
+# ══════════════════════════════════════════════════════════
+# Daten stammen allein von den Etiketten-Fotos. Unsichere Werte stehen
+# dort als null und werden hier weggelassen, nicht geraten. Preis nur,
+# wenn das Etikett genau einen zeigt — sonst „Preis auf Anfrage".
+# Steinart (natuerlich/Labor) ist nicht bestaetigt, deshalb neutral „Stein".
+import json as _json, html as _html
+VITRINE = _json.load(io.open(os.path.join(DIR, 'vitrine.json'), encoding='utf-8'))['ringe']
+
+
+def ct(x):
+    return ('%.2f' % x).replace('.', ',') + '&nbsp;ct'
+
+
+def doppel(s):
+    """'D1: VVS; D2: VS' -> 'VVS / VS'"""
+    return s.replace('D1: ', '').replace('D2: ', '').replace('; ', ' / ') if s else None
+
+
+def vt_daten(r):
+    zeilen = [('Legierung', r['legierung']),
+              ('Gewicht', ('%.2f' % r['gewicht']).replace('.', ',') + '&nbsp;g')]
+    if r['stein1']:
+        zeilen.append(('Mittelstein', ct(r['stein1'])))
+    if r['stein2']:
+        zeilen.append(('Besatz', ct(r['stein2'])))
+    if r['farbe']:
+        zeilen.append(('Farbe', doppel(r['farbe'])))
+    if r['reinheit']:
+        zeilen.append(('Reinheit', doppel(r['reinheit'])))
+    zeilen.append(('Etikett', r['kennung']))
+    return zeilen
+
+
+def vt_preis(r):
+    return ('%s&nbsp;€' % preis(r['preis'])) if r['preis'] else 'Preis auf Anfrage'
+
+
+def vt_karte(r):
+    nr = '%02d' % r['nr']
+    titel = '%s, %s' % (r['form'], r['zusatz'])
+    kurz = [r['legierung'].split(' · ')[1]]
+    if r['stein1']:
+        kurz.append('Mittelstein ' + ct(r['stein1']))
+    # Farbe + Reinheit nur, wenn beide eindeutig sind (sonst steht es im Dialog)
+    f, k = doppel(r['farbe']), doppel(r['reinheit'])
+    gute = ('Farbe %s · %s' % (f, k)) if f and k and '/' not in f + k else ''
+    alt = 'Ring Nº %s: %s, %s, in %s' % (nr, r['form'], r['zusatz'], r['legierung'].split(' · ')[1])
+    return """        <article class="vt-karte" data-nr="%(n)d" data-metall="%(m)s" data-form="%(f)s">
+          <button type="button" class="vt-bett" aria-label="Ring Nº %(nr)s ansehen">
+            <img src="assets/vitrine/ring-%(nr)s-a-s.webp" alt="%(alt)s" width="480" height="480" loading="lazy" decoding="async">
+            <img class="vt-bett__zweit" src="assets/vitrine/ring-%(nr)s-b-s.webp" alt="" width="480" height="480" loading="lazy" decoding="async" aria-hidden="true">
+            <span class="vt-bett__nr">Nº %(nr)s</span>
+          </button>
+          <div class="sh-karte__zeile">
+            <h3 class="sh-karte__name">%(titel)s</h3>
+            <span class="sh-preis%(an)s">%(preis)s</span>
+          </div>
+          <p class="sh-karte__fakten">%(kurz)s%(gute)s</p>
+        </article>""" % dict(
+        n=r['nr'], nr=nr, m=r['metall'], f=r['formkey'], alt=_html.escape(alt),
+        titel=titel, preis=vt_preis(r), an='' if r['preis'] else ' sh-preis--anfrage',
+        kurz=' · '.join(kurz), gute=('<br>' + gute) if gute else '')
+
+
+vt_karten = '\n\n'.join(vt_karte(r) for r in VITRINE)
+# Fuer die Detailansicht: dieselben Zeilen als JSON, damit Seite und Dialog
+# aus einer Quelle kommen. '</' maskiert, sonst endet der Script-Block.
+vt_json = _json.dumps([dict(nr='%02d' % r['nr'], titel='%s, %s' % (r['form'], r['zusatz']),
+                            preis=vt_preis(r), hatPreis=bool(r['preis']), kennung=r['kennung'],
+                            zeilen=vt_daten(r)) for r in VITRINE],
+                      ensure_ascii=False, separators=(',', ':')).replace('</', '<\\/')
+vt_gelb = sum(1 for r in VITRINE if r['metall'] == 'gelb')
+vt_weiss = len(VITRINE) - vt_gelb
+
+
 kat_kacheln = '\n'.join(
     '        <a href="%s"><img src="%s" alt="%s" width="%d" height="%d" loading="lazy"><b>%s</b></a>'
     % ((h, b, a) + masse(b) + (n,)) for h, n, b, a in KATEGORIEN)
@@ -221,7 +298,8 @@ SHOP_JS = """
     }
   }
   </script>
-  <script type="module" src="assets/shop.js"></script>"""
+  <script type="module" src="assets/shop.js"></script>
+  <script src="assets/vitrine.js" defer></script>"""
 
 
 TEMPLATE = """<!DOCTYPE html>
@@ -261,7 +339,9 @@ SEITEN = [
          desc='Entwurf eines Onlineshops für Juwelier Damla: Trauringe und '
               'Verlobungsringe aus eigener Werkstatt, Wellritzstraße 3 in Wiesbaden.',
          body=io.open(os.path.join(DIR, 'shop.body.html'), encoding='utf-8').read()
-              % dict(trauringe=tr_karten, fassungen=fa_karten, armband=ab_karten)),
+              % dict(trauringe=tr_karten, fassungen=fa_karten, armband=ab_karten,
+                     vitrine=vt_karten, vitrine_json=vt_json, n_alle=len(VITRINE),
+                     n_gelb=vt_gelb, n_weiss=vt_weiss)),
 
     dict(slug='shop-produkt.html',
          title='Trauring Wellritz (Entwurf) – Juwelier Damla Wiesbaden',

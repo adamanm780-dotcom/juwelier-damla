@@ -1,4 +1,4 @@
-  <div class="sh-hinweis"><b>Entwurf</b> · Gestaltungsvorschlag · Preise sind Platzhalter · Ringe sind Abbildungen, keine Fotos</div>
+  <div class="sh-hinweis"><b>Entwurf</b> · Gestaltungsvorschlag · Trauring-Preise sind Platzhalter · Vitrine: echte Stücke aus dem Laden</div>
 
   <!-- ═══════════════════════════════════
        AUFTAKT — ein Ring in 3D, dreht sich mit dem Scrollen
@@ -85,6 +85,69 @@
 %(fassungen)s
       </div>
     </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       VITRINE — echte Einzelstuecke aus dem Laden (vitrine.json)
+  ═══════════════════════════════════ -->
+  <section id="vitrine" class="sh-block vt" aria-labelledby="vtTitel">
+    <div class="wrap">
+      <header class="sh-kopf">
+        <h2 id="vtTitel">Aus der Vitrine</h2>
+        <p>%(n_alle)d Ringe, die gerade bei uns in der Wellritzstraße liegen. Jedes Stück
+           gibt es genau einmal – fotografiert mit seinem Etikett, so wie es in der
+           Vitrine steht. Antippen zeigt alle Ansichten und Angaben.</p>
+      </header>
+
+      <div class="vt-filter" role="group" aria-label="Vitrine filtern">
+        <div class="vt-filter__reihe" data-filter="metall">
+          <button type="button" class="sh-chip is-on" data-wert="alle" aria-pressed="true">Alle <span>%(n_alle)d</span></button>
+          <button type="button" class="sh-chip" data-wert="gelb" aria-pressed="false"><i class="vt-punkt vt-punkt--gelb"></i>Gelbgold <span>%(n_gelb)d</span></button>
+          <button type="button" class="sh-chip" data-wert="weiss" aria-pressed="false"><i class="vt-punkt vt-punkt--weiss"></i>Weißgold <span>%(n_weiss)d</span></button>
+        </div>
+        <div class="vt-filter__reihe" data-filter="form">
+          <button type="button" class="sh-chip is-on" data-wert="alle" aria-pressed="true">Jede Form</button>
+          <button type="button" class="sh-chip" data-wert="rund" aria-pressed="false">Rund</button>
+          <button type="button" class="sh-chip" data-wert="oval" aria-pressed="false">Oval</button>
+          <button type="button" class="sh-chip" data-wert="eckig" aria-pressed="false">Eckig</button>
+          <button type="button" class="sh-chip" data-wert="navette" aria-pressed="false">Navette</button>
+          <button type="button" class="sh-chip" data-wert="tropfen" aria-pressed="false">Tropfen</button>
+        </div>
+      </div>
+
+      <div class="sh-raster vt-raster" id="vtRaster">
+%(vitrine)s
+      </div>
+      <p class="vt-leer" id="vtLeer" hidden>Für diese Auswahl liegt gerade kein Ring in der Vitrine.</p>
+
+      <p class="vt-fuss">Angaben laut Etikett. Wo das Etikett keinen eindeutigen Preis zeigt,
+        nennen wir ihn gern auf Anfrage. Aufnahmen digital nachgeschärft.</p>
+    </div>
+
+    <dialog class="vt-dialog" id="vtDialog" aria-labelledby="vtdTitel">
+      <div class="vt-dialog__innen">
+        <button type="button" class="vt-dialog__zu" data-vt="zu" aria-label="Schließen"></button>
+        <div class="vt-dialog__bild">
+          <img id="vtdBild" src="" alt="" width="960" height="960">
+          <button type="button" class="vt-dialog__pfeil vt-dialog__pfeil--zurueck" data-vt="zurueck" aria-label="Vorheriger Ring"></button>
+          <button type="button" class="vt-dialog__pfeil vt-dialog__pfeil--vor" data-vt="vor" aria-label="Nächster Ring"></button>
+          <div class="vt-dialog__daumen" id="vtdDaumen" role="group" aria-label="Ansichten"></div>
+        </div>
+        <div class="vt-dialog__text">
+          <p class="vt-dialog__kicker" id="vtdNr"></p>
+          <h2 id="vtdTitel"></h2>
+          <p class="vt-dialog__preis" id="vtdPreis"></p>
+          <dl class="vt-dialog__daten" id="vtdDaten"></dl>
+          <div class="vt-dialog__aktionen">
+            <a class="btn-solid btn--schlicht" id="vtdWa" href="https://wa.me/496115807830" target="_blank" rel="noopener">Per WhatsApp anfragen</a>
+            <a class="btn-ghost btn--schlicht" href="tel:+496115807830">0611 5807830</a>
+          </div>
+          <p class="vt-dialog__klein">Einzelstück – fragen Sie gern vorab, ob er noch da ist.
+            Anprobieren ohne Termin, Wellritzstraße 3.</p>
+        </div>
+      </div>
+    </dialog>
+    <script type="application/json" id="vitrineDaten">%(vitrine_json)s</script>
   </section>
 
   <!-- ═══════════════════════════════════
