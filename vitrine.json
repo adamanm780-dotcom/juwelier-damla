@@ -149,7 +149,7 @@
    "stein2": 0.15,
    "farbe": "D1: F; D2: E",
    "reinheit": "D1: VS2; D2: VS",
-   "preis": null
+   "preis": 2850
   },
   {
    "nr": 11,
@@ -284,7 +284,8 @@
    "stein2": 0.12,
    "farbe": "D",
    "reinheit": "VS1",
-   "preis": null
+   "preis": 2900
   }
- ]
+ ],
+ "preisregel": "Handschriftlicher Preis geht vor Etikettpreis (Vorgabe 25.10.2026). Nr. 19 = 2900 laut Foto Z1-089 (dort neben LG 795601898)."
 }
