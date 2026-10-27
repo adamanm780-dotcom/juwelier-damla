@@ -594,18 +594,18 @@ vr_cards = '\n\n'.join("""        <article class="service-card reveal%s">
 # — Foto-Derivate aus echten Damla-Aufnahmen, KI-retuschiert —
 # Editoriale Auswahl ohne Modell-, Material- oder Preiszuordnung.
 VR_MODELLE = [
-    ("photos-20260928/schmuck-sortiment.webp", 1086, 1448,
-     "Ringauswahl in einem dunklen Schmucktableau",
+    ("damla-bilder-v2/13-verlobung-klare-formen.webp", 1122, 1402,
+     "Drei Solitärringe mit unterschiedlichen Steinformen",
      "Klare Formen",
      "Runde und rechteckige Steinformen, feine Schienen und unterschiedliche Größen. "
      "Ein Blick auf die Details unserer fotografierten Auswahl."),
-    ("photos-20260928/verlobungsringe-sortiment.webp", 1122, 1402,
-     "Solitär-Ringe in vier Reihen eines hellen Schmucktableaus",
+    ("damla-bilder-v2/14-verlobung-feine-unterschiede.webp", 1122, 1402,
+     "Zwei Solitärringe mit sichtbaren Krappenfassungen auf einer hellen Ringablage",
      "Feine Unterschiede",
      "Fassung, Steinform und Ringschiene prägen den Eindruck. "
      "Nebeneinander werden die Unterschiede sichtbar."),
-    ("photos-20260928/ringe-sortiment.webp", 1122, 1402,
-     "Verschiedene Ringe in einem silbergrauen Schmucktableau",
+    ("damla-bilder-v2/15-verlobung-auswaehlen.webp", 1122, 1402,
+     "Vier Solitärringe auf einem hellgrauen Beratungstablett",
      "In Ruhe auswählen",
      "Manchmal entscheidet ein kleines Detail. "
      "Wir nehmen uns Zeit, gemeinsam mit Ihnen genauer hinzusehen."),
@@ -961,12 +961,13 @@ DELAYS = ['', ' d1', ' d2', '', ' d1', ' d2']
 # nicht wie sechs schwarze Kacheln wirken.
 # Die Bilder illustrieren nur die Ueberschrift daneben und sind damit
 # schmueckend — leeres alt, sonst liest der Screenreader alles doppelt.
-RP_BILDER = ['rhodinieren', 'vergolden', 'loetarbeiten',
-             'ringweite', 'gravuren', 'aufbereitung']
+RP_BILDER = ['01-rhodinieren', '02-vergolden', '03-loetarbeiten',
+             '04-ringweite', '05-gravuren', '06-aufbereitung']
 
 rp_cards = '\n\n'.join("""        <article class="service-card service-card--foto reveal%s">
-          <img class="rp-foto" src="assets/reparaturen/%s.webp" alt="" aria-hidden="true"
-               width="900" height="675" loading="lazy" decoding="async">
+          <img class="rp-foto" src="assets/damla-bilder-v2/%s.webp" srcset="assets/damla-bilder-v2/%s-640.webp 640w, assets/damla-bilder-v2/%s.webp 1448w"
+               sizes="(max-width: 760px) 90vw, (max-width: 1100px) 45vw, 400px" alt="" aria-hidden="true"
+               width="1448" height="1086" loading="lazy" decoding="async">
           <div class="service-icon" aria-hidden="true">
             <svg viewBox="0 0 48 48">
               %s
@@ -974,7 +975,7 @@ rp_cards = '\n\n'.join("""        <article class="service-card service-card--fot
           </div>
           <h3 class="service-title">%s</h3>
           <p class="service-text">%s</p>
-        </article>""" % (DELAYS[i], RP_BILDER[i], icon, name, txt)
+        </article>""" % (DELAYS[i], RP_BILDER[i], RP_BILDER[i], RP_BILDER[i], icon, name, txt)
     for i, (name, icon, txt) in enumerate(RP_SERVICES))
 
 RP_FLOW = [
